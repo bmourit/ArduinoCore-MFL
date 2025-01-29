@@ -1,0 +1,62 @@
+# See: https://arduino.github.io/arduino-cli/latest/platform-specification/
+
+menu.pnum=Board part number
+
+menu.usb=USB support (if available)
+
+menu.opt=Optimize
+menu.rtlib=C Runtime Library
+menu.upload_method=Upload method
+
+##################################################
+# Creality GD32F30x
+gd_creality_gd32f30x.name=Creality GD32F303RE series
+gd_creality_gd32f30x.build.core=Arduino
+gd_creality_gd32f30x.build.board=creality_gd32f30x
+gd_creality_gd32f30x.build.mcu=cortex-m4
+gd_creality_gd32f30x.build.series=GD32F30x
+
+gd_creality_gd32f30x.build.vid=0xdead
+gd_creality_gd32f30x.build.pid=0xbeef
+gd_creality_gd32f30x.build.usb_product="USB Test"
+gd_creality_gd32f30x.build.usb_manufacturer="Arduino"
+
+# create a new entry for each board here
+
+# Creality GD32F303RE
+gd_creality_gd32f30x.menu.pnum.CREALITY_422_GD32F303RE=Creality GD32F303RE
+gd_creality_gd32f30x.menu.pnum.CREALITY_422_GD32F303RE.upload.maximum_size=524288
+gd_creality_gd32f30x.menu.pnum.CREALITY_422_GD32F303RE.upload.maximum_data_size=65536
+gd_creality_gd32f30x.menu.pnum.CREALITY_422_GD32F303RE.build.board=CREALITY_422_GD32F303RE
+gd_creality_gd32f30x.menu.pnum.CREALITY_422_GD32F303RE.build.series=GD32F30x
+gd_creality_gd32f30x.menu.pnum.CREALITY_422_GD32F303RE.build.product_line=GD32F30X_HD
+gd_creality_gd32f30x.menu.pnum.CREALITY_422_GD32F303RE.build.variant=CREALITY_422_GD32F303RE
+gd_creality_gd32f30x.menu.pnum.CREALITY_422_GD32F303RE.upload.openocd_script=target/gd32f3x.cfg
+
+# Various GD32F303VE
+gd_creality_gd32f30x.menu.pnum.CREALITY_422_GD32F303RE=Various GD32F303VC
+gd_creality_gd32f30x.menu.pnum.CREALITY_422_GD32F303RE.upload.maximum_size=262144
+gd_creality_gd32f30x.menu.pnum.CREALITY_422_GD32F303RE.upload.maximum_data_size=49152
+gd_creality_gd32f30x.menu.pnum.CREALITY_422_GD32F303RE.build.board=CREALITY_422_GD32F303VC
+gd_creality_gd32f30x.menu.pnum.CREALITY_422_GD32F303RE.build.series=GD32F30x
+gd_creality_gd32f30x.menu.pnum.CREALITY_422_GD32F303RE.build.product_line=GD32F30X_HD
+gd_creality_gd32f30x.menu.pnum.CREALITY_422_GD32F303RE.build.variant=CREALITY_422_GD32F303VC
+gd_creality_gd32f30x.menu.pnum.CREALITY_422_GD32F303RE.upload.openocd_script=target/gd32f3x.cfg
+
+# Optimizations
+gd_creality_gd32f30x.menu.opt.osstd=Smallest (-Os default)
+gd_creality_gd32f30x.menu.opt.o1std=Fast (-O1)
+gd_creality_gd32f30x.menu.opt.o1std.build.flags.optimize=-O1
+gd_creality_gd32f30x.menu.opt.o1std.build.flags.ldspecs=
+gd_creality_gd32f30x.menu.opt.o2std=Faster (-O2)
+gd_creality_gd32f30x.menu.opt.o2std.build.flags.optimize=-O2
+gd_creality_gd32f30x.menu.opt.o2std.build.flags.ldspecs=
+gd_creality_gd32f30x.menu.opt.o3std=Fastest (-O3)
+gd_creality_gd32f30x.menu.opt.o3std.build.flags.optimize=-O3
+gd_creality_gd32f30x.menu.opt.o3std.build.flags.ldspecs=
+gd_creality_gd32f30x.menu.opt.ogstd=Debug (-Og)
+gd_creality_gd32f30x.menu.opt.ogstd.build.flags.optimize=-Og
+gd_creality_gd32f30x.menu.opt.ogstd.build.flags.ldspecs=
+gd_creality_gd32f30x.menu.opt.ogstd=No Optimization (-O0)
+gd_creality_gd32f30x.menu.opt.ogstd.build.flags.optimize=-O0
+gd_creality_gd32f30x.menu.opt.ogstd.build.flags.ldspecs=

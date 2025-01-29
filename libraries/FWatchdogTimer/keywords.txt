@@ -1,0 +1,30 @@
+#######################################
+# Syntax Coloring Map For FWatchdogTimer
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+FWatchdogTimer	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+begin		KEYWORD2
+set		KEYWORD2
+get		KEYWORD2
+reload		KEYWORD2
+isEnabled	KEYWORD2
+isReset		KEYWORD2
+clearReset	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+minPrescaler	LITERAL1
+maxPrescaler	LITERAL1
+minTimeout	LITERAL1
+maxTimeoutBase	LITERAL1

@@ -1,0 +1,95 @@
+//
+// MFL gd32f30x Interrupt handlers
+//
+// Copyright (C) 2025 B. Mouritsen <bnmguy@gmail.com>. All rights reserved.
+//
+// This file is part of the Microcontroller Firmware Library (MFL).
+//
+// MFL is free software: you can redistribute it and/or modify it under the terms of the
+// GNU Lesser General Public License as published by the Free Software Foundation,
+// either version 3 of the License, or (at your option) any later version.
+//
+// MFL is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License along with MFL.
+// If not, see <https://www.gnu.org/licenses/>.
+//
+
+#pragma once
+
+#include <stdint.h>
+
+// Single macro to define default ISR behavior
+#define DEFINE_EXTERN_ISR(name) extern "C" void name(void);
+
+DEFINE_EXTERN_ISR(NMI_Handler)
+DEFINE_EXTERN_ISR(HardFault_Handler)
+DEFINE_EXTERN_ISR(MemManage_Handler)
+DEFINE_EXTERN_ISR(BusFault_Handler)
+DEFINE_EXTERN_ISR(UsageFault_Handler)
+DEFINE_EXTERN_ISR(SVC_Handler)
+DEFINE_EXTERN_ISR(DebugMon_Handler)
+DEFINE_EXTERN_ISR(PendSV_Handler)
+DEFINE_EXTERN_ISR(SysTick_Handler)
+DEFINE_EXTERN_ISR(WWDGT_IRQHandler)
+DEFINE_EXTERN_ISR(LVD_IRQHandler)
+DEFINE_EXTERN_ISR(TAMPER_IRQHandler)
+DEFINE_EXTERN_ISR(RTC_IRQHandler)
+DEFINE_EXTERN_ISR(FMC_IRQHandler)
+DEFINE_EXTERN_ISR(RCU_CTC_IRQHandler)
+DEFINE_EXTERN_ISR(EXTI0_IRQHandler)
+DEFINE_EXTERN_ISR(EXTI1_IRQHandler)
+DEFINE_EXTERN_ISR(EXTI2_IRQHandler)
+DEFINE_EXTERN_ISR(EXTI3_IRQHandler)
+DEFINE_EXTERN_ISR(EXTI4_IRQHandler)
+DEFINE_EXTERN_ISR(DMA0_Channel0_IRQHandler)
+DEFINE_EXTERN_ISR(DMA0_Channel1_IRQHandler)
+DEFINE_EXTERN_ISR(DMA0_Channel2_IRQHandler)
+DEFINE_EXTERN_ISR(DMA0_Channel3_IRQHandler)
+DEFINE_EXTERN_ISR(DMA0_Channel4_IRQHandler)
+DEFINE_EXTERN_ISR(DMA0_Channel5_IRQHandler)
+DEFINE_EXTERN_ISR(DMA0_Channel6_IRQHandler)
+DEFINE_EXTERN_ISR(ADC0_1_IRQHandler)
+DEFINE_EXTERN_ISR(USBD_HP_CAN0_TX_IRQHandler)
+DEFINE_EXTERN_ISR(USBD_LP_CAN0_RX0_IRQHandler)
+DEFINE_EXTERN_ISR(CAN0_RX1_IRQHandler)
+DEFINE_EXTERN_ISR(CAN0_EWMC_IRQHandler)
+DEFINE_EXTERN_ISR(EXTI5_9_IRQHandler)
+DEFINE_EXTERN_ISR(TIMER0_BRK_IRQHandler)
+DEFINE_EXTERN_ISR(TIMER0_UP_IRQHandler)
+DEFINE_EXTERN_ISR(TIMER0_TRG_CMT_IRQHandler)
+DEFINE_EXTERN_ISR(TIMER0_Channel_IRQHandler)
+DEFINE_EXTERN_ISR(TIMER1_IRQHandler)
+DEFINE_EXTERN_ISR(TIMER2_IRQHandler)
+DEFINE_EXTERN_ISR(TIMER3_IRQHandler)
+DEFINE_EXTERN_ISR(I2C0_EV_IRQHandler)
+DEFINE_EXTERN_ISR(I2C0_ER_IRQHandler)
+DEFINE_EXTERN_ISR(I2C1_EV_IRQHandler)
+DEFINE_EXTERN_ISR(I2C1_ER_IRQHandler)
+DEFINE_EXTERN_ISR(SPI0_IRQHandler)
+DEFINE_EXTERN_ISR(SPI1_IRQHandler)
+DEFINE_EXTERN_ISR(USART0_IRQHandler)
+DEFINE_EXTERN_ISR(USART1_IRQHandler)
+DEFINE_EXTERN_ISR(USART2_IRQHandler)
+DEFINE_EXTERN_ISR(EXTI10_15_IRQHandler)
+DEFINE_EXTERN_ISR(RTC_Alarm_IRQHandler)
+DEFINE_EXTERN_ISR(USBD_WKUP_IRQHandler)
+DEFINE_EXTERN_ISR(TIMER7_BRK_IRQHandler)
+DEFINE_EXTERN_ISR(TIMER7_UP_IRQHandler)
+DEFINE_EXTERN_ISR(TIMER7_TRG_CMT_IRQHandler)
+DEFINE_EXTERN_ISR(TIMER7_Channel_IRQHandler)
+DEFINE_EXTERN_ISR(ADC2_IRQHandler)
+DEFINE_EXTERN_ISR(EXMC_IRQHandler)
+DEFINE_EXTERN_ISR(SDIO_IRQHandler)
+DEFINE_EXTERN_ISR(TIMER4_IRQHandler)
+DEFINE_EXTERN_ISR(SPI2_IRQHandler)
+DEFINE_EXTERN_ISR(UART3_IRQHandler)
+DEFINE_EXTERN_ISR(UART4_IRQHandler)
+DEFINE_EXTERN_ISR(TIMER5_IRQHandler)
+DEFINE_EXTERN_ISR(TIMER6_IRQHandler)
+DEFINE_EXTERN_ISR(DMA1_Channel0_IRQHandler)
+DEFINE_EXTERN_ISR(DMA1_Channel1_IRQHandler)
+DEFINE_EXTERN_ISR(DMA1_Channel2_IRQHandler)
+DEFINE_EXTERN_ISR(DMA1_Channel3_4_IRQHandler)
