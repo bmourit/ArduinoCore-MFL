@@ -6,7 +6,6 @@
 #include "F303RE.hpp"
 #include "CONFIG.hpp"
 #include "Interrupt_Handlers.hpp"
-#include "startup_config.hpp"
 #include "STARTUP.hpp"
 
 
