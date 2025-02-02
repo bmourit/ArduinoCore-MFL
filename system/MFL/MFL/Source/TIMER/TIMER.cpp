@@ -713,7 +713,6 @@ void TIMER::output_compare_init(Timer_Channel channel, TIMER_Output_Compare comp
     compare_config_ = compare_config;
 }
 
-
 /**
  * @brief Set the output mode for a given channel
  *
