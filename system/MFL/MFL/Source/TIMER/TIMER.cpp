@@ -667,87 +667,52 @@ void TIMER::output_compare_init(Timer_Channel channel, TIMER_Output_Compare comp
         return;
     }
 
-    // Channel-specific settings
-    constexpr uint32_t CH_MS_BITS[] = { 
-        static_cast<uint32_t>(CHCTL0_Bits::CH0MS),
-        static_cast<uint32_t>(CHCTL0_Bits::CH1MS),
-        static_cast<uint32_t>(CHCTL1_Bits::CH2MS),
-        static_cast<uint32_t>(CHCTL1_Bits::CH3MS)
+    static constexpr struct ChannelBits {
+        uint32_t ms;
+        uint32_t en;
+        uint32_t p;
+        uint32_t nen;
+        uint32_t np;
+        uint32_t iso;
+        uint32_t iso_n;
+    } CH_BITS[] = {
+        {static_cast<uint32_t>(CHCTL0_Bits::CH0MS), static_cast<uint32_t>(CHCTL2_Bits::CH0EN), static_cast<uint32_t>(CHCTL2_Bits::CH0P), static_cast<uint32_t>(CHCTL2_Bits::CH0NEN), static_cast<uint32_t>(CHCTL2_Bits::CH0NP), static_cast<uint32_t>(CTL1_Bits::ISO0), static_cast<uint32_t>(CTL1_Bits::ISO0N)},
+        {static_cast<uint32_t>(CHCTL0_Bits::CH1MS), static_cast<uint32_t>(CHCTL2_Bits::CH1EN), static_cast<uint32_t>(CHCTL2_Bits::CH1P), static_cast<uint32_t>(CHCTL2_Bits::CH1NEN), static_cast<uint32_t>(CHCTL2_Bits::CH1NP), static_cast<uint32_t>(CTL1_Bits::ISO1), static_cast<uint32_t>(CTL1_Bits::ISO1N)},
+        {static_cast<uint32_t>(CHCTL1_Bits::CH2MS), static_cast<uint32_t>(CHCTL2_Bits::CH2EN), static_cast<uint32_t>(CHCTL2_Bits::CH2P), static_cast<uint32_t>(CHCTL2_Bits::CH2NEN), static_cast<uint32_t>(CHCTL2_Bits::CH2NP), static_cast<uint32_t>(CTL1_Bits::ISO2), static_cast<uint32_t>(CTL1_Bits::ISO2N)},
+        {static_cast<uint32_t>(CHCTL1_Bits::CH3MS), static_cast<uint32_t>(CHCTL2_Bits::CH3EN), static_cast<uint32_t>(CHCTL2_Bits::CH3P), 0U, 0U, static_cast<uint32_t>(CTL1_Bits::ISO3), 0U}
     };
 
-    constexpr uint32_t CH_EN_BITS[] = {
-        static_cast<uint32_t>(CHCTL2_Bits::CH0EN),
-        static_cast<uint32_t>(CHCTL2_Bits::CH1EN),
-        static_cast<uint32_t>(CHCTL2_Bits::CH2EN),
-        static_cast<uint32_t>(CHCTL2_Bits::CH3EN)
-    };
+    const size_t idx = static_cast<size_t>(channel);
+    const auto& bits = CH_BITS[idx];
 
-    constexpr uint32_t CH_P_BITS[] = {
-        static_cast<uint32_t>(CHCTL2_Bits::CH0P),
-        static_cast<uint32_t>(CHCTL2_Bits::CH1P),
-        static_cast<uint32_t>(CHCTL2_Bits::CH2P),
-        static_cast<uint32_t>(CHCTL2_Bits::CH3P)
-    };
-
-    constexpr uint32_t CH_NEN_BITS[] = {
-        static_cast<uint32_t>(CHCTL2_Bits::CH0NEN),
-        static_cast<uint32_t>(CHCTL2_Bits::CH1NEN),
-        static_cast<uint32_t>(CHCTL2_Bits::CH2NEN),
-        0U // CH3 doesn't have a companion channel
-    };
-
-    constexpr uint32_t CH_NP_BITS[] = {
-        static_cast<uint32_t>(CHCTL2_Bits::CH0NP),
-        static_cast<uint32_t>(CHCTL2_Bits::CH1NP),
-        static_cast<uint32_t>(CHCTL2_Bits::CH2NP),
-        0U // CH3 doesn't have a companion channel
-    };
-
-    constexpr uint32_t ISO_BITS[] = {
-        static_cast<uint32_t>(CTL1_Bits::ISO0),
-        static_cast<uint32_t>(CTL1_Bits::ISO1),
-        static_cast<uint32_t>(CTL1_Bits::ISO2),
-        static_cast<uint32_t>(CTL1_Bits::ISO3)
-    };
-
-    constexpr uint32_t ISO_N_BITS[] = {
-        static_cast<uint32_t>(CTL1_Bits::ISO0N),
-        static_cast<uint32_t>(CTL1_Bits::ISO1N),
-        static_cast<uint32_t>(CTL1_Bits::ISO2N),
-        0U // CH3 doesn't have a companion channel
-    };
-
-    // Clear the mode bits for the channel
+    // Clear mode bits in single operation
     if (channel <= Timer_Channel::CH1) {
-        write_bit_range(*this, TIMER_Regs::CHCTL0, CH_MS_BITS[static_cast<size_t>(channel)], Clear);
+        write_bit_range(*this, TIMER_Regs::CHCTL0, bits.ms, Clear);
     } else {
-        write_bit_range(*this, TIMER_Regs::CHCTL1, CH_MS_BITS[static_cast<size_t>(channel)], Clear);
+        write_bit_range(*this, TIMER_Regs::CHCTL1, bits.ms, Clear);
     }
 
     // Configure output compare enable and polarity
     write_bits_sequence(*this, TIMER_Regs::CHCTL2,
-                       CH_P_BITS[static_cast<size_t>(channel)], compare_config.polarity == Polarity_Select::LOW_FALLING,
-                       CH_EN_BITS[static_cast<size_t>(channel)], compare_config.state == Output_Compare_State::OC_ENABLE);
+                       bits.p, compare_config.polarity == Polarity_Select::LOW_FALLING,
+                       bits.en, compare_config.state == Output_Compare_State::OC_ENABLE);
 
-    // Configure companion output compare (advanced timers only)
-    if (is_advanced_timer() && CH_NEN_BITS[static_cast<size_t>(channel)] != 0U) {
+    if (is_advanced_timer() && bits.nen != 0U) {
         write_bits_sequence(*this, TIMER_Regs::CHCTL2,
-                           CH_NP_BITS[static_cast<size_t>(channel)], compare_config.companion_polarity == Polarity_Select::LOW_FALLING,
-                           CH_NEN_BITS[static_cast<size_t>(channel)], compare_config.companion_state == Output_Compare_State::OC_ENABLE);
+                           bits.np, compare_config.companion_polarity == Polarity_Select::LOW_FALLING,
+                           bits.nen, compare_config.companion_state == Output_Compare_State::OC_ENABLE);
 
-        // Configure idle states
         write_bit_ranges(*this, TIMER_Regs::CTL1,
-                           ISO_BITS[static_cast<size_t>(channel)], static_cast<uint32_t>(compare_config.idle_state),
-                           ISO_N_BITS[static_cast<size_t>(channel)], static_cast<uint32_t>(compare_config.companion_idle_state));
+                        bits.iso, static_cast<uint32_t>(compare_config.idle_state),
+                        bits.iso_n, static_cast<uint32_t>(compare_config.companion_idle_state));
     } else if (channel == Timer_Channel::CH3) {
-        // Only for CH3: Configure idle state without companion
         write_bit_range(*this, TIMER_Regs::CTL1,
-                           ISO_BITS[static_cast<size_t>(channel)], static_cast<uint32_t>(compare_config.idle_state));
+                        bits.iso, static_cast<uint32_t>(compare_config.idle_state));
     }
 
-    // Store the configuration
     compare_config_ = compare_config;
 }
+
 
 /**
  * @brief Set the output mode for a given channel
