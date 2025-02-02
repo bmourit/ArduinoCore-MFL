@@ -81,6 +81,7 @@ public:
     inline void setup_regular_conversion();
     inline void cleanup_regular_conversion();
     inline void calibration_delay();
+    inline uint32_t get_prescaler_value();
     uint32_t start_regular_single_conversion(ADC_Channel channel, ADC_Sample_Time sample, ADC_Resolution resolution, bool calibrate = false);
 
     // Accessor methods
@@ -100,6 +101,7 @@ private:
     ADC_Base base_;
     ADC_Clock_Config ADC_pclk_info_;
     uint32_t base_address_;
+    uint32_t prescaler_;
 
     inline void set_sampling_time(ADC_Channel channel, ADC_Sample_Time sample_time);
     inline uint32_t configure_channel(uint32_t reg, uint8_t rank, ADC_Channel channel);

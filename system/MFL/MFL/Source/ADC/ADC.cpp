@@ -53,7 +53,8 @@ std::array<bool, static_cast<size_t>(ADC_Base::INVALID)> ADC::clock_enabled_ = {
 ADC::ADC(ADC_Base Base) :
     base_(Base),
     ADC_pclk_info_(ADC_pclk_index[static_cast<size_t>(Base)]),
-    base_address_(ADC_baseAddress[static_cast<size_t>(Base)])
+    base_address_(ADC_baseAddress[static_cast<size_t>(Base)]),
+    prescaler_(get_prescaler_value())
 {
     if (!clock_enabled_[static_cast<size_t>(Base)]) {
         RCU_I.set_pclk_enable(ADC_pclk_info_.clock_reg, true);
@@ -911,53 +912,57 @@ uint32_t ADC::start_regular_single_conversion(ADC_Channel channel, ADC_Sample_Ti
  */
 inline void ADC::calibration_delay() {
     // Hardware requires delay before starting calibration
-    rcu::ADC_Prescaler adc_prescaler = RCU_I.get_adc_prescaler();
-    uint32_t prescaler_value = 0U;
-    switch (adc_prescaler) {
-    case rcu::ADC_Prescaler::CKAPB2_DIV2:
-    case rcu::ADC_Prescaler::CKAPB2_DIV2B:
-        prescaler_value = 2U;
-        break;
-    case rcu::ADC_Prescaler::CKAPB2_DIV4:
-        prescaler_value = 4U;
-        break;
-    case rcu::ADC_Prescaler::CKAPB2_DIV6:
-    case rcu::ADC_Prescaler::CKAHB_DIV6:
-        prescaler_value = 6U;
-        break;
-    case rcu::ADC_Prescaler::CKAPB2_DIV8:
-    case rcu::ADC_Prescaler::CKAPB2_DIV8B:
-        prescaler_value = 8U;
-        break;
-    case rcu::ADC_Prescaler::CKAPB2_DIV12:
-        prescaler_value = 12U;
-        break;
-    case rcu::ADC_Prescaler::CKAPB2_DIV16:
-        prescaler_value = 16U;
-        break;
-    case rcu::ADC_Prescaler::CKAHB_DIV5:
-        prescaler_value = 5U;
-        break;
-    case rcu::ADC_Prescaler::CKAHB_DIV10:
-        prescaler_value = 10U;
-        break;
-    case rcu::ADC_Prescaler::CKAHB_DIV20:
-        prescaler_value = 20U;
-        break;
-    case rcu::ADC_Prescaler::INVALID:
-        return;
-    }
-
-    if (prescaler_value == 0U) {
+    if (prescaler_ == 0U) {
         return;
     }
 
     volatile uint32_t wait_count = ((RCU_I.get_system_clock() /
-                   (RCU_I.get_clock_frequency(rcu::Clock_Frequency::CK_APB2) / prescaler_value))
+                   (RCU_I.get_clock_frequency(rcu::Clock_Frequency::CK_APB2) / prescaler_))
                    * Calibration_Delay_Cycles);
 
     while (wait_count != 0) {
         wait_count = wait_count - 1U;
+    }
+}
+
+/**
+ * @brief Gets the current ADC prescaler value.
+ *
+ * This function retrieves the current ADC prescaler value from the RCU
+ * interface and returns it as an unsigned 32-bit integer. The prescaler value
+ * determines the division factor applied to the clock signal provided to the
+ * ADC module.
+ *
+ * @return The current ADC prescaler value as an unsigned 32-bit integer.
+ */
+inline uint32_t ADC::get_prescaler_value() {
+    rcu::ADC_Prescaler adc_prescaler = RCU_I.get_adc_prescaler();
+
+    switch (adc_prescaler) {
+    case rcu::ADC_Prescaler::CKAPB2_DIV2:
+    case rcu::ADC_Prescaler::CKAPB2_DIV2B:
+        return 2U;
+    case rcu::ADC_Prescaler::CKAPB2_DIV4:
+        return 4U;
+    case rcu::ADC_Prescaler::CKAPB2_DIV6:
+    case rcu::ADC_Prescaler::CKAHB_DIV6:
+        return 6U;
+    case rcu::ADC_Prescaler::CKAPB2_DIV8:
+    case rcu::ADC_Prescaler::CKAPB2_DIV8B:
+        return 8U;
+    case rcu::ADC_Prescaler::CKAPB2_DIV12:
+        return 12U;
+    case rcu::ADC_Prescaler::CKAPB2_DIV16:
+        return 16U;
+    case rcu::ADC_Prescaler::CKAHB_DIV5:
+        return 5U;
+    case rcu::ADC_Prescaler::CKAHB_DIV10:
+        return 10U;
+    case rcu::ADC_Prescaler::CKAHB_DIV20:
+        return 20U;
+    case rcu::ADC_Prescaler::INVALID:
+    default:
+        return 0U;
     }
 }
 
