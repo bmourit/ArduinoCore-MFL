@@ -4,9 +4,11 @@
 
 /**
  * @brief Free debug pins for other use
- * This function is used to free the debug pins from SWD/JTAG use for other purposes.
- * It is only available when `USE_SWD_DEBUG` is not defined.
- * @param pin The pin to free
+ *
+ * This function takes a pin number as argument and frees the associated debug
+ * pin for other use. The debug pins are JTAG-DP and SW-DP pins.
+ *
+ * @param pin The pin number to free
  */
 void freeDebugPins(pin_size_t pin) {
 #ifndef USE_SWD_DEBUG

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # Extended and rewritten by B. Mouritsen <bnmguy@gmail.com>
-# For Arduino core using MFL C++ library
+# For GC32F303RE Arduino core using the MFL C++ library
 
 """
 Arduino
@@ -132,7 +132,7 @@ env.Append(
 	],
 	CPPDEFINES=[
 		series,
-		("ARDUINO", 10000),
+		("ARDUINO_CORE_VERSION", 10000),
 		"ARDUINO_ARCH_MFL",
 		"ARDUINO_%s" % board_name.upper(),
 		("BOARD_NAME", '\\"%s\\"' % board_name.upper()),

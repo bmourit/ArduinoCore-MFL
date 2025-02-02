@@ -37,10 +37,10 @@ DAC::DAC() : is_clock_enabled_(false) {
 }
 
 /**
- * Resets the DAC peripheral by toggling the reset control.
- * This function enables the peripheral clock reset for the DAC,
- * then disables it, effectively resetting all registers to their
- * default values.
+ * @brief Resets the DAC peripheral by toggling its peripheral clock reset.
+ *
+ * This function enables the reset of the DAC peripheral by setting the
+ * reset register, then disables the reset to complete the operation.
  */
 void DAC::reset() {
     RCU_I.set_pclk_reset_enable(rcu::RCU_PCLK_Reset::PCLK_DACRST, true);
@@ -91,6 +91,17 @@ void DAC::disable(Internal_Device instance) {
     write_bit(*this, DAC_Regs::CTL, bits, false);
 }
 
+/**
+ * @brief Enables or disables the specified DAC internal device.
+ *
+ * This function sets or clears the enable bit in the DAC control register for the
+ * specified internal device. If the device is invalid, the function returns
+ * without making any changes.
+ *
+ * @param instance The internal DAC device to enable or disable. Must be a value
+ *                 from the Internal_Device enumeration.
+ * @param enable    Set to true to enable the device, false to disable it.
+ */
 void DAC::set_enable(Internal_Device instance, bool enable) {
     if (instance == Internal_Device::INVALID) {
         return;

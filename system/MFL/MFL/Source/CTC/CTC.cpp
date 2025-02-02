@@ -37,11 +37,11 @@ CTC::CTC() : is_clock_enabled_(false) {
 }
 
 /**
- * Reset the CTC peripheral.
+ * @brief Resets the CTC peripheral.
  *
- * This function will assert the reset signal to the CTC peripheral and then
- * deassert it. This will cause the CTC peripheral to reset all of its internal
- * registers to their default values.
+ * This function resets the CTC peripheral by performing a peripheral
+ * clock reset. All registers of the CTC peripheral are reset to their
+ * default values.
  */
 void CTC::reset() {
     RCU_I.set_pclk_reset_enable(rcu::RCU_PCLK_Reset::PCLK_CTCRST, true);
@@ -49,213 +49,220 @@ void CTC::reset() {
 }
 
 /**
- * Enable or disable the trim counter.
+ * @brief Enables or disables the trim counter.
  *
- * If the trim counter is enabled, the CTC peripheral will increment the trim
- * counter register (CTC_CTL1[15:0]) each time the IRC48M is toggled. The trim
- * counter register will wrap around to zero when it reaches 0x0000FFFF.
+ * This function enables or disables the trim counter in the CTC peripheral
+ * by setting or clearing the CNTEN bit in the CTL0 register.
  *
- * @param[in] enable true to enable the trim counter, false to disable it
+ * @param enable Set to true to enable the trim counter, or false to disable it.
  */
 void CTC::set_trim_counter_enable(bool enable) {
     write_bit(*this, CTC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::CNTEN), enable);
 }
 
 /**
- * Set the IRC48M trim value.
+ * @brief Sets the IRC48M trim value.
  *
- * This function sets the trim value for the IRC48M internal clock.
- * The value is written to the TRIMVALUE field of the CTC_CTL0 register.
+ * This function sets the IRC48M trim value by writing the provided value
+ * to the TRIMVALUE bits in the CTL0 register. The IRC48M trim value is used
+ * to adjust the frequency of the IRC48M clock source.
  *
- * @param[in] value The trim value to set (0 to 255).
+ * @param value The new IRC48M trim value.
  */
 void CTC::set_irc48m_trim(uint8_t value) {
     write_bit_range(*this, CTC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::TRIMVALUE), static_cast<uint32_t>(value));
 }
 
 /**
- * Generate a reference source pulse to initiate a reference source calibration.
+ * @brief Generates a software-controlled pulse on the reference source output.
  *
- * When this function is called, the CTC peripheral will generate a reference
- * source pulse to initiate a reference source calibration. This pulse will be
- * output on the REFOUT pin and will be active high.
+ * This function generates a software-controlled pulse on the reference source
+ * output by setting the SWREFPUL bit in the CTL0 register. The pulse is
+ * generated after a delay of 1 clock cycle. The pulse width is 1 clock cycle.
  */
 void CTC::generate_reference_source_pulse() {
     write_bit(*this, CTC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::SWREFPUL), true);
 }
 
 /**
- * Enable or disable the hardware auto-trim feature.
+ * @brief Enables or disables the hardware-controlled auto-trim feature.
  *
- * If the hardware auto-trim feature is enabled, the CTC peripheral will
- * automatically adjust the IRC48M trim value based on the reference clock
- * frequency. This feature is typically used to trim the IRC48M clock to a
- * specific frequency.
+ * This function enables or disables the hardware-controlled auto-trim feature
+ * by setting or clearing the AUTOTRIM bit in the CTL0 register. The
+ * hardware-controlled auto-trim feature causes the CTC peripheral to
+ * automatically adjust the IRC48M trim value based on the
+ * reference source signal. The trim value is adjusted to keep the IRC48M
+ * clock source in sync with the reference source signal.
  *
- * @param[in] enable true to enable the hardware auto-trim feature, false to disable it
+ * @param enable Set to true to enable the hardware-controlled auto-trim
+ *               feature, or false to disable it.
  */
 void CTC::set_hardware_auto_trim_enable(bool enable) {
     write_bit(*this, CTC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::AUTOTRIM), enable);
 }
 
 /**
- * Set the reference source polarity.
+ * @brief Sets the reference source signal polarity.
  *
- * This function sets the polarity of the reference clock signal
- * that is output on the REFOUT pin. The polarity can be set
- * to either rising edge (Reference_Polarity::RISING) or falling
- * edge (Reference_Polarity::FALLING). The polarity is set in the
- * REFPOL field of the CTL1 register.
+ * This function sets the reference source signal polarity by setting or clearing
+ * the REFOL bit in the CTL1 register. The reference source signal is used to
+ * control the hardware-controlled auto-trim feature. The reference source signal
+ * is either a rising or falling edge.
  *
- * @param[in] polarity The reference source polarity to set (RISING or FALLING)
+ * @param polarity The desired reference source signal polarity. Use
+ *                 Reference_Polarity::RISING to set the reference source signal
+ *                 polarity to rising edge, or Reference_Polarity::FALLING to set
+ *                 the reference source signal polarity to falling edge.
  */
 void CTC::set_reference_source_polarity(Reference_Polarity polarity) {
-    write_bit(*this, CTC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::REFPOL), polarity == Reference_Polarity::FALLING ? true : false);
+    write_bit(*this, CTC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::REFPOL),
+           (polarity == Reference_Polarity::FALLING) ? true : false);
 }
 
 /**
- * Set the reference source signal.
+ * @brief Sets the reference source signal.
  *
- * This function sets the reference source signal for the CTC peripheral.
- * The reference source signal is the clock signal that is used to generate
- * the IRC48M clock. The reference source signal is selected in the
- * REFSEL field of the CTL1 register.
+ * This function configures the reference source signal by writing the provided
+ * reference selection value to the REFSEL bits in the CTL1 register. The reference
+ * source signal is used to control the hardware-controlled auto-trim feature.
  *
- * @param[in] reference The reference source signal to set (HXTAL, HXTAL_DIV2, or IRC8M)
+ * @param reference The reference source signal to be set, represented by the
+ *                  Reference_Select enumeration.
  */
 void CTC::set_refenece_source_signal(Reference_Select reference) {
     write_bit_range(*this, CTC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::REFSEL), static_cast<uint32_t>(reference));
 }
 
 /**
- * Set the prescaler for the reference source signal.
+ * @brief Sets the prescaler value for the reference source signal.
  *
- * This function sets the prescaler for the reference source signal that is
- * input to the IRC48M clock generator. The prescaler is set in the REFPSC
- * field of the CTL1 register.
+ * This function configures the prescaler value for the reference source signal
+ * by writing the provided reference prescaler value to the REFPSC bits in the
+ * CTL1 register. The reference source signal prescaler determines the division
+ * factor applied to the clock signal provided to the reference source signal.
  *
- * @param[in] prescaler The prescaler to set (DIV1 to DIV16)
+ * @param prescaler The reference source signal prescaler to be set, represented
+ *                  by the Reference_Prescaler enumeration.
  */
 void CTC::set_reference_source_prescaler(Reference_Prescaler prescaler) {
     write_bit_range(*this, CTC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::REFPSC), static_cast<uint32_t>(prescaler));
 }
 
 /**
- * Set the IRC48M clock limit for the auto trim function.
+ * @brief Sets the clock trim limit for the CTC.
  *
- * This function sets the upper limit for the IRC48M clock frequency
- * that is used to trim the IRC48M clock. The clock limit is set in the
- * CKLIM field of the CTL1 register.
+ * This function sets the clock trim limit for the CTC by writing the provided
+ * limit value to the CKLIM bits in the CTL1 register. The clock trim limit is
+ * used to control the hardware-controlled auto-trim feature.
  *
- * @param[in] limit The upper limit to set (0-255 in 100 Hz steps)
+ * @param limit The clock trim limit to be set. The limit value is a 5-bit
+ *              unsigned integer.
  */
 void CTC::set_clock_trim_limit(uint8_t limit) {
     write_bit_range(*this, CTC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::CKLIM), static_cast<uint32_t>(limit));
 }
 
 /**
- * Set the trim counter reload value.
+ * @brief Sets the trim counter reload value.
  *
- * This function sets the reload value for the trim counter of the CTC
- * peripheral. The trim counter is used to generate a reference clock signal
- * for the IRC48M clock generator. The reload value is set in the RLVALUE
- * field of the CTL1 register.
+ * This function configures the trim counter reload value by writing the
+ * specified reload value to the RLVALUE bits in the CTL1 register. The trim
+ * counter reload value determines the number of clock cycles before the counter
+ * is reloaded.
  *
- * @param[in] reload The reload value to set (0-65535)
+ * @param reload The trim counter reload value to set.
  */
 void CTC::set_trim_counter_reload(uint16_t reload) {
     write_bit_range(*this, CTC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::RLVALUE), static_cast<uint32_t>(reload));
 }
 
 /**
- * Get the capture value of the trim counter.
+ * @brief Gets the current capture value of the trim counter.
  *
- * This function returns the capture value of the trim counter of the CTC
- * peripheral. The capture value is the value of the trim counter at the
- * time of the last IRC48M clock edge. The capture value is read from the
- * REFCAP field of the STAT register.
+ * This function returns the current capture value of the trim counter by
+ * reading from the REFCAp bits in the STAT register.
  *
- * @return The capture value of the trim counter (0-65535)
+ * @return The current capture value of the trim counter.
  */
 uint16_t CTC::get_trim_counter_capture() {
     return static_cast<uint16_t>(read_bit_range(*this, CTC_Regs::STAT, static_cast<uint32_t>(STAT_Bits::REFCAP)));
 }
 
 /**
- * Get the direction of the trim counter.
+ * @brief Gets the current direction of the trim counter.
  *
- * This function returns the direction of the trim counter of the CTC
- * peripheral. The direction is either incrementing (true) or decrementing
- * (false). The direction is read from the REFDIR bit of the STAT register.
+ * This function returns the current direction of the trim counter by reading
+ * the REFDIR bit in the STAT register. The direction indicates whether the
+ * counter is counting up or down.
  *
- * @return The direction of the trim counter (true for incrementing, false for decrementing)
+ * @return true if the trim counter direction is up, false if it is down.
  */
 bool CTC::get_trim_counter_direction() {
     return read_bit(*this, CTC_Regs::STAT, static_cast<uint32_t>(STAT_Bits::REFDIR));
 }
 
 /**
- * Get the trim counter reload value.
+ * @brief Retrieves the current trim counter reload value.
  *
- * This function returns the trim counter reload value as set by the
- * set_trim_counter_reload function. The reload value is read from the
- * RLVALUE field of the CTL1 register.
+ * This function returns the current trim counter reload value by reading from
+ * the RLVALUE bits in the CTL1 register.
  *
- * @return The trim counter reload value (0-65535)
+ * @return The current trim counter reload value.
  */
 uint16_t CTC::get_trim_counter_reload() {
     return static_cast<uint16_t>(read_bit_range(*this, CTC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::RLVALUE)));
 }
 
 /**
- * Get the IRC48M trim value.
+ * @brief Retrieves the current trim value of the IRC48M oscillator.
  *
- * This function returns the IRC48M trim value that has been set by the
- * set_irc48m_trim function. The trim value is read from the TRIMVALUE
- * field of the CTL0 register.
+ * This function returns the current trim value of the IRC48M oscillator by
+ * reading from the TRIMVALUE bits in the CTL0 register.
  *
- * @return The IRC48M trim value (0-255)
+ * @return The current trim value of the IRC48M oscillator.
  */
 uint8_t CTC::get_trim_irc48m() {
     return static_cast<uint8_t>(read_bit_range(*this, CTC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::TRIMVALUE)));
 }
 
 /**
- * Check the status of a specific flag in the CTC peripheral.
+ * @brief Retrieves the status of the specified flag.
  *
- * This function reads the status of the specified flag from the STAT register
- * of the CTC peripheral. The flag indicates a particular status or event within
- * the CTC module.
+ * This function reads the status register of the CTC peripheral and returns
+ * the value of the specified flag, which can be any of the values in the
+ * Status_Flags enumeration.
  *
- * @param[in] flag The status flag to check.
- * @return True if the flag is set, false otherwise.
+ * @param flag The status flag to retrieve. Must be a value from the
+ *             Status_Flags enumeration.
+ * @return true if the flag is set, false otherwise.
  */
 bool CTC::get_flag(Status_Flags flag) {
     return read_bit(*this, CTC_Regs::STAT, static_cast<uint32_t>(flag));
 }
 
 /**
- * Clear a specified flag in the CTC peripheral.
+ * @brief Clears a specified flag in the CTC peripheral.
  *
- * This function clears a given flag specified by the Clear_Flags enumeration.
- * The flag is cleared by writing a 1 to the corresponding bit in the INTC register.
+ * This function clears the specified flag in the CTC by writing a 1 to the
+ * corresponding bit in the INTC register. The flag is cleared regardless of
+ * whether or not the interrupt is enabled.
  *
- * @param[in] flag The flag to clear, specified as a Clear_Flags enumeration value.
+ * @param flag The flag to clear, specified as a Clear_Flags enumeration value.
  */
 void CTC::clear_flag(Clear_Flags flag) {
     write_register(*this, CTC_Regs::INTC, (1U << static_cast<uint32_t>(flag)));
 }
 
 /**
- * Check the status of a specific interrupt flag in the CTC peripheral.
+ * @brief Retrieves the status of the specified interrupt flag.
  *
- * This function evaluates whether a specified interrupt flag is active by
- * checking both the status and control registers. It verifies if the
- * interrupt is enabled and the corresponding flag is set.
+ * This function checks both the status and control registers to determine if
+ * a specified interrupt flag is set and enabled. If both the status and control
+ * bits for the specified interrupt flag are set, the function returns true,
+ * indicating that the interrupt condition is active and enabled.
  *
- * @param flag The interrupt flag to check. Must be one of the Interrupt_Flags
- *             enumeration values.
- * @return True if the specified interrupt flag is set and enabled, false otherwise.
+ * @param flag The interrupt flag to check, specified as an Interrupt_Flags enumeration value.
+ * @return true if the specified interrupt flag is set and enabled, false otherwise.
  */
 bool CTC::get_interrupt_flag(Interrupt_Flags flag) {
     bool enabled = false;
@@ -271,27 +278,28 @@ bool CTC::get_interrupt_flag(Interrupt_Flags flag) {
 }
 
 /**
- * Clear a specified interrupt flag in the CTC peripheral.
+ * @brief Clears a specified interrupt flag in the CTC peripheral.
  *
- * This function clears a given interrupt flag specified by the Clear_Flags enumeration.
- * The flag is cleared by writing a 1 to the corresponding bit in the INTC register.
+ * This function clears the specified interrupt flag in the CTC by writing a 1 to the
+ * corresponding bit in the INTC register. The flag is cleared regardless of
+ * whether or not the interrupt is enabled.
  *
- * @param[in] flag The interrupt flag to clear, specified as a Clear_Flags enumeration value.
+ * @param flag The flag to clear, specified as a Clear_Flags enumeration value.
  */
 void CTC::clear_interrupt_flag(Clear_Flags flag) {
     write_register(*this, CTC_Regs::INTC, (1U << static_cast<uint32_t>(flag)));
 }
 
 /**
- * Enable or disable a specific interrupt in the CTC peripheral.
+ * @brief Enables or disables a specified interrupt type in the CTC peripheral.
  *
- * This function is used to enable or disable specific interrupts in the CTC
- * peripheral. The interrupt type is specified as one of the Interrupt_Type
- * enumeration values.
+ * This function configures the interrupt settings for the CTC peripheral by
+ * enabling or disabling the specified interrupt type. It modifies the interrupt
+ * enable register to reflect the desired configuration.
  *
- * @param type The interrupt type to enable or disable. Must be one of the
- *             Interrupt_Type enumeration values.
- * @param enable True to enable the interrupt, false to disable it.
+ * @param[in] type The interrupt type to enable or disable, specified as an
+ *                 Interrupt_Type enumeration value.
+ * @param[in] enable Set to true to enable the interrupt, false to disable it.
  */
 void CTC::set_interrupt_enable(Interrupt_Type type, bool enable) {
     write_bit(*this, CTC_Regs::CTL0, static_cast<uint32_t>(type), enable);

@@ -5,14 +5,22 @@
 #include "PinOps.hpp"
 
 /**
- * Configures the specified pin's mode of operation.
- * 
- * @param pin The pin number to configure
- * @param mode The mode to set (INPUT, OUTPUT, INPUT_PULLUP, INPUT_PULLDOWN, 
- *             OUTPUT_OPENDRAIN, or INPUT_ANALOG)
- * 
- * Handles PWM cleanup if pin was previously configured for timer output.
- * For analog inputs, uses ADC pin configuration if not temp/vref pins.
+ * @brief Configures the specified pin as an input or output.
+ *
+ * This function takes a pin number and a pin mode as arguments and configures
+ * the specified pin accordingly. The pin mode can be one of the following:
+ * INPUT, INPUT_PULLUP, INPUT_PULLDOWN, OUTPUT, OUTPUT_OPENDRAIN, or
+ * INPUT_ANALOG. If the pin is not configured, the function does not take any
+ * action.
+ *
+ * If the pin is currently configured as a PWM pin, the function stops the PWM
+ * output on that pin before configuring it as an input or output.
+ *
+ * @param pin The pin number to configure.
+ * @param mode The pin mode to set. Valid values are PinMode::INPUT,
+ *             PinMode::INPUT_PULLUP, PinMode::INPUT_PULLDOWN,
+ *             PinMode::OUTPUT, PinMode::OUTPUT_OPENDRAIN, or
+ *             PinMode::INPUT_ANALOG.
  */
 void pinMode(pin_size_t pin, PinMode mode) {
     if (pin == NO_PIN) {
@@ -54,10 +62,15 @@ void pinMode(pin_size_t pin, PinMode mode) {
 }
 
 /**
- * Sets the digital output value of a specified pin to HIGH or LOW.
- * 
- * @param pin The pin number to write to
- * @param status The output value (HIGH/LOW) to set
+ * @brief Writes a digital value to a pin.
+ *
+ * This function takes a pin number and a PinStatus as arguments and writes the
+ * specified digital value to the pin. The PinStatus can be either LOW (0) or
+ * HIGH (1). If the pin is not configured as an output, the function does not
+ * take any action.
+ *
+ * @param pin The pin number to write to.
+ * @param status The PinStatus to write to the pin. Valid values are LOW (0) or HIGH (1).
  */
 void digitalWrite(pin_size_t pin, PinStatus status) {
     gpio::GPIO_Base port = getPortFromPin(pin);
@@ -77,10 +90,14 @@ void digitalWrite(pin_size_t pin, PinStatus status) {
 }
 
 /**
- * Reads the digital state of a specified pin.
- * 
- * @param pin The pin number to read from
- * @return PinStatus HIGH if pin is high, LOW if pin is low
+ * @brief Reads the current state of a digital GPIO pin.
+ *
+ * This function takes a pin number and returns the current state of the pin
+ * as a PinStatus. The PinStatus can be either LOW (0) or HIGH (1). If the pin
+ * is not configured as a digital input, the function returns LOW.
+ *
+ * @param pin The pin number to read from.
+ * @return The current state of the pin as a PinStatus.
  */
 PinStatus digitalRead(pin_size_t pin) {
     auto result = gpio::GPIO::get_instance(getPortFromPin(pin));
@@ -89,9 +106,13 @@ PinStatus digitalRead(pin_size_t pin) {
 }
 
 /**
- * Toggles the state of a digital GPIO pin.
- * 
- * @param pin The pin number to toggle
+ * @brief Toggles the specified digital GPIO pin.
+ *
+ * This function takes a pin number as an argument and toggles the specified
+ * digital GPIO pin. If the pin is not configured as a digital output, the
+ * function does not take any action.
+ *
+ * @param pin The pin number to toggle.
  */
 void digitalToggle(pin_size_t pin) {
     gpio::GPIO_Base port = getPortFromPin(pin);

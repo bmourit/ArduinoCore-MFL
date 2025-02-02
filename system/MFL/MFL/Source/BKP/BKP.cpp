@@ -37,11 +37,12 @@ BKP::BKP() : is_clock_enabled_(false) {
 }
 
 /**
- * Resets the BKP peripheral.
+ * @brief Resets the BKP peripheral by toggling its peripheral clock reset.
  *
- * This function will perform a reset of the BKP peripheral by asserting and then
- * deasserting the PCLK_BKPIRST bit in the RCU APC register. This will reset the
- * entire BKP peripheral and all its registers.
+ * This function enables the peripheral clock reset for the BKP peripheral by
+ * setting the reset register, then disables the reset to complete the reset
+ * operation. This effectively resets all registers of the BKP peripheral to
+ * their default values.
  */
 void BKP::reset() {
     RCU_I.set_pclk_reset_enable(rcu::RCU_PCLK_Reset::PCLK_BKPIRST, true);
@@ -49,17 +50,16 @@ void BKP::reset() {
 }
 
 /**
- * Sets the backup data register with the specified data value.
+ * @brief Sets the value of the specified backup data register.
  *
- * This function writes a 16-bit data value to a specified backup data register
- * within the BKP peripheral. The register is selected based on the provided
- * Backup_Data enumeration value. The data is written only if the specified 
- * register index is within the valid range (DATA_0 to DATA_41).
+ * This function sets the current 16-bit value of a specified backup data
+ * register within the BKP peripheral. The register is selected based on the
+ * provided Backup_Data enumeration value. The data is only set if the
+ * specified register index is within the valid range (DATA_0 to DATA_41).
  *
- * @param datax The backup data register index to set, specified as a 
+ * @param data_offset The backup data register index to set, specified as a
  *              Backup_Data enumeration value.
- * @param data  The 16-bit data value to write to the selected backup 
- *              data register.
+ * @param data The new 16-bit value to set the selected backup data register.
  */
 void BKP::set_data(Backup_Data data_offset, uint16_t data) {
     uint32_t offset = static_cast<uint32_t>(data_offset);
@@ -77,17 +77,17 @@ void BKP::set_data(Backup_Data data_offset, uint16_t data) {
 }
 
 /**
- * Retrieves the 16-bit data from a specified backup data register.
+ * @brief Retrieves the value of the specified backup data register.
  *
- * This function reads the value from a backup data register within the
- * BKP peripheral. The register is selected based on the provided
- * Backup_Data enumeration value. The function returns the data only if
- * the specified register index is within the valid range (DATA_0 to DATA_41).
+ * This function returns the current 16-bit value of a specified backup data
+ * register within the BKP peripheral. The register is selected based on the
+ * provided Backup_Data enumeration value. The data is returned only if the
+ * specified register index is within the valid range (DATA_0 to DATA_41).
  *
- * @param datax The backup data register index to read, specified as a 
+ * @param data_offset The backup data register index to get, specified as a
  *              Backup_Data enumeration value.
- * @return The 16-bit data value read from the selected backup data register,
- *         or 0 if the register index is invalid.
+ * @return The current 16-bit value of the selected backup data register, or
+ *         0 if the specified register index is not within the valid range.
  */
 uint16_t BKP::get_data(Backup_Data data_offset) {
     uint32_t offset = static_cast<uint32_t>(data_offset);
@@ -107,44 +107,46 @@ uint16_t BKP::get_data(Backup_Data data_offset) {
 }
 
 /**
- * Enables or disables the output calibration for the RTC.
+ * @brief Enables or disables the output calibration of the RTC.
  *
- * When the output calibration is enabled, the RTC clock output is
- * divided by 32, and the output is the divided clock. The divided clock
- * is used to perform the calibration of the RTC.
+ * If the output calibration is enabled, the RTC output signal is
+ * calibrated to ensure that the output signal is correct. The
+ * calibration is done by adjusting the clock signal of the RTC
+ * to match the crystal oscillator frequency. If the output
+ * calibration is disabled, the RTC output signal is not
+ * calibrated and may be incorrect.
  *
- * @param enable Set to true to enable the output calibration, or false to
- *               disable it.
+ * @param enable Set to true to enable the output calibration, or
+ *               false to disable it.
  */
 void BKP::set_rtc_output_calibration_enable(bool enable) {
     write_bit(*this, BKP_Regs::OCTL, static_cast<uint32_t>(OCTL_Bits::COEN), enable);
 }
 
 /**
- * Enables or disables the output signal for the RTC.
+ * @brief Enables or disables the RTC output signal.
  *
- * When the output signal is enabled, the RTC output signal is
- * available at the output pin. The output signal is the clock
- * signal divided by the value specified in the RCCV field of the
- * OCTL register.
+ * If the output signal is enabled, the RTC generates a signal on the
+ * selected output pin. If the output signal is disabled, the RTC
+ * does not generate a signal on the output pin.
  *
- * @param enable Set to true to enable the output signal, or false to
- *               disable it.
+ * @param enable Set to true to enable the output signal, or false
+ *               to disable it.
  */
 void BKP::set_rtc_output_signal_enable(bool enable) {
     write_bit(*this, BKP_Regs::OCTL, static_cast<uint32_t>(OCTL_Bits::ASOEN), enable);
 }
 
 /**
- * Selects the pulse width of the RTC output signal.
+ * @brief Selects the RTC output pulse type.
  *
- * The pulse width of the RTC output signal is controlled by the ROSEL bit of the OCTL
- * register. The pulse width is either 1 second or 2 seconds. If the ROSEL bit is set to
- * 0, the pulse width is 1 second. If the ROSEL bit is set to 1, the pulse width is 2
- * seconds.
+ * This function selects either a first pulse or second pulse type for the
+ * RTC output signal. The pulse type is selected by setting the ROSEL bit
+ * in the OCTL register to either 0 or 1. If ROSEL is 0, the first pulse is
+ * selected, and if ROSEL is 1, the second pulse is selected.
  *
- * @param pulse Set to SECOND_PULSE to select a pulse width of 1 second, or
- *              SECOND_HALF_PULSE to select a pulse width of 2 seconds.
+ * @param pulse The output pulse type to select, either FIRST_PULSE or
+ *              SECOND_PULSE.
  */
 void BKP::set_rtc_output_pulse(Output_Pulse pulse) {
     write_bit(*this, BKP_Regs::OCTL, static_cast<uint32_t>(OCTL_Bits::ROSEL),
@@ -152,15 +154,15 @@ void BKP::set_rtc_output_pulse(Output_Pulse pulse) {
 }
 
 /**
- * Selects the clock divider for the RTC.
+ * @brief Sets the clock divider for the RTC output signal.
  *
- * The RTC clock divider is used to divide the clock signal that is used to
- * drive the RTC. The clock divider is either 1 (no division) or 32 (divide
- * by 32). If the CCOSEL bit of the OCTL register is set to 0, the clock divider
- * is 1. If the CCOSEL bit is set to 1, the clock divider is 32.
+ * This function sets the clock divider for the RTC output signal to either
+ * 1 or 2. The divider is set by writing the CCOSEL bit in the OCTL register
+ * to either 0 or 1. If the CCOSEL bit is 0, the divider is set to 2; if the
+ * CCOSEL bit is 1, the divider is set to 1.
  *
- * @param divider Set to DIV_1 to select a clock divider of 1, or DIV_32 to
- *                select a clock divider of 32.
+ * @param divider The clock divider to set, specified as a
+ *                Clock_Divider enumeration value.
  */
 void BKP::set_rtc_clock_divider(Clock_Divider divider) {
     write_bit(*this, BKP_Regs::OCTL, static_cast<uint32_t>(OCTL_Bits::CCOSEL),
@@ -168,15 +170,13 @@ void BKP::set_rtc_clock_divider(Clock_Divider divider) {
 }
 
 /**
- * Selects the type of calibration for the RTC clock.
+ * @brief Sets the type of the RTC clock calibration.
  *
- * The RTC clock can be calibrated to either speed up or slow down. This
- * function sets the CALDIR bit of the OCTL register to select the
- * type of calibration. If the CALDIR bit is set to 0, the RTC clock
- * is calibrated to slow down. If the CALDIR bit is set to 1, the
- * RTC clock is calibrated to speed up.
+ * This function sets the type of the RTC clock calibration to either
+ * slow down or speed up the clock. The calibration type is set by
+ * setting the CALDIR bit in the OCTL register.
  *
- * @param type The type of calibration to select, specified as a
+ * @param type The type of the RTC clock calibration, specified as a
  *             Calibration_Type enumeration value.
  */
 void BKP::set_rtc_clock_calibration_type(Calibration_Type type) {
@@ -185,40 +185,48 @@ void BKP::set_rtc_clock_calibration_type(Calibration_Type type) {
 }
 
 /**
- * Sets the value of the RTC calibration.
+ * @brief Sets the RTC clock calibration value.
  *
- * The value of the RTC calibration is used to adjust the frequency of the
- * RTC clock. The calibration value is a 5-bit value that is stored in the
- * RCCV field of the OCTL register. The calibration value is used to adjust
- * the frequency of the RTC clock to within +/- 1% of the nominal frequency.
+ * This function sets the value of the RTC clock calibration register.
+ * The calibration value is a 7-bit unsigned integer from 0 to 127.
+ * The calibration value is used to adjust the RTC clock frequency to
+ * compensate for frequency deviations due to process variations or
+ * temperature changes.
  *
- * @param value The value of the RTC calibration, specified as a
- *              uint8_t value in the range 0 to 31.
+ * @param value The calibration value to set, specified as a 7-bit unsigned
+ *              integer from 0 to 127.
  */
 void BKP::set_rtc_calibration_value(uint8_t value) {
     write_bit_range(*this, BKP_Regs::OCTL, static_cast<uint32_t>(OCTL_Bits::RCCV), static_cast<uint32_t>(value));
 }
 
 /**
- * Enables or disables the tamper detection function.
+ * @brief Enables or disables the tamper detection feature of the BKP peripheral.
  *
- * @param enable Set to true to enable the tamper detection function, or false
- *               to disable it.
+ * This function enables or disables the tamper detection feature of the BKP
+ * peripheral. When enabled, the BKP peripheral will detect changes in the
+ * voltage level of the tamper detection pin and generate a tamper detection
+ * event.
+ *
+ * @param enable Set to true to enable the tamper detection feature or false to
+ *               disable it.
  */
 void BKP::set_tamper_detection_enable(bool enable) {
     write_bit(*this, BKP_Regs::TPCTL, static_cast<uint32_t>(TPCTL_Bits::TPEN), enable);
 }
 
 /**
- * Sets the tamper detection level for the BKP peripheral.
+ * @brief Sets the level of the tamper detection pin.
  *
- * This function configures the tamper detection level to either active
- * high or active low, based on the specified `level` parameter. This setting
- * determines the voltage level at which the tamper detection event is triggered.
+ * This function sets the level of the tamper detection pin to either active
+ * high or active low. When set to active high, the BKP peripheral will detect
+ * changes in the voltage level of the tamper detection pin and generate a
+ * tamper detection event when the pin is high. When set to active low, the BKP
+ * peripheral will detect changes in the voltage level of the tamper detection
+ * pin and generate a tamper detection event when the pin is low.
  *
- * @param level The tamper detection level to set, specified as a
- *              Tamper_Level enumeration value. It can be either
- *              ACTIVE_HIGH or ACTIVE_LOW.
+ * @param level The level of the tamper detection pin, specified as a
+ *              Tamper_Level enumeration value.
  */
 void BKP::set_tamper_level(Tamper_Level level) {
     write_bit(*this, BKP_Regs::TPCTL, static_cast<uint32_t>(TPCTL_Bits::TPAL),
@@ -226,30 +234,36 @@ void BKP::set_tamper_level(Tamper_Level level) {
 }
 
 /**
- * Enables or disables the tamper interrupt for the BKP peripheral.
+ * @brief Enables or disables the tamper interrupt.
  *
- * @param enable Set to true to enable the tamper interrupt, or false to disable it.
+ * This function sets the tamper interrupt enable bit in the TPCS register.
+ * When the tamper interrupt is enabled, the BKP peripheral will generate
+ * an interrupt in response to a tamper detection event.
+ *
+ * @param enable Set to true to enable the tamper interrupt or false to
+ *               disable it.
  */
 void BKP::set_tamper_interrupt_enable(bool enable) {
     write_bit(*this, BKP_Regs::TPCS, static_cast<uint32_t>(TPCS_Bits::TPIE), enable);
 }
 
 /**
- * Checks the status of a specified flag within the BKP peripheral.
+ * @brief Retrieves the status of the specified flag.
  *
- * This function reads the status of a given flag specified by the 
- * Status_Flags enumeration. The result indicates whether the flag is set.
+ * This function reads the specified flag from the BKP status register (TPCS)
+ * and returns its status. If the flag is not applicable to the BKP
+ * peripheral, this function returns false.
  *
- * @param flag The status flag to check, specified as a Status_Flags 
- *             enumeration value.
- * @return True if the specified flag is set, otherwise false.
+ * @param flag The status flag to retrieve. Must be a value from the
+ *             Status_Flags enumeration.
+ * @return true if the flag is set, false otherwise.
  */
 bool BKP::get_flag(Status_Flags flag) {
     return (read_bit(*this, BKP_Regs::TPCS, static_cast<uint32_t>(flag)));
 }
 
 /**
- * Clears a specified flag within the BKP peripheral.
+ * @brief Clears a specified flag in the BKP peripheral.
  *
  * This function clears a given flag specified by the Clear_Flags enumeration.
  * The flag is cleared by writing a 1 to the corresponding bit in the TPCS register.
@@ -261,26 +275,29 @@ void BKP::clear_flag(Clear_Flags flag) {
 }
 
 /**
- * Checks the status of a specified interrupt flag within the BKP peripheral.
+ * @brief Retrieves the status of the specified interrupt flag.
  *
- * This function reads the status of a given interrupt flag specified by the 
- * Interrupt_Flags enumeration. The result indicates whether the flag is set.
+ * This function reads the specified interrupt flag from the BKP status register (TPCS)
+ * and returns its status. If the flag is not applicable to the BKP
+ * peripheral, this function returns false.
  *
- * @param flag The interrupt flag to check, specified as an Interrupt_Flags 
- *             enumeration value.
- * @return True if the specified flag is set, otherwise false.
+ * @param flag The interrupt flag to retrieve. Must be a value from the
+ *             Interrupt_Flags enumeration.
+ * @return true if the flag is set, false otherwise.
  */
 bool BKP::get_interrupt_flag(Interrupt_Flags flag) {
     return (read_bit(*this, BKP_Regs::TPCS, static_cast<uint32_t>(flag)));
 }
 
 /**
- * Clears a specified interrupt flag within the BKP peripheral.
+ * @brief Clears a specified interrupt flag in the BKP peripheral.
  *
- * This function clears a given interrupt flag specified by the Clear_Flags enumeration.
- * The flag is cleared by writing a 1 to the corresponding bit in the TPCS register.
+ * This function clears a given interrupt flag specified by the Clear_Flags
+ * enumeration. The flag is cleared by writing a 1 to the corresponding bit
+ * in the TPCS register.
  *
- * @param flag The interrupt flag to clear, specified as a Clear_Flags enumeration value.
+ * @param flag The interrupt flag to clear, specified as a Clear_Flags
+ *             enumeration value.
  */
 void BKP::clear_interrupt_flag(Clear_Flags flag) {
     write_bit(*this, BKP_Regs::TPCS, static_cast<uint32_t>(flag), true);

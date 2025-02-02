@@ -113,9 +113,14 @@ void EXMC::nor_sram_init() {
 }
 
 /**
- * \brief Enable or disable NOR/PSRAM block
- * \param block Which block to enable or disable
- * \param enable True to enable, false to disable
+ * @brief Enables or disables the NOR Flash block.
+ *
+ * This function enables or disables the NOR Flash block by setting the
+ * NRBKEN bit in the SNCTLX register. When enabled, the NOR Flash block
+ * is ready to receive commands, otherwise it will not respond.
+ *
+ * @param block The NOR Flash block to enable or disable.
+ * @param enable Set to true to enable the NOR Flash block, false to disable it.
  */
 void EXMC::set_nor_sram_enable(Block_Number block, bool enable) {
     EXMC_Regs snctl_offset = get_snctl_offset(block);
@@ -123,8 +128,13 @@ void EXMC::set_nor_sram_enable(Block_Number block, bool enable) {
 }
 
 /**
- * \brief Resets the NAND Flash block
- * \param block Which block to reset
+ * @brief Resets the NAND Flash block configuration registers.
+ *
+ * This function resets the NAND Flash block configuration registers
+ * to their default values. This function is used to initialize the
+ * NAND Flash block before a conversion is started.
+ *
+ * @param block The NAND Flash block to reset.
  */
 void EXMC::nand_reset(NPC_Block block) {
     EXMC_Regs npctl_offset = get_npctl_offset(block);
@@ -140,16 +150,10 @@ void EXMC::nand_reset(NPC_Block block) {
 
 /**
  * @brief Initializes the NAND Flash block configuration registers.
- * 
- * This function configures the NAND Flash block by setting up the NPCTL,
- * NPCTCFG, and NPATCFG registers based on the settings provided in the
- * `nand_config_` structure. It enables or disables features such as wait
- * signal and ECC, and configures timing parameters like databus width,
- * ECC size, counter latency, and attribute latency.
- * 
- * The function writes the timing parameters, control settings, and mode
- * configurations to the respective registers using helper functions to
- * manipulate individual bits and bit ranges.
+ *
+ * This function initializes the NAND Flash block configuration registers
+ * to the values specified in the NAND_Config object. This function is used
+ * to initialize the NAND Flash block before a conversion is started.
  */
 void EXMC::nand_init() {
     EXMC_Regs npctl_offset = get_npctl_offset(nand_config_.npc_block);
@@ -196,7 +200,7 @@ void EXMC::set_nand_enable(NPC_Block npc_block, bool enable) {
 }
 
 /**
- * \brief Resets the PC Card block configuration registers.
+ * @brief Resets the PC Card block configuration registers.
  *
  * This function resets the PC Card block by writing the default reset values
  * to the NPCTL3, NPINTEN3, NPCTCFG3, NPATCFG3, and PIOTCFG3 registers.

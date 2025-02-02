@@ -327,6 +327,13 @@ void DMA::set_transfer_direction(Transfer_Direction direction) {
            (direction == Transfer_Direction::M2P));
 }
 
+/**
+ * @brief Abandons the current DMA transfer and clears all flags and interrupts.
+ *
+ * This function disables interrupts, disables the channel, and clears all flags
+ * and interrupts. It should be used to abort a DMA transfer and clear up any
+ * pending interrupts.
+ */
 void DMA::set_transfer_abandon() {
     // Disable interrupts
     write_bits_sequence(*this, cached_offsets_.ctl,
@@ -341,9 +348,11 @@ void DMA::set_transfer_abandon() {
 }
 
 /**
- * @brief Clears the DMA channel by setting all the control register bits to
- *        zero. This function is useful for resetting the DMA channel to its
- *        default state after a transfer is complete.
+ * @brief Clears all configuration and status for the DMA channel.
+ *
+ * This function clears the channel control register (CHXCTL) by writing
+ * a value of zero to it. This clears all configuration and status for the
+ * DMA channel. The channel is disabled and all interrupts are cleared.
  */
 void DMA::clear_channel() {
     write_bit_range(*this, cached_offsets_.ctl, static_cast<uint32_t>(CHXCTL_Bits::ALL), Clear);
@@ -476,10 +485,16 @@ void DMA::set_interrupt_enable(Interrupt_Type type, bool enable) {
 }
 
 /**
- * @brief Converts a DMA channel status flag to its corresponding INTF flag.
+ * @brief Maps a Status_Flags value to the corresponding INTF_Bits value for this
+ *        channel.
  *
- * @param flag A Status_Flags value representing a DMA channel status flag.
- * @return The corresponding INTF flag for the given status flag.
+ * This function takes a Status_Flags value and returns the corresponding INTF_Bits
+ * value for this channel. For example, if the Status_Flags value is
+ * Status_Flags::FLAG_GIF and the channel is 0, the function will return
+ * INTF_Bits::GIF0.
+ *
+ * @param flag The Status_Flags value to map.
+ * @return The corresponding INTF_Bits value for this channel.
  */
 inline INTF_Bits DMA::get_channel_bits_from_flag(Status_Flags flag) {
     static const INTF_Bits gif_map[] = {
@@ -513,10 +528,15 @@ inline INTF_Bits DMA::get_channel_bits_from_flag(Status_Flags flag) {
 }
 
 /**
- * @brief Converts a Channel_Regs enum value to the corresponding DMA register offset.
+ * @brief Given a Channel_Regs value, returns the corresponding DMA_Regs value
+ *        plus the channel offset.
  *
- * @param reg The Channel_Regs enum value to convert.
- * @return The corresponding DMA register offset.
+ * This function takes a Channel_Regs value and returns the corresponding
+ * DMA_Regs value plus the channel offset. The channel offset is determined
+ * by the channel_ member variable.
+ *
+ * @param reg The Channel_Regs value to map.
+ * @return The corresponding DMA_Regs value plus the channel offset.
  */
 inline DMA_Regs DMA::get_channel_offset_from_reg(Channel_Regs reg) {
     static const DMA_Regs chxctl_map[] = {
@@ -548,6 +568,12 @@ inline DMA_Regs DMA::get_channel_offset_from_reg(Channel_Regs reg) {
     }
 }
 
+/**
+ * @brief Caches the register offsets for the given channel.
+ *
+ * This function caches the register offsets for the given channel. The
+ * cached offsets are stored in the cached_offsets_ member variable.
+ */
 void DMA::cache_register_offsets() {
     cached_offsets_.ctl = get_channel_offset_from_reg(Channel_Regs::CHXCTL);
     cached_offsets_.cnt = get_channel_offset_from_reg(Channel_Regs::CHXCNT);

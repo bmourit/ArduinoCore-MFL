@@ -29,12 +29,12 @@ CEE& CEE::get_instance() {
 CEE::CEE() {}
 
 /**
- * @brief Enables or disables the enhanced mode for the CEE module.
+ * @brief Enables or disables the code execution enhancement bit.
  *
  * This function sets or clears the CEE_EN bit in the CEE register
- * to enable or disable the enhanced mode. 
+ * to enable or disable the code execution enhancement mode. 
  *
- * @param enable Set to true to enable the enhanced mode, false to disable it.
+ * @param enable Set to true to enable the code execution enhancement, false to disable it.
  */
 void CEE::set_enhanced_mode_enable(bool enable) {
     write_bit(*this, CEE_Regs::CEE, static_cast<uint32_t>(CEE_Bits::CEE_EN), enable);

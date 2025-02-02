@@ -37,10 +37,12 @@ WWDGT::WWDGT() : is_clock_enabled_(false) {
 }
 
 /**
- * Reset the WWDGT peripheral.
+ * @brief Resets the WWDGT peripheral by toggling its peripheral clock reset.
  *
- * This function triggers the WWDGT peripheral reset, which resets all WWDGT
- * registers to their default values.
+ * This function enables the peripheral clock reset for the WWDGT by setting
+ * the reset register, then disables the reset to complete the reset operation.
+ * This effectively resets all registers of the WWDGT peripheral to their
+ * default values.
  */
 void WWDGT::reset() {
     RCU_I.set_pclk_reset_enable(rcu::RCU_PCLK_Reset::PCLK_WWDGTRST, true);
@@ -48,23 +50,25 @@ void WWDGT::reset() {
 }
 
 /**
- * Enable the WWDGT peripheral.
+ * @brief Enables the WWDGT peripheral.
  *
  * This function enables the WWDGT peripheral by setting the WDGTEN bit in the
- * Control Register (CTL). When the WWDGT is enabled, it starts counting down
- * from the initial value set with the update_counter() function.
+ * CTL register. Once enabled, the WWDGT starts counting down from the current
+ * counter value and can generate an early warning interrupt. 
  */
 void WWDGT::enable() {
     write_bit(*this, WWDGT_Regs::CTL, static_cast<uint32_t>(CTL_Bits::WDGTEN), true);
 }
 
 /**
- * Updates the WWDGT counter value.
+ * @brief Updates the WWDGT counter value.
  *
- * This function updates the WWDGT counter value, which is the initial value from
- * which the WWDGT starts counting down when enabled. The counter value is a
- * 16-bit unsigned integer.
- *
+ * This function updates the current counter value of the WWDGT peripheral by
+ * setting the CNT bits in the CTL register to the specified value. This
+ * function can be used at any time, regardless of whether the WWDGT is enabled
+ * or disabled. If the WWDGT is enabled, the counter value is updated immediately
+ * and the WWDGT continues counting down from the new value.
+ * 
  * @param[in] value The new counter value to be set.
  */
 void WWDGT::update_counter(uint16_t value) {
@@ -72,17 +76,19 @@ void WWDGT::update_counter(uint16_t value) {
 }
 
 /**
- * Configures the WWDGT peripheral.
+ * @brief Sets up the WWDGT peripheral with the specified counter value, window value, and prescaler.
  *
- * This function configures the WWDGT peripheral by setting the counter value,
- * window value, and prescaler value. The counter value is the initial value
- * from which the WWDGT starts counting down when enabled. The window value
- * specifies the window for the early warning interrupt to be generated. The
- * prescaler value specifies the prescaler division factor for the WWDGT clock.
+ * This function sets up the WWDGT peripheral by setting the CNT bits in the CTL
+ * register to the specified counter value, the WIN bits in the CFG register to
+ * the specified window value, and the PSC bits in the CFG register to the
+ * specified prescaler value. The window value must be less than or equal to the
+ * counter value, and the prescaler value must be one of the values listed in the
+ * Prescaler_Values enumeration.
  *
  * @param[in] value The counter value to be set.
  * @param[in] window The window value to be set.
- * @param[in] prescaler The prescaler value to be set.
+ * @param[in] prescaler The prescaler value to be set. Must be one of the
+ *            values listed in the Prescaler_Values enumeration.
  */
 void WWDGT::setup(uint16_t value, uint16_t window, Prescaler_Values prescaler) {
     write_bit_range(*this, WWDGT_Regs::CTL,
@@ -107,27 +113,28 @@ bool WWDGT::get_flag() {
 }
 
 /**
- * Clears the WWDGT early warning interrupt flag (EWIF).
+ * @brief Clears the WWDGT early warning interrupt flag.
  *
- * This function clears the EWIF by writing a 1 to the corresponding bit in
- * the STAT register. The EWIF is set when the WWDGT counter value is equal to
- * the window value set with the setup() function. The EWIF is cleared when the
- * WWDGT is reset or when this function is called.
+ * This function clears the WWDGT early warning interrupt flag (EWIF) by writing
+ * a 1 to the EWIF bit in the STAT register. The EWIF is set when the WWDGT
+ * counter value is equal to the window value set with the setup() function. The
+ * EWIF is cleared when the WWDGT is reset or when this function is called.
  */
 void WWDGT::clear_flag() {
     write_register(*this, WWDGT_Regs::STAT, Clear);
 }
 
 /**
- * Enables or disables the WWDGT early warning interrupt.
+ * @brief Enables or disables the WWDGT early warning interrupt.
  *
- * This function enables or disables the WWDGT early warning interrupt by setting
- * or clearing the EWIE bit in the CFG register. When the EWIE is set, an interrupt
- * will be generated when the WWDGT counter value is equal to the window value set
- * with the setup() function.
+ * This function enables or disables the WWDGT early warning interrupt. If the
+ * interrupt is enabled, the WWDGT generates an interrupt when the counter value
+ * is equal to the window value set with the setup() function. If the interrupt
+ * is disabled, the WWDGT does not generate an interrupt when the counter value
+ * is equal to the window value set with the setup() function.
  *
- * @param[in] enable If true, enables the early warning interrupt. If false,
- * disables the early warning interrupt.
+ * @param[in] enable Set to true to enable the WWDGT early warning interrupt,
+ *                   false to disable it.
  */
 void WWDGT::set_interrupt_enable(bool enable) {
     write_bit(*this, WWDGT_Regs::CFG, static_cast<uint32_t>(CFG_Bits::EWIE), enable);
