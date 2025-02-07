@@ -7,9 +7,9 @@
 #endif
 
 // Arduino core version number
-#define VERSION_MAJOR   0	// Major version
-#define VERSION_MINOR   9	// Minor version
-#define VERSION_PATCH   5	// Patch version
+#define VERSION_MAJOR   1	// Major version
+#define VERSION_MINOR   0	// Minor version
+#define VERSION_PATCH   1	// Patch version
 #define CORE_VERSION    (VERSION_MAJOR << 16) | (VERSION_MINOR << 8) | (VERSION_PATCH)
 
 // libc porting layers for GCC
@@ -22,11 +22,11 @@ extern "C" {
 #endif
 
 // Error handler
-void _ErrorHandler(const char *msg, int value);
+void _ErrorHandler(const char* msg, int value);
 #define ErrorHandler() _ErrorHandler(__FILE__, __LINE__)
 
 // Core debug
-inline void core_debug(const char *format, ...) {
+inline void core_debug(const char* format, ...) {
 #ifdef CORE_DEBUG
     va_list arglist;
     va_start(arglist, format);

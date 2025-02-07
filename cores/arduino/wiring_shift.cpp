@@ -32,14 +32,14 @@
  */
 uint8_t shiftIn(pin_size_t dataPin, pin_size_t clockPin, BitOrder bitOrder) {
     uint8_t value = 0U;
+    const bool isLSBFIRST = (bitOrder == LSBFIRST);
+    uint8_t shiftIndex = isLSBFIRST ? 0U : 7U;
+    const int8_t increment = isLSBFIRST ? 1 : -1;
 
     for (uint8_t i = 0U; i < 8U; i++) {
         digitalWrite(clockPin, HIGH);
-        if (bitOrder == LSBFIRST) {
-            value |= digitalRead(dataPin) << i;
-        } else {
-            value |= digitalRead(dataPin) << (7U - i);
-        }
+        value |= digitalRead(dataPin) << shiftIndex;
+        shiftIndex += increment;
         digitalWrite(clockPin, LOW);
     }
 
@@ -59,13 +59,14 @@ uint8_t shiftIn(pin_size_t dataPin, pin_size_t clockPin, BitOrder bitOrder) {
  * @param val The byte of data to shift out
  */
 void shiftOut(pin_size_t dataPin, pin_size_t clockPin, BitOrder bitOrder, uint8_t val) {
+    const bool isLSBFIRST = (bitOrder == LSBFIRST);
+    uint8_t shiftIndex = isLSBFIRST ? 0U : 7U;
+    const int8_t increment = isLSBFIRST ? 1 : -1;
+
     for (uint8_t i = 0U; i < 8U; i++) {
-        if (bitOrder == LSBFIRST) {
-            digitalWrite(dataPin, !!(val & (1U << i)));
-        } else {
-            digitalWrite(dataPin, !!(val & (1U << (7U - i))));
-        }
+        digitalWrite(dataPin, !!(val & (1U << shiftIndex)));
         digitalWrite(clockPin, HIGH);
         digitalWrite(clockPin, LOW);
+        shiftIndex += increment;
     }
 }

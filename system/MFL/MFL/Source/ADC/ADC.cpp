@@ -149,7 +149,7 @@ void ADC::calibration_enable() {
  *
  * @param enable Set to true to enable DMA, false to disable it.
  */
-void ADC::dma_enable(bool enable) {
+void ADC::set_dma_enable(bool enable) {
     write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::DMA), enable);
 }
 
@@ -244,33 +244,33 @@ void ADC::set_mode(Sync_Mode mode) {
  * @param enable Set to true to enable the specified functional mode,
  *               false to disable it.
  */
-void ADC::set_special_function(Special_Function function, bool enable) {
+void ADC::set_functional_mode(Functional_Mode function, bool enable) {
     switch (function) {
-    case Special_Function::SCAN_MODE:
+    case Functional_Mode::SCAN_MODE:
         write_bit(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::SM), enable);
         break;
-    case Special_Function::INSERTED_CH_MODE:
+    case Functional_Mode::INSERTED_CH_MODE:
         write_bit(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::ICA), enable);
         break;
-    case Special_Function::CONTINUOUS_MODE:
+    case Functional_Mode::CONTINUOUS_MODE:
         write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::CTN), enable);
         break;
-    case Special_Function::SCAN_INSERTED:
+    case Functional_Mode::SCAN_INSERTED:
         write_bits_sequence(*this, ADC_Regs::CTL0,
                    static_cast<uint32_t>(CTL0_Bits::SM), enable,
                    static_cast<uint32_t>(CTL0_Bits::ICA), enable);
         break;
-    case Special_Function::SCAN_CONTINUOUS:
+    case Functional_Mode::SCAN_CONTINUOUS:
         write_bit(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::SM), enable);
         write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::CTN), enable);
         break;
-    case Special_Function::SCAN_INSERTED_CONTINUOUS:
+    case Functional_Mode::SCAN_INSERTED_CONTINUOUS:
         write_bits_sequence(*this, ADC_Regs::CTL0,
                    static_cast<uint32_t>(CTL0_Bits::SM), enable,
                    static_cast<uint32_t>(CTL0_Bits::ICA), enable);
         write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::CTN), enable);
         break;
-    case Special_Function::INSERTED_CONTINUOUS:
+    case Functional_Mode::INSERTED_CONTINUOUS:
         write_bit(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::ICA), enable);
         write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::CTN), enable);
         break;
@@ -497,7 +497,7 @@ uint32_t ADC::get_inserted_data(Inserted_Channel inserted_channel) {
 }
 
 /**
- * @brief Retrieves the ADC conversion result when in synchronization mode.
+ * @brief Retrieves the converted data when in synchronization mode.
  *
  * In synchronization mode, the ADC conversion result is always stored in the
  * RDATA register. This function is used to retrieve the conversion result in
@@ -505,7 +505,7 @@ uint32_t ADC::get_inserted_data(Inserted_Channel inserted_channel) {
  *
  * @return The 32-bit result of the ADC conversion in synchronization mode.
  */
-uint32_t ADC::get_sync_mode_convert_value(void) {
+uint32_t ADC::get_sync_mode_data() {
     return read_register<uint32_t>(*this, ADC_Regs::RDATA);
 }
 

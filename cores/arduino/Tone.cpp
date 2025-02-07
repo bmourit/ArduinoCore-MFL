@@ -63,7 +63,7 @@ static void timerTonePinInit(pin_size_t pin, uint32_t frequency, uint32_t durati
 
         setPinOp(pinInfo.pin, createPackedPinOps(
             gpio::Pin_Mode::OUTPUT_PUSHPULL,
-            gpio::Output_Speed::SPEED_50MHZ,
+            gpio::Output_Speed::SPEED_MAX,
             gpio::Pin_Remap_Select::NO_REMAP,
             0U,
             0U
@@ -87,7 +87,7 @@ static void timerTonePinDeinit() {
     if (pinInfo.pin != NO_PIN && pinInfo.pin <= MAX_PIN_NUM) {
         setPinOp(pinInfo.pin, createPackedPinOps(
             gpio::Pin_Mode::INPUT_FLOATING,
-            gpio::Output_Speed::SPEED_50MHZ,
+            gpio::Output_Speed::SPEED_MAX,
             gpio::Pin_Remap_Select::NO_REMAP,
             0,
             0

@@ -63,6 +63,15 @@ inline void backup_register_set(bkp::Backup_Data data, uint16_t value) {
     bkp::BKP::get_instance().set_data(data, value);
 }
 
-inline uint16_t backup_rergister_get(bkp::Backup_Data data) {
+/**
+ * @brief Gets the value of a backup register.
+ *
+ * This function gets the value of a backup register with the
+ * specified address.
+ *
+ * @param data The address of the backup register to get.
+ * @return The current value of the backup register.
+ */
+inline uint16_t backup_register_get(bkp::Backup_Data data) {
     return bkp::BKP::get_instance().get_data(data);
 }

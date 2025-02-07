@@ -66,7 +66,7 @@ static void Servo_PeriodElapsedCallback() {
     timerChannel[timerId] = timerChannel[timerId] + 1;
     if (timerChannel[timerId] < ServoCount && timerChannel[timerId] < SERVOS_PER_TIMER) {
         servoTimer.setRolloverValue(servos[timerChannel[timerId]].ticks, TimerFormat::TICK);
-        TotalCount += servos[timerChannel[timerId]].ticks;
+        TotalCount = TotalCount + servos[timerChannel[timerId]].ticks;
         if (servos[timerChannel[timerId]].pinNumber.isActive == true) {
             digitalWrite(servos[timerChannel[timerId]].pinNumber.pin, HIGH);   // It is an active channel so pulse it high
         }

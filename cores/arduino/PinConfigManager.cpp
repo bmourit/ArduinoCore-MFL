@@ -3,7 +3,7 @@
 #include "PinOpsMap.hpp"
 #include "PinOps.hpp"
 
-constexpr uint8_t Max_Pins_Per_Port = 16U;
+inline constexpr uint8_t Max_Pins_Per_Port = 16U;
 
 /**
  * @brief Check if the specified pin is configured.

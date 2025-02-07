@@ -199,7 +199,7 @@ enum class Sync_Mode : uint8_t {
     SM_ITR		// Inserted trigger rotation mode only
 };
 
-enum class Special_Function : uint8_t {
+enum class Functional_Mode : uint8_t {
     SCAN_MODE,
     INSERTED_CH_MODE,
     CONTINUOUS_MODE,

@@ -1,6 +1,6 @@
 {
   "name": "framework-arduino-mfl",
   "description": "Arduino Core for the GD32F303RE microcontroller utilizing the ArduinoCore API and the MFL C++ library",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "url": "https://github.com/bmourit/ArduinoCore-MFL"
 }

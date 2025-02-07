@@ -18,7 +18,7 @@ using namespace arduino;
 #define noInterrupts()    __disable_irq()
 
 #ifdef __cplusplus
-// Currently we support less than this
+// We currently support less than this
 inline constexpr pin_size_t NO_PIN = 70;
 #else
 #define NO_PIN	70

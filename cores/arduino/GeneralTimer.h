@@ -47,7 +47,6 @@ public:
     }
     void setPrescaler(uint16_t prescaler);
     uint16_t getPrescaler();
-    // Rollover (overflow/auto reload)
     void setRolloverValue(uint32_t value, TimerFormat format = TimerFormat::TICK);
     uint32_t getRolloverValue(TimerFormat format = TimerFormat::TICK);
     void setCounter(uint16_t count, TimerFormat format = TimerFormat::TICK);

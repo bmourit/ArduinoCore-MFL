@@ -45,10 +45,7 @@ extern void randomSeed(unsigned long seed) {
  * @return A pseudo-random number in the range [0, size).
  */
 extern long random(long size) {
-    if (size == 0) {
-        return 0;
-    }
-    return rand() % size;
+    return (size == 0) ? 0 : rand() % size;
 }
 
 /**

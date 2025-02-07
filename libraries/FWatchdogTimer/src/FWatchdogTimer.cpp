@@ -91,7 +91,7 @@ bool FWatchdogTimer::set(uint32_t timeout) {
     }
 
     // Pre-calculate timeout in seconds to avoid repeated division
-    float timeout_sec = static_cast<float>(timeout) / 1'000'000U * rcu::IRC40K_VALUE;
+    float timeout_sec = static_cast<float>(timeout) / 1'000'000.0f * rcu::IRC40K_VALUE;
     uint8_t prescaler = 0U;
 
     // Find optimal prescaler using bit shifting

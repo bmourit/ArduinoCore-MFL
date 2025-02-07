@@ -12,7 +12,7 @@ extern uint32_t msTickPriority;
 
 SysTick_Error tickInit(uint32_t priority);
 uint32_t getTickPriority();
-void tickInc();
+void tickIncrement();
 
 uint32_t getCurrentMillis();
 uint32_t getCurrentMicros();

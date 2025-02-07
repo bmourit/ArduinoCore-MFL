@@ -121,7 +121,6 @@ env.Append(
 	],
 	CCFLAGS=machine_flags + [
 		"-Os",
-		"-ggdb",
 		"--specs=nosys.specs",
 		"-ffunction-sections",
 		"-fdata-sections",
@@ -132,7 +131,7 @@ env.Append(
 	],
 	CPPDEFINES=[
 		series,
-		("ARDUINO_CORE_VERSION", 10000),
+		("ARDUINO", 10000),
 		"ARDUINO_ARCH_MFL",
 		"ARDUINO_%s" % board_name.upper(),
 		("BOARD_NAME", '\\"%s\\"' % board_name.upper()),
@@ -178,14 +177,12 @@ env.Append(
 	],
 	LINKFLAGS=machine_flags + [
 		"-Os",
-		"-ggdb",
 		"--specs=nosys.specs",
 		"-Wl,--gc-sections",
 		"-Wl,--check-sections",
 		"-Wl,--entry=Reset_Handler",
 		"-Wl,--unresolved-symbols=report-all",
 		"-Wl,--warn-common",
-        "-Wl,--warn-section-align",
 		"-Wl,--defsym=LD_MAX_SIZE=%d" % board_config.get("upload.maximum_size"),
 		"-Wl,--defsym=LD_MAX_DATA_SIZE=%d" % board_config.get("upload.maximum_ram_size"),
 		'-Wl,-Map="%s"' % join("${BUILD_DIR}", "${PROGNAME}.map"),
