@@ -22,30 +22,30 @@
 #include <stdbool.h>
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"{
 #endif
 
 void yield(void);
 
 typedef enum {
-    LOW     = 0,
-    HIGH    = 1,
-    CHANGE  = 2,
-    FALLING = 3,
-    RISING  = 4,
+  LOW     = 0,
+  HIGH    = 1,
+  CHANGE  = 2,
+  FALLING = 3,
+  RISING  = 4,
 } PinStatus;
 
 typedef enum {
-    INPUT            = 0x0,
-    OUTPUT           = 0x1,
-    INPUT_PULLUP     = 0x2,
-    INPUT_PULLDOWN   = 0x3,
-    OUTPUT_OPENDRAIN = 0x4,
+  INPUT            = 0x0,
+  OUTPUT           = 0x1,
+  INPUT_PULLUP     = 0x2,
+  INPUT_PULLDOWN   = 0x3,
+  OUTPUT_OPENDRAIN = 0x4,
 } PinMode;
 
 typedef enum {
-    LSBFIRST = 0,
-    MSBFIRST = 1,
+  LSBFIRST = 0,
+  MSBFIRST = 1,
 } BitOrder;
 
 #define PI          3.1415926535897932384626433832795
@@ -141,17 +141,17 @@ void loop(void);
 #endif
 
 #ifdef __cplusplus
-template<class T, class L>
-auto min(const T& a, const L& b) -> decltype((b < a) ? b : a)
-{
+  template<class T, class L> 
+  auto min(const T& a, const L& b) -> decltype((b < a) ? b : a)
+  {
     return (b < a) ? b : a;
-}
+  }
 
-template<class T, class L>
-auto max(const T& a, const L& b) -> decltype((b < a) ? b : a)
-{
+  template<class T, class L> 
+  auto max(const T& a, const L& b) -> decltype((b < a) ? b : a)
+  {
     return (a < b) ? b : a;
-}
+  }
 #else
 #ifndef min
 #define min(a,b) \
