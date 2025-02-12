@@ -29,7 +29,10 @@ RTC& RTC::get_instance() {
     return instance;
 }
 
-RTC::RTC() : is_clock_enabled_(false) {
+RTC::RTC() :
+    bkp_(bkp::BKP::get_instance()),
+    is_clock_enabled_(false)
+{
     if (!is_clock_enabled_) {
         PMU_I.set_backup_write_enable(true);
         RCU_I.set_pclk_enable(rcu::RCU_PCLK::PCLK_RTC, true);
@@ -103,7 +106,7 @@ void RTC::sync_register_wait() {
  */
 uint32_t RTC::get_counter() {
     return ((read_bit_range(*this, RTC_Regs::CNTH, static_cast<uint32_t>(CNTH_Bits::HIGH_CNT)) << 16) |
-             read_bit_range(*this, RTC_Regs::CNTL, static_cast<uint32_t>(CNTL_Bits::LOW_CNT)));
+            read_bit_range(*this, RTC_Regs::CNTL, static_cast<uint32_t>(CNTL_Bits::LOW_CNT)));
 }
 
 /**
@@ -173,7 +176,7 @@ void RTC::set_alarm(uint32_t alarm) {
  */
 uint32_t RTC::get_divider() {
     return ((read_bit_range(*this, RTC_Regs::DIVH, static_cast<uint32_t>(DIVH_Bits::HIGH_DIV)) << 16) |
-             read_bit_range(*this, RTC_Regs::DIVL, static_cast<uint32_t>(DIVL_Bits::LOW_DIV)));
+            read_bit_range(*this, RTC_Regs::DIVL, static_cast<uint32_t>(DIVL_Bits::LOW_DIV)));
 }
 
 /**
@@ -211,7 +214,7 @@ void RTC::clear_flag(Status_Flags flag) {
  * or disabling the specified interrupt type. It modifies the interrupt
  * enable register to reflect the desired configuration.
  *
- * @param type The interrupt type to enable or disable. Must be a value from 
+ * @param type The interrupt type to enable or disable. Must be a value from
  *             the Interrupt_Type enumeration.
  * @param enable Set to true to enable the interrupt, false to disable it.
  */

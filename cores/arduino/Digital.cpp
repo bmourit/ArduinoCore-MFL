@@ -36,28 +36,28 @@ void pinMode(pin_size_t pin, PinMode mode) {
     }
 
     switch (mode) {
-    case INPUT:
-        setPinOp(pin, createPackedPinOps(gpio::Pin_Mode::INPUT_FLOATING, gpio::Output_Speed::SPEED_MAX, gpio::Pin_Remap_Select::NO_REMAP, 0, 0));
-        break;
-    case INPUT_PULLUP:
-        setPinOp(pin, createPackedPinOps(gpio::Pin_Mode::INPUT_PULLUP, gpio::Output_Speed::SPEED_MAX, gpio::Pin_Remap_Select::NO_REMAP, 0, 0));
-        break;
-    case INPUT_PULLDOWN:
-        setPinOp(pin, createPackedPinOps(gpio::Pin_Mode::INPUT_PULLDOWN, gpio::Output_Speed::SPEED_MAX, gpio::Pin_Remap_Select::NO_REMAP, 0, 0));
-        break;
-    case OUTPUT:
-        setPinOp(pin, createPackedPinOps(gpio::Pin_Mode::OUTPUT_PUSHPULL, gpio::Output_Speed::SPEED_MAX, gpio::Pin_Remap_Select::NO_REMAP, 0, 0));
-        break;
-    case OUTPUT_OPENDRAIN:
-        setPinOp(pin, createPackedPinOps(gpio::Pin_Mode::OUTPUT_OPENDRAIN, gpio::Output_Speed::SPEED_MAX, gpio::Pin_Remap_Select::NO_REMAP, 0, 0));
-        break;
-    #pragma GCC diagnostic ignored "-Wswitch"
-    case INPUT_ANALOG:
-    default:    // Default to INPUT_ANALOG
-        if ((pin != ADC_TEMP) && (pin != ADC_VREF)) {
-            pinOpsPinout(ADC_PinOps, pin);
-        }
-        break;
+        case INPUT:
+            setPinOp(pin, createPackedPinOps(gpio::Pin_Mode::INPUT_FLOATING, gpio::Output_Speed::SPEED_MAX, gpio::Pin_Remap_Select::NO_REMAP, 0, 0));
+            break;
+        case INPUT_PULLUP:
+            setPinOp(pin, createPackedPinOps(gpio::Pin_Mode::INPUT_PULLUP, gpio::Output_Speed::SPEED_MAX, gpio::Pin_Remap_Select::NO_REMAP, 0, 0));
+            break;
+        case INPUT_PULLDOWN:
+            setPinOp(pin, createPackedPinOps(gpio::Pin_Mode::INPUT_PULLDOWN, gpio::Output_Speed::SPEED_MAX, gpio::Pin_Remap_Select::NO_REMAP, 0, 0));
+            break;
+        case OUTPUT:
+            setPinOp(pin, createPackedPinOps(gpio::Pin_Mode::OUTPUT_PUSHPULL, gpio::Output_Speed::SPEED_MAX, gpio::Pin_Remap_Select::NO_REMAP, 0, 0));
+            break;
+        case OUTPUT_OPENDRAIN:
+            setPinOp(pin, createPackedPinOps(gpio::Pin_Mode::OUTPUT_OPENDRAIN, gpio::Output_Speed::SPEED_MAX, gpio::Pin_Remap_Select::NO_REMAP, 0, 0));
+            break;
+#pragma GCC diagnostic ignored "-Wswitch"
+        case INPUT_ANALOG:
+        default:    // Default to INPUT_ANALOG
+            if ((pin != ADC_TEMP) && (pin != ADC_VREF)) {
+                pinOpsPinout(ADC_PinOps, pin);
+            }
+            break;
     }
 }
 

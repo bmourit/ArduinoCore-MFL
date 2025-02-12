@@ -23,7 +23,7 @@
 
 /**
  * @brief Reads the value of a register.
- * 
+ *
  * @tparam T The data type of the register value.
  * @tparam RegType The type of the register identifier.
  * @tparam Instance The type of the instance containing the register.
@@ -38,7 +38,7 @@ inline T read_register(const Instance& instance, RegType reg) {
 
 /**
  * @brief Writes a value to a register.
- * 
+ *
  * @tparam T The data type of the value to write.
  * @tparam RegType The type of the register identifier.
  * @tparam Instance The type of the instance containing the register.

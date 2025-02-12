@@ -323,49 +323,49 @@ struct index_to_bits {
 };
 
 static inline constexpr std::array<index_to_bits, 42> pclk_index {{
-    {RCU_Regs::AHBEN, REG_BIT_DEF(0, 0)},
-    {RCU_Regs::AHBEN, REG_BIT_DEF(1, 1)},
-    {RCU_Regs::AHBEN, REG_BIT_DEF(6, 6)},
-    {RCU_Regs::AHBEN, REG_BIT_DEF(8, 8)},
-    {RCU_Regs::AHBEN, REG_BIT_DEF(10, 10)},
-    {RCU_Regs::APB1EN, REG_BIT_DEF(0, 0)},
-    {RCU_Regs::APB1EN, REG_BIT_DEF(1, 1)},
-    {RCU_Regs::APB1EN, REG_BIT_DEF(2, 2)},
-    {RCU_Regs::APB1EN, REG_BIT_DEF(3, 3)},
-    {RCU_Regs::APB1EN, REG_BIT_DEF(4, 4)},
-    {RCU_Regs::APB1EN, REG_BIT_DEF(5, 5)},
-    {RCU_Regs::APB1EN, REG_BIT_DEF(11, 11)},
-    {RCU_Regs::APB1EN, REG_BIT_DEF(14, 14)},
-    {RCU_Regs::APB1EN, REG_BIT_DEF(15, 15)},
-    {RCU_Regs::APB1EN, REG_BIT_DEF(17, 17)},
-    {RCU_Regs::APB1EN, REG_BIT_DEF(18, 18)},
-    {RCU_Regs::APB1EN, REG_BIT_DEF(19, 19)},
-    {RCU_Regs::APB1EN, REG_BIT_DEF(20, 20)},
-    {RCU_Regs::APB1EN, REG_BIT_DEF(21, 21)},
-    {RCU_Regs::APB1EN, REG_BIT_DEF(22, 22)},
-    {RCU_Regs::APB1EN, REG_BIT_DEF(23, 23)},
-    {RCU_Regs::APB1EN, REG_BIT_DEF(25, 25)},
-    {RCU_Regs::APB1EN, REG_BIT_DEF(27, 27)},
-    {RCU_Regs::APB1EN, REG_BIT_DEF(28, 28)},
-    {RCU_Regs::APB1EN, REG_BIT_DEF(29, 29)},
-    {RCU_Regs::BDCTL, REG_BIT_DEF(15, 15)},
-    {RCU_Regs::ADDAPB1EN, REG_BIT_DEF(27, 27)},
-    {RCU_Regs::APB2EN, REG_BIT_DEF(0, 0)},
-    {RCU_Regs::APB2EN, REG_BIT_DEF(2, 2)},
-    {RCU_Regs::APB2EN, REG_BIT_DEF(3, 3)},
-    {RCU_Regs::APB2EN, REG_BIT_DEF(4, 4)},
-    {RCU_Regs::APB2EN, REG_BIT_DEF(5, 5)},
-    {RCU_Regs::APB2EN, REG_BIT_DEF(6, 6)},
-    {RCU_Regs::APB2EN, REG_BIT_DEF(7, 7)},
-    {RCU_Regs::APB2EN, REG_BIT_DEF(8, 8)},
-    {RCU_Regs::APB2EN, REG_BIT_DEF(9, 9)},
-    {RCU_Regs::APB2EN, REG_BIT_DEF(10, 10)},
-    {RCU_Regs::APB2EN, REG_BIT_DEF(11, 11)},
-    {RCU_Regs::APB2EN, REG_BIT_DEF(12, 12)},
-    {RCU_Regs::APB2EN, REG_BIT_DEF(13, 13)},
-    {RCU_Regs::APB2EN, REG_BIT_DEF(14, 14)},
-    {RCU_Regs::APB2EN, REG_BIT_DEF(15, 15)}
-}};
+        {RCU_Regs::AHBEN, REG_BIT_DEF(0, 0)},
+        {RCU_Regs::AHBEN, REG_BIT_DEF(1, 1)},
+        {RCU_Regs::AHBEN, REG_BIT_DEF(6, 6)},
+        {RCU_Regs::AHBEN, REG_BIT_DEF(8, 8)},
+        {RCU_Regs::AHBEN, REG_BIT_DEF(10, 10)},
+        {RCU_Regs::APB1EN, REG_BIT_DEF(0, 0)},
+        {RCU_Regs::APB1EN, REG_BIT_DEF(1, 1)},
+        {RCU_Regs::APB1EN, REG_BIT_DEF(2, 2)},
+        {RCU_Regs::APB1EN, REG_BIT_DEF(3, 3)},
+        {RCU_Regs::APB1EN, REG_BIT_DEF(4, 4)},
+        {RCU_Regs::APB1EN, REG_BIT_DEF(5, 5)},
+        {RCU_Regs::APB1EN, REG_BIT_DEF(11, 11)},
+        {RCU_Regs::APB1EN, REG_BIT_DEF(14, 14)},
+        {RCU_Regs::APB1EN, REG_BIT_DEF(15, 15)},
+        {RCU_Regs::APB1EN, REG_BIT_DEF(17, 17)},
+        {RCU_Regs::APB1EN, REG_BIT_DEF(18, 18)},
+        {RCU_Regs::APB1EN, REG_BIT_DEF(19, 19)},
+        {RCU_Regs::APB1EN, REG_BIT_DEF(20, 20)},
+        {RCU_Regs::APB1EN, REG_BIT_DEF(21, 21)},
+        {RCU_Regs::APB1EN, REG_BIT_DEF(22, 22)},
+        {RCU_Regs::APB1EN, REG_BIT_DEF(23, 23)},
+        {RCU_Regs::APB1EN, REG_BIT_DEF(25, 25)},
+        {RCU_Regs::APB1EN, REG_BIT_DEF(27, 27)},
+        {RCU_Regs::APB1EN, REG_BIT_DEF(28, 28)},
+        {RCU_Regs::APB1EN, REG_BIT_DEF(29, 29)},
+        {RCU_Regs::BDCTL, REG_BIT_DEF(15, 15)},
+        {RCU_Regs::ADDAPB1EN, REG_BIT_DEF(27, 27)},
+        {RCU_Regs::APB2EN, REG_BIT_DEF(0, 0)},
+        {RCU_Regs::APB2EN, REG_BIT_DEF(2, 2)},
+        {RCU_Regs::APB2EN, REG_BIT_DEF(3, 3)},
+        {RCU_Regs::APB2EN, REG_BIT_DEF(4, 4)},
+        {RCU_Regs::APB2EN, REG_BIT_DEF(5, 5)},
+        {RCU_Regs::APB2EN, REG_BIT_DEF(6, 6)},
+        {RCU_Regs::APB2EN, REG_BIT_DEF(7, 7)},
+        {RCU_Regs::APB2EN, REG_BIT_DEF(8, 8)},
+        {RCU_Regs::APB2EN, REG_BIT_DEF(9, 9)},
+        {RCU_Regs::APB2EN, REG_BIT_DEF(10, 10)},
+        {RCU_Regs::APB2EN, REG_BIT_DEF(11, 11)},
+        {RCU_Regs::APB2EN, REG_BIT_DEF(12, 12)},
+        {RCU_Regs::APB2EN, REG_BIT_DEF(13, 13)},
+        {RCU_Regs::APB2EN, REG_BIT_DEF(14, 14)},
+        {RCU_Regs::APB2EN, REG_BIT_DEF(15, 15)}
+    }};
 
 ///////////////////////////// PCLK RESET /////////////////////////////
 
@@ -409,43 +409,43 @@ enum class RCU_PCLK_Reset : uint8_t {
 };
 
 static inline constexpr std::array<index_to_bits, 36> pclk_reset_index {{
-    {RCU_Regs::APB1RST, REG_BIT_DEF(0, 0)},
-    {RCU_Regs::APB1RST, REG_BIT_DEF(1, 1)},
-    {RCU_Regs::APB1RST, REG_BIT_DEF(2, 2)},
-    {RCU_Regs::APB1RST, REG_BIT_DEF(3, 3)},
-    {RCU_Regs::APB1RST, REG_BIT_DEF(4, 4)},
-    {RCU_Regs::APB1RST, REG_BIT_DEF(5, 5)},
-    {RCU_Regs::APB1RST, REG_BIT_DEF(11, 11)},
-    {RCU_Regs::APB1RST, REG_BIT_DEF(14, 14)},
-    {RCU_Regs::APB1RST, REG_BIT_DEF(15, 15)},
-    {RCU_Regs::APB1RST, REG_BIT_DEF(17, 17)},
-    {RCU_Regs::APB1RST, REG_BIT_DEF(18, 18)},
-    {RCU_Regs::APB1RST, REG_BIT_DEF(19, 19)},
-    {RCU_Regs::APB1RST, REG_BIT_DEF(20, 20)},
-    {RCU_Regs::APB1RST, REG_BIT_DEF(21, 21)},
-    {RCU_Regs::APB1RST, REG_BIT_DEF(22, 22)},
-    {RCU_Regs::APB1RST, REG_BIT_DEF(23, 23)},
-    {RCU_Regs::APB1RST, REG_BIT_DEF(25, 25)},
-    {RCU_Regs::APB1RST, REG_BIT_DEF(27, 27)},
-    {RCU_Regs::APB1RST, REG_BIT_DEF(28, 28)},
-    {RCU_Regs::APB1RST, REG_BIT_DEF(29, 29)},
-    {RCU_Regs::ADDAPB1RST, REG_BIT_DEF(27, 27)},
-    {RCU_Regs::APB2RST, REG_BIT_DEF(0, 0)},
-    {RCU_Regs::APB2RST, REG_BIT_DEF(2, 2)},
-    {RCU_Regs::APB2RST, REG_BIT_DEF(3, 3)},
-    {RCU_Regs::APB2RST, REG_BIT_DEF(4, 4)},
-    {RCU_Regs::APB2RST, REG_BIT_DEF(5, 5)},
-    {RCU_Regs::APB2RST, REG_BIT_DEF(6, 6)},
-    {RCU_Regs::APB2RST, REG_BIT_DEF(7, 7)},
-    {RCU_Regs::APB2RST, REG_BIT_DEF(8, 8)},
-    {RCU_Regs::APB2RST, REG_BIT_DEF(9, 9)},
-    {RCU_Regs::APB2RST, REG_BIT_DEF(10, 10)},
-    {RCU_Regs::APB2RST, REG_BIT_DEF(11, 11)},
-    {RCU_Regs::APB2RST, REG_BIT_DEF(12, 12)},
-    {RCU_Regs::APB2RST, REG_BIT_DEF(13, 13)},
-    {RCU_Regs::APB2RST, REG_BIT_DEF(14, 14)},
-    {RCU_Regs::APB2RST, REG_BIT_DEF(15, 15)}
-}};
+        {RCU_Regs::APB1RST, REG_BIT_DEF(0, 0)},
+        {RCU_Regs::APB1RST, REG_BIT_DEF(1, 1)},
+        {RCU_Regs::APB1RST, REG_BIT_DEF(2, 2)},
+        {RCU_Regs::APB1RST, REG_BIT_DEF(3, 3)},
+        {RCU_Regs::APB1RST, REG_BIT_DEF(4, 4)},
+        {RCU_Regs::APB1RST, REG_BIT_DEF(5, 5)},
+        {RCU_Regs::APB1RST, REG_BIT_DEF(11, 11)},
+        {RCU_Regs::APB1RST, REG_BIT_DEF(14, 14)},
+        {RCU_Regs::APB1RST, REG_BIT_DEF(15, 15)},
+        {RCU_Regs::APB1RST, REG_BIT_DEF(17, 17)},
+        {RCU_Regs::APB1RST, REG_BIT_DEF(18, 18)},
+        {RCU_Regs::APB1RST, REG_BIT_DEF(19, 19)},
+        {RCU_Regs::APB1RST, REG_BIT_DEF(20, 20)},
+        {RCU_Regs::APB1RST, REG_BIT_DEF(21, 21)},
+        {RCU_Regs::APB1RST, REG_BIT_DEF(22, 22)},
+        {RCU_Regs::APB1RST, REG_BIT_DEF(23, 23)},
+        {RCU_Regs::APB1RST, REG_BIT_DEF(25, 25)},
+        {RCU_Regs::APB1RST, REG_BIT_DEF(27, 27)},
+        {RCU_Regs::APB1RST, REG_BIT_DEF(28, 28)},
+        {RCU_Regs::APB1RST, REG_BIT_DEF(29, 29)},
+        {RCU_Regs::ADDAPB1RST, REG_BIT_DEF(27, 27)},
+        {RCU_Regs::APB2RST, REG_BIT_DEF(0, 0)},
+        {RCU_Regs::APB2RST, REG_BIT_DEF(2, 2)},
+        {RCU_Regs::APB2RST, REG_BIT_DEF(3, 3)},
+        {RCU_Regs::APB2RST, REG_BIT_DEF(4, 4)},
+        {RCU_Regs::APB2RST, REG_BIT_DEF(5, 5)},
+        {RCU_Regs::APB2RST, REG_BIT_DEF(6, 6)},
+        {RCU_Regs::APB2RST, REG_BIT_DEF(7, 7)},
+        {RCU_Regs::APB2RST, REG_BIT_DEF(8, 8)},
+        {RCU_Regs::APB2RST, REG_BIT_DEF(9, 9)},
+        {RCU_Regs::APB2RST, REG_BIT_DEF(10, 10)},
+        {RCU_Regs::APB2RST, REG_BIT_DEF(11, 11)},
+        {RCU_Regs::APB2RST, REG_BIT_DEF(12, 12)},
+        {RCU_Regs::APB2RST, REG_BIT_DEF(13, 13)},
+        {RCU_Regs::APB2RST, REG_BIT_DEF(14, 14)},
+        {RCU_Regs::APB2RST, REG_BIT_DEF(15, 15)}
+    }};
 
 
 ///////////////////////////// SLEEP /////////////////////////////
@@ -456,9 +456,9 @@ enum class RCU_PCLK_Sleep : uint8_t {
 };
 
 static inline constexpr std::array<index_to_bits, 2> pclk_sleep_index {{
-    {RCU_Regs::AHBEN, REG_BIT_DEF(2, 2)},
-    {RCU_Regs::AHBEN, REG_BIT_DEF(4, 4)}
-}};
+        {RCU_Regs::AHBEN, REG_BIT_DEF(2, 2)},
+        {RCU_Regs::AHBEN, REG_BIT_DEF(4, 4)}
+    }};
 
 
 ///////////////////////////// INTERRUPTS AND FLAGS /////////////////////////////
@@ -479,19 +479,19 @@ enum class Status_Flags : uint8_t {
 };
 
 static inline constexpr std::array<index_to_bits, 12> status_flag_index {{
-    {RCU_Regs::CTL, REG_BIT_DEF(1, 1)},
-    {RCU_Regs::CTL, REG_BIT_DEF(17, 17)},
-    {RCU_Regs::CTL, REG_BIT_DEF(25, 25)},
-    {RCU_Regs::BDCTL, REG_BIT_DEF(1, 1)},
-    {RCU_Regs::RSTSCK, REG_BIT_DEF(1, 1)},
-    {RCU_Regs::ADDCTL, REG_BIT_DEF(17, 17)},
-    {RCU_Regs::RSTSCK, REG_BIT_DEF(26, 26)},
-    {RCU_Regs::RSTSCK, REG_BIT_DEF(27, 27)},
-    {RCU_Regs::RSTSCK, REG_BIT_DEF(28, 28)},
-    {RCU_Regs::RSTSCK, REG_BIT_DEF(29, 29)},
-    {RCU_Regs::RSTSCK, REG_BIT_DEF(30, 30)},
-    {RCU_Regs::RSTSCK, REG_BIT_DEF(31, 31)}
-}};
+        {RCU_Regs::CTL, REG_BIT_DEF(1, 1)},
+        {RCU_Regs::CTL, REG_BIT_DEF(17, 17)},
+        {RCU_Regs::CTL, REG_BIT_DEF(25, 25)},
+        {RCU_Regs::BDCTL, REG_BIT_DEF(1, 1)},
+        {RCU_Regs::RSTSCK, REG_BIT_DEF(1, 1)},
+        {RCU_Regs::ADDCTL, REG_BIT_DEF(17, 17)},
+        {RCU_Regs::RSTSCK, REG_BIT_DEF(26, 26)},
+        {RCU_Regs::RSTSCK, REG_BIT_DEF(27, 27)},
+        {RCU_Regs::RSTSCK, REG_BIT_DEF(28, 28)},
+        {RCU_Regs::RSTSCK, REG_BIT_DEF(29, 29)},
+        {RCU_Regs::RSTSCK, REG_BIT_DEF(30, 30)},
+        {RCU_Regs::RSTSCK, REG_BIT_DEF(31, 31)}
+    }};
 
 enum class Interrupt_Flags : uint8_t {
     INTR_FLAG_IRC40KSTB,
@@ -504,14 +504,14 @@ enum class Interrupt_Flags : uint8_t {
 };
 
 static inline constexpr std::array<index_to_bits, 7> interrupt_flag_index {{
-    {RCU_Regs::INTR, REG_BIT_DEF(0, 0)},
-    {RCU_Regs::INTR, REG_BIT_DEF(1, 1)},
-    {RCU_Regs::INTR, REG_BIT_DEF(2, 2)},
-    {RCU_Regs::INTR, REG_BIT_DEF(3, 3)},
-    {RCU_Regs::INTR, REG_BIT_DEF(4, 4)},
-    {RCU_Regs::INTR, REG_BIT_DEF(7, 7)},
-    {RCU_Regs::ADDINTR, REG_BIT_DEF(6, 6)}
-}};
+        {RCU_Regs::INTR, REG_BIT_DEF(0, 0)},
+        {RCU_Regs::INTR, REG_BIT_DEF(1, 1)},
+        {RCU_Regs::INTR, REG_BIT_DEF(2, 2)},
+        {RCU_Regs::INTR, REG_BIT_DEF(3, 3)},
+        {RCU_Regs::INTR, REG_BIT_DEF(4, 4)},
+        {RCU_Regs::INTR, REG_BIT_DEF(7, 7)},
+        {RCU_Regs::ADDINTR, REG_BIT_DEF(6, 6)}
+    }};
 
 enum class Clear_Flags : uint8_t {
     INTR_FLAG_IRC40KSTB_CLR,
@@ -524,14 +524,14 @@ enum class Clear_Flags : uint8_t {
 };
 
 static inline constexpr std::array<index_to_bits, 7> clear_flag_index {{
-    {RCU_Regs::INTR, REG_BIT_DEF(16, 16)},
-    {RCU_Regs::INTR, REG_BIT_DEF(17, 17)},
-    {RCU_Regs::INTR, REG_BIT_DEF(18, 18)},
-    {RCU_Regs::INTR, REG_BIT_DEF(19, 19)},
-    {RCU_Regs::INTR, REG_BIT_DEF(20, 20)},
-    {RCU_Regs::INTR, REG_BIT_DEF(23, 23)},
-    {RCU_Regs::ADDINTR, REG_BIT_DEF(22, 22)}
-}};
+        {RCU_Regs::INTR, REG_BIT_DEF(16, 16)},
+        {RCU_Regs::INTR, REG_BIT_DEF(17, 17)},
+        {RCU_Regs::INTR, REG_BIT_DEF(18, 18)},
+        {RCU_Regs::INTR, REG_BIT_DEF(19, 19)},
+        {RCU_Regs::INTR, REG_BIT_DEF(20, 20)},
+        {RCU_Regs::INTR, REG_BIT_DEF(23, 23)},
+        {RCU_Regs::ADDINTR, REG_BIT_DEF(22, 22)}
+    }};
 
 enum class Interrupt_Type : uint8_t {
     INTR_IRC40KSTB,
@@ -543,13 +543,13 @@ enum class Interrupt_Type : uint8_t {
 };
 
 static inline constexpr std::array<index_to_bits, 6> interrupt_type_index {{
-    {RCU_Regs::INTR, REG_BIT_DEF(8, 8)},
-    {RCU_Regs::INTR, REG_BIT_DEF(9, 9)},
-    {RCU_Regs::INTR, REG_BIT_DEF(10, 10)},
-    {RCU_Regs::INTR, REG_BIT_DEF(11, 11)},
-    {RCU_Regs::INTR, REG_BIT_DEF(12, 12)},
-    {RCU_Regs::ADDINTR, REG_BIT_DEF(14, 14)}
-}};
+        {RCU_Regs::INTR, REG_BIT_DEF(8, 8)},
+        {RCU_Regs::INTR, REG_BIT_DEF(9, 9)},
+        {RCU_Regs::INTR, REG_BIT_DEF(10, 10)},
+        {RCU_Regs::INTR, REG_BIT_DEF(11, 11)},
+        {RCU_Regs::INTR, REG_BIT_DEF(12, 12)},
+        {RCU_Regs::ADDINTR, REG_BIT_DEF(14, 14)}
+    }};
 
 ///////////////////////////// OSCI /////////////////////////////
 
@@ -563,13 +563,13 @@ enum class OSCI_Select : uint8_t {
 };
 
 static inline constexpr std::array<index_to_bits, 6> osci_select_index {{
-    {RCU_Regs::CTL, REG_BIT_DEF(16, 16)},
-    {RCU_Regs::BDCTL, REG_BIT_DEF(0, 0)},
-    {RCU_Regs::CTL, REG_BIT_DEF(0, 0)},
-    {RCU_Regs::ADDCTL, REG_BIT_DEF(16, 16)},
-    {RCU_Regs::RSTSCK, REG_BIT_DEF(0, 0)},
-    {RCU_Regs::CTL, REG_BIT_DEF(24, 24)}
-}};
+        {RCU_Regs::CTL, REG_BIT_DEF(16, 16)},
+        {RCU_Regs::BDCTL, REG_BIT_DEF(0, 0)},
+        {RCU_Regs::CTL, REG_BIT_DEF(0, 0)},
+        {RCU_Regs::ADDCTL, REG_BIT_DEF(16, 16)},
+        {RCU_Regs::RSTSCK, REG_BIT_DEF(0, 0)},
+        {RCU_Regs::CTL, REG_BIT_DEF(24, 24)}
+    }};
 
 
 ///////////////////////////// SYSTEM CLOCK /////////////////////////////
@@ -595,10 +595,10 @@ struct System_Clock_Source_Mapping {
 };
 
 static inline constexpr std::array<System_Clock_Source_Mapping, 3> source_mapping {{
-    {0, System_Clock_Source::SOURCE_IRC8M},
-    {1, System_Clock_Source::SOURCE_HXTAL},
-    {2, System_Clock_Source::SOURCE_PLL}
-}};
+        {0, System_Clock_Source::SOURCE_IRC8M},
+        {1, System_Clock_Source::SOURCE_HXTAL},
+        {2, System_Clock_Source::SOURCE_PLL}
+    }};
 
 ///////////////////////////// AHB?APB1/APB2 BUSES /////////////////////////////
 
@@ -659,9 +659,9 @@ struct PLL_Source_Mapping {
 };
 
 static inline constexpr std::array<PLL_Source_Mapping, 2> pll_mapping {{
-    {false, PLL_Source::PLLSRC_IRC8M_DIV2},
-    {true, PLL_Source::PLLSRC_HXTAL_IRC48M}
-}};
+        {false, PLL_Source::PLLSRC_IRC8M_DIV2},
+        {true, PLL_Source::PLLSRC_HXTAL_IRC48M}
+    }};
 
 enum class PLLMF_Select : uint8_t {
     PLL_MUL2,
@@ -710,9 +710,9 @@ struct PLL_Presel_Mapping {
 };
 
 static inline constexpr std::array<PLL_Presel_Mapping, 2> pll_presel_mapping {{
-    {false, PLL_Presel::PLLPRESRC_HXTAL},
-    {true, PLL_Presel::PLLPRESRC_IRC48M}
-}};
+        {false, PLL_Presel::PLLPRESRC_HXTAL},
+        {true, PLL_Presel::PLLPRESRC_IRC48M}
+    }};
 
 
 ///////////////////////////// USB /////////////////////////////

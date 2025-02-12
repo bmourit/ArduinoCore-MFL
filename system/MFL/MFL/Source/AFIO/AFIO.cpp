@@ -27,7 +27,7 @@ AFIO& AFIO::get_instance() {
     return instance;
 }
 
-AFIO::AFIO() : 
+AFIO::AFIO() :
     is_clock_enabled_(false)
 {
     if (!is_clock_enabled_) {
@@ -100,8 +100,8 @@ void AFIO::set_output_event(Event_Port port, Pin_Number pin) {
         return;
     }
     write_bit_ranges(*this, AFIO_Regs::EC,
-           static_cast<uint32_t>(EC_Bits::PORT), static_cast<uint32_t>(port),
-           static_cast<uint32_t>(EC_Bits::PIN), static_cast<uint32_t>(pin));
+                     static_cast<uint32_t>(EC_Bits::PORT), static_cast<uint32_t>(port),
+                     static_cast<uint32_t>(EC_Bits::PIN), static_cast<uint32_t>(pin));
 }
 
 /**

@@ -32,17 +32,17 @@ EXTI::EXTI() {}
 
 /**
  * @brief Initialize the EXTI line configuration.
- * 
+ *
  * This function initializes a specified EXTI line with the given mode and trigger settings.
- * It first resets the relevant registers for the line, disabling any previously set events 
- * or interrupts. Then, it configures the EXTI line to operate in interrupt or event mode 
- * based on the provided EXTI_Mode value. Additionally, it sets the trigger condition for 
- * the EXTI line according to the EXTI_Trigger value, allowing for rising, falling, both, 
+ * It first resets the relevant registers for the line, disabling any previously set events
+ * or interrupts. Then, it configures the EXTI line to operate in interrupt or event mode
+ * based on the provided EXTI_Mode value. Additionally, it sets the trigger condition for
+ * the EXTI line according to the EXTI_Trigger value, allowing for rising, falling, both,
  * or no edge detection.
- * 
+ *
  * @param line The EXTI line to configure. Must be a valid EXTI_Line value.
  * @param mode The operation mode for the EXTI line, either interrupt or event.
- * @param trigger The trigger condition for the EXTI line, specifying which edge(s) 
+ * @param trigger The trigger condition for the EXTI line, specifying which edge(s)
  *                should generate an interrupt or event.
  */
 void EXTI::init(EXTI_Line line, EXTI_Mode mode, EXTI_Trigger trigger) {

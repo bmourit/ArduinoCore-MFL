@@ -30,21 +30,21 @@ ADC& get_instance_for_base() {
 
 Result<ADC, ADC_Error_Type> ADC::get_instance(ADC_Base Base) {
     switch (Base) {
-    case ADC_Base::ADC0_BASE:
-        return get_enum_instance<ADC_Base, ADC, ADC_Error_Type>(
-                   Base, ADC_Base::ADC0_BASE, get_instance_for_base<ADC_Base::ADC0_BASE>()
-               );
-    case ADC_Base::ADC1_BASE:
-        return get_enum_instance<ADC_Base, ADC, ADC_Error_Type>(
-                   Base, ADC_Base::ADC1_BASE, get_instance_for_base<ADC_Base::ADC1_BASE>()
-               );
-    case ADC_Base::ADC2_BASE:
-        return get_enum_instance<ADC_Base, ADC, ADC_Error_Type>(
-                   Base, ADC_Base::ADC2_BASE, get_instance_for_base<ADC_Base::ADC2_BASE>()
-               );
-    case ADC_Base::INVALID:
-    default:
-        return RETURN_RESULT(ADC, ADC_Error_Type::INVALID_ADC);
+        case ADC_Base::ADC0_BASE:
+            return get_enum_instance<ADC_Base, ADC, ADC_Error_Type>(
+                       Base, ADC_Base::ADC0_BASE, get_instance_for_base<ADC_Base::ADC0_BASE>()
+                   );
+        case ADC_Base::ADC1_BASE:
+            return get_enum_instance<ADC_Base, ADC, ADC_Error_Type>(
+                       Base, ADC_Base::ADC1_BASE, get_instance_for_base<ADC_Base::ADC1_BASE>()
+                   );
+        case ADC_Base::ADC2_BASE:
+            return get_enum_instance<ADC_Base, ADC, ADC_Error_Type>(
+                       Base, ADC_Base::ADC2_BASE, get_instance_for_base<ADC_Base::ADC2_BASE>()
+                   );
+        case ADC_Base::INVALID:
+        default:
+            return RETURN_RESULT(ADC, ADC_Error_Type::INVALID_ADC);
     }
 }
 
@@ -181,7 +181,7 @@ void ADC::set_temperature_voltage_reference_enable(bool enable) {
  */
 void ADC::set_resolution(ADC_Resolution resolution) {
     write_bit_range(*this, ADC_Regs::OVSAMPCTL,
-               static_cast<uint32_t>(OVSAMPCTL_Bits::DRES), static_cast<uint32_t>(resolution));
+                    static_cast<uint32_t>(OVSAMPCTL_Bits::DRES), static_cast<uint32_t>(resolution));
 }
 
 /**
@@ -197,22 +197,22 @@ void ADC::set_resolution(ADC_Resolution resolution) {
  */
 void ADC::set_group_channel_discontinuous_mode(Channel_Group_Type channel_group, uint8_t length) {
     write_bits_sequence(*this, ADC_Regs::CTL0,
-               static_cast<uint32_t>(CTL0_Bits::DISIC), false,
-               static_cast<uint32_t>(CTL0_Bits::DISRC), false);
+                        static_cast<uint32_t>(CTL0_Bits::DISIC), false,
+                        static_cast<uint32_t>(CTL0_Bits::DISRC), false);
 
     switch (channel_group) {
-    case Channel_Group_Type::REGULAR_CHANNEL:
-        write_bit_range(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::DISNUM), static_cast<uint32_t>(length - 1U));
-        write_bit(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::DISRC), true);
-        break;
-    case Channel_Group_Type::INSERTED_CHANNEL:
-        write_bit(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::DISIC), true);
-        break;
-    case Channel_Group_Type::CHANNEL_DISCON_DISABLE:
-        break;
-    case Channel_Group_Type::REGULAR_INSERTED_CHANNEL:
-    default:
-        break;
+        case Channel_Group_Type::REGULAR_CHANNEL:
+            write_bit_range(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::DISNUM), static_cast<uint32_t>(length - 1U));
+            write_bit(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::DISRC), true);
+            break;
+        case Channel_Group_Type::INSERTED_CHANNEL:
+            write_bit(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::DISIC), true);
+            break;
+        case Channel_Group_Type::CHANNEL_DISCON_DISABLE:
+            break;
+        case Channel_Group_Type::REGULAR_INSERTED_CHANNEL:
+        default:
+            break;
     }
 }
 
@@ -246,36 +246,36 @@ void ADC::set_mode(Sync_Mode mode) {
  */
 void ADC::set_functional_mode(Functional_Mode function, bool enable) {
     switch (function) {
-    case Functional_Mode::SCAN_MODE:
-        write_bit(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::SM), enable);
-        break;
-    case Functional_Mode::INSERTED_CH_MODE:
-        write_bit(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::ICA), enable);
-        break;
-    case Functional_Mode::CONTINUOUS_MODE:
-        write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::CTN), enable);
-        break;
-    case Functional_Mode::SCAN_INSERTED:
-        write_bits_sequence(*this, ADC_Regs::CTL0,
-                   static_cast<uint32_t>(CTL0_Bits::SM), enable,
-                   static_cast<uint32_t>(CTL0_Bits::ICA), enable);
-        break;
-    case Functional_Mode::SCAN_CONTINUOUS:
-        write_bit(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::SM), enable);
-        write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::CTN), enable);
-        break;
-    case Functional_Mode::SCAN_INSERTED_CONTINUOUS:
-        write_bits_sequence(*this, ADC_Regs::CTL0,
-                   static_cast<uint32_t>(CTL0_Bits::SM), enable,
-                   static_cast<uint32_t>(CTL0_Bits::ICA), enable);
-        write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::CTN), enable);
-        break;
-    case Functional_Mode::INSERTED_CONTINUOUS:
-        write_bit(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::ICA), enable);
-        write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::CTN), enable);
-        break;
-    default:
-        break;
+        case Functional_Mode::SCAN_MODE:
+            write_bit(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::SM), enable);
+            break;
+        case Functional_Mode::INSERTED_CH_MODE:
+            write_bit(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::ICA), enable);
+            break;
+        case Functional_Mode::CONTINUOUS_MODE:
+            write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::CTN), enable);
+            break;
+        case Functional_Mode::SCAN_INSERTED:
+            write_bits_sequence(*this, ADC_Regs::CTL0,
+                                static_cast<uint32_t>(CTL0_Bits::SM), enable,
+                                static_cast<uint32_t>(CTL0_Bits::ICA), enable);
+            break;
+        case Functional_Mode::SCAN_CONTINUOUS:
+            write_bit(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::SM), enable);
+            write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::CTN), enable);
+            break;
+        case Functional_Mode::SCAN_INSERTED_CONTINUOUS:
+            write_bits_sequence(*this, ADC_Regs::CTL0,
+                                static_cast<uint32_t>(CTL0_Bits::SM), enable,
+                                static_cast<uint32_t>(CTL0_Bits::ICA), enable);
+            write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::CTN), enable);
+            break;
+        case Functional_Mode::INSERTED_CONTINUOUS:
+            write_bit(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::ICA), enable);
+            write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::CTN), enable);
+            break;
+        default:
+            break;
     }
 }
 
@@ -301,14 +301,14 @@ void ADC::set_data_alignment(Data_Alignment align) {
  */
 void ADC::set_channel_length(Channel_Group_Type type, uint32_t length) {
     switch (type) {
-    case Channel_Group_Type::REGULAR_CHANNEL:
-        write_bit_range(*this, ADC_Regs::RSQ0, static_cast<uint32_t>(RSQX_Bits::RL), length - 1U);
-        break;
-    case Channel_Group_Type::INSERTED_CHANNEL:
-        write_bit_range(*this, ADC_Regs::ISQ, static_cast<uint32_t>(ISQ_Bits::IL), length - 1U);
-        break;
-    default:
-        break;
+        case Channel_Group_Type::REGULAR_CHANNEL:
+            write_bit_range(*this, ADC_Regs::RSQ0, static_cast<uint32_t>(RSQX_Bits::RL), length - 1U);
+            break;
+        case Channel_Group_Type::INSERTED_CHANNEL:
+            write_bit_range(*this, ADC_Regs::ISQ, static_cast<uint32_t>(ISQ_Bits::IL), length - 1U);
+            break;
+        default:
+            break;
     }
 }
 
@@ -328,19 +328,18 @@ void ADC::set_regular_channel_sequence(uint8_t rank, ADC_Channel channel, ADC_Sa
         return;
     }
 
-    if (rank < 6U) {
-        uint32_t reg = read_register<uint32_t>(*this, ADC_Regs::RSQ2);
-        uint32_t reg_value = configure_channel(reg, rank, channel);
-        write_register(*this, ADC_Regs::RSQ2, reg_value);
-    } else if (rank < 12U) {
-        uint32_t reg = read_register<uint32_t>(*this, ADC_Regs::RSQ1);
-        uint32_t reg_value = configure_channel(reg, rank - 6U, channel);
-        write_register(*this, ADC_Regs::RSQ1, reg_value);
-    } else {
-        uint32_t reg = read_register<uint32_t>(*this, ADC_Regs::RSQ0);
-        uint32_t reg_value = configure_channel(reg, rank - 12U, channel);
-        write_register(*this, ADC_Regs::RSQ0, reg_value);
-    }
+    const ADC_Regs reg = (rank < 6U) ? ADC_Regs::RSQ2 :
+                         (rank < 12U) ? ADC_Regs::RSQ1 :
+                         ADC_Regs::RSQ0;
+
+    const uint8_t adjusted_rank = (rank < 6U) ? rank :
+                                  (rank < 12U) ? (rank - 6U) :
+                                  (rank - 12U);
+
+    uint32_t reg_value = read_register<uint32_t>(*this, reg);
+    reg_value &= ~(static_cast<uint32_t>(0x1FU) << (adjusted_rank * 5U));
+    reg_value |= (static_cast<uint32_t>(channel) << (adjusted_rank * 5U));
+    write_register(*this, reg, reg_value);
 
     set_sampling_time(channel, sample_time);
 }
@@ -388,7 +387,7 @@ void ADC::set_inserted_channel_offset(Inserted_Channel inserted_channel, uint16_
     ADC_Regs reg = (reg_offset == 0U) ? ADC_Regs::IOFF0 :
                    (reg_offset == 1U) ? ADC_Regs::IOFF1 :
                    (reg_offset == 2U) ? ADC_Regs::IOFF1 :
-                                        ADC_Regs::IOFF3;
+                   ADC_Regs::IOFF3;
 
     write_bit_range(*this, reg, static_cast<uint32_t>(IOFFX_Bits::IOFF), static_cast<uint32_t>(offset));
 }
@@ -414,8 +413,8 @@ void ADC::set_external_trigger_enable(Channel_Group_Type channel_group, bool ena
     }
     if (channel_group == Channel_Group_Type::REGULAR_INSERTED_CHANNEL) {
         write_bits_sequence(*this, ADC_Regs::CTL1,
-                   static_cast<uint32_t>(CTL1_Bits::ETERC), enable,
-                   static_cast<uint32_t>(CTL1_Bits::ETEIC), enable);
+                            static_cast<uint32_t>(CTL1_Bits::ETERC), enable,
+                            static_cast<uint32_t>(CTL1_Bits::ETEIC), enable);
     }
 }
 
@@ -432,9 +431,9 @@ void ADC::set_external_trigger_enable(Channel_Group_Type channel_group, bool ena
  *               group.
  */
 void ADC::set_external_group_source(Channel_Group_Type channel_group, External_Trigger_Source source) {
-    const uint32_t ctl1_bits = (channel_group == Channel_Group_Type::REGULAR_CHANNEL) ? 
-                                    static_cast<uint32_t>(CTL1_Bits::ETSRC) :
-                                    static_cast<uint32_t>(CTL1_Bits::ETSIC);
+    const uint32_t ctl1_bits = (channel_group == Channel_Group_Type::REGULAR_CHANNEL) ?
+                               static_cast<uint32_t>(CTL1_Bits::ETSRC) :
+                               static_cast<uint32_t>(CTL1_Bits::ETSIC);
 
     write_bit_ranges(*this, ADC_Regs::CTL1, ctl1_bits, Clear, ctl1_bits, static_cast<uint32_t>(source));
 }
@@ -448,17 +447,17 @@ void ADC::set_external_group_source(Channel_Group_Type channel_group, External_T
  * taken if the channel group is set to disable.
  *
  * @param channel_group The ADC channel group to trigger. Can be one of
- *                      REGULAR_CHANNEL, INSERTED_CHANNEL, or 
- *                      REGULAR_INSERTED_CHANNEL. If set to 
+ *                      REGULAR_CHANNEL, INSERTED_CHANNEL, or
+ *                      REGULAR_INSERTED_CHANNEL. If set to
  *                      CHANNEL_DISCON_DISABLE, no trigger is executed.
  */
 void ADC::set_software_trigger_group(Channel_Group_Type channel_group) {
     uint32_t bits = (channel_group == Channel_Group_Type::REGULAR_CHANNEL) ?
-                       (1U << static_cast<uint32_t>(CTL1_Bits::SWRCST)) :
+                    (1U << static_cast<uint32_t>(CTL1_Bits::SWRCST)) :
                     (channel_group == Channel_Group_Type::INSERTED_CHANNEL) ?
-                       (1U << static_cast<uint32_t>(CTL1_Bits::SWICST)) :
-                       ((1U << static_cast<uint32_t>(CTL1_Bits::SWRCST)) |
-                        (1U << static_cast<uint32_t>(CTL1_Bits::SWICST)));
+                    (1U << static_cast<uint32_t>(CTL1_Bits::SWICST)) :
+                    ((1U << static_cast<uint32_t>(CTL1_Bits::SWRCST)) |
+                     (1U << static_cast<uint32_t>(CTL1_Bits::SWICST)));
 
     write_bits(*this, ADC_Regs::CTL1, bits, true);
 }
@@ -524,15 +523,15 @@ void ADC::single_channel_watchdog_enable(ADC_Channel channel) {
         return;
     }
     write_bits_sequence(*this, ADC_Regs::CTL0,
-               static_cast<uint32_t>(CTL0_Bits::RWDEN), false,
-               static_cast<uint32_t>(CTL0_Bits::IWDEN), false,
-               static_cast<uint32_t>(CTL0_Bits::WDSC), false);
+                        static_cast<uint32_t>(CTL0_Bits::RWDEN), false,
+                        static_cast<uint32_t>(CTL0_Bits::IWDEN), false,
+                        static_cast<uint32_t>(CTL0_Bits::WDSC), false);
     write_bit_range(*this, ADC_Regs::CTL0,
-               static_cast<uint32_t>(CTL0_Bits::WDCHSEL), static_cast<uint32_t>(channel));
+                    static_cast<uint32_t>(CTL0_Bits::WDCHSEL), static_cast<uint32_t>(channel));
     write_bits_sequence(*this, ADC_Regs::CTL0,
-               static_cast<uint32_t>(CTL0_Bits::RWDEN), true,
-               static_cast<uint32_t>(CTL0_Bits::IWDEN), true,
-               static_cast<uint32_t>(CTL0_Bits::WDSC), true);
+                        static_cast<uint32_t>(CTL0_Bits::RWDEN), true,
+                        static_cast<uint32_t>(CTL0_Bits::IWDEN), true,
+                        static_cast<uint32_t>(CTL0_Bits::WDSC), true);
 }
 
 /**
@@ -548,25 +547,25 @@ void ADC::single_channel_watchdog_enable(ADC_Channel channel) {
  */
 void ADC::group_channel_watchdog_enable(Channel_Group_Type channel_group) {
     write_bits_sequence(*this, ADC_Regs::CTL0,
-               static_cast<uint32_t>(CTL0_Bits::RWDEN), false,
-               static_cast<uint32_t>(CTL0_Bits::IWDEN), false,
-               static_cast<uint32_t>(CTL0_Bits::WDSC), false);
+                        static_cast<uint32_t>(CTL0_Bits::RWDEN), false,
+                        static_cast<uint32_t>(CTL0_Bits::IWDEN), false,
+                        static_cast<uint32_t>(CTL0_Bits::WDSC), false);
 
     switch (channel_group) {
-    case Channel_Group_Type::REGULAR_CHANNEL:
-        write_bit(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::RWDEN), true);
-        break;
-    case Channel_Group_Type::INSERTED_CHANNEL:
-        write_bit(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::IWDEN), true);
-        break;
-    case Channel_Group_Type::REGULAR_INSERTED_CHANNEL:
-        write_bits_sequence(*this, ADC_Regs::CTL0,
-                   static_cast<uint32_t>(CTL0_Bits::RWDEN), true,
-                   static_cast<uint32_t>(CTL0_Bits::IWDEN), true);
-        break;
-    case Channel_Group_Type::CHANNEL_DISCON_DISABLE:
-    default:
-        break;
+        case Channel_Group_Type::REGULAR_CHANNEL:
+            write_bit(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::RWDEN), true);
+            break;
+        case Channel_Group_Type::INSERTED_CHANNEL:
+            write_bit(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::IWDEN), true);
+            break;
+        case Channel_Group_Type::REGULAR_INSERTED_CHANNEL:
+            write_bits_sequence(*this, ADC_Regs::CTL0,
+                                static_cast<uint32_t>(CTL0_Bits::RWDEN), true,
+                                static_cast<uint32_t>(CTL0_Bits::IWDEN), true);
+            break;
+        case Channel_Group_Type::CHANNEL_DISCON_DISABLE:
+        default:
+            break;
     }
 }
 
@@ -580,9 +579,9 @@ void ADC::group_channel_watchdog_enable(Channel_Group_Type channel_group) {
  */
 void ADC::watchdog_disable() {
     write_bits_sequence(*this, ADC_Regs::CTL0,
-               static_cast<uint32_t>(CTL0_Bits::IWDEN), false,
-               static_cast<uint32_t>(CTL0_Bits::WDSC), false,
-               static_cast<uint32_t>(CTL0_Bits::RWDEN), false);
+                        static_cast<uint32_t>(CTL0_Bits::IWDEN), false,
+                        static_cast<uint32_t>(CTL0_Bits::WDSC), false,
+                        static_cast<uint32_t>(CTL0_Bits::RWDEN), false);
     write_bit_range(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::WDCHSEL), Clear);
 }
 
@@ -621,10 +620,10 @@ void ADC::set_watchdog_threshold(uint16_t low, uint16_t high) {
  */
 void ADC::set_oversampling_configuration(Oversampling_Conversion mode, Oversampling_Shift shift, Oversampling_Ratio ratio) {
     write_bit(*this, ADC_Regs::OVSAMPCTL,
-               static_cast<uint32_t>(OVSAMPCTL_Bits::TOVS), (mode == Oversampling_Conversion::OVERSAMPLING_CONVERT_ONE));
+              static_cast<uint32_t>(OVSAMPCTL_Bits::TOVS), (mode == Oversampling_Conversion::OVERSAMPLING_CONVERT_ONE));
     write_bit_ranges(*this, ADC_Regs::OVSAMPCTL,
-               static_cast<uint32_t>(OVSAMPCTL_Bits::OVSS), static_cast<uint32_t>(shift),
-               static_cast<uint32_t>(OVSAMPCTL_Bits::OVSR), static_cast<uint32_t>(ratio));
+                     static_cast<uint32_t>(OVSAMPCTL_Bits::OVSS), static_cast<uint32_t>(shift),
+                     static_cast<uint32_t>(OVSAMPCTL_Bits::OVSR), static_cast<uint32_t>(ratio));
 }
 
 /**
@@ -645,7 +644,7 @@ void ADC::set_oversampling_enable(bool enable) {
 /**
  * @brief Checks the status of a specific ADC flag.
  *
- * This function reads the ADC status register to determine whether a 
+ * This function reads the ADC status register to determine whether a
  * specified status flag is set or not.
  *
  * @param flag The status flag to check. Must be one of the Status_Flags
@@ -686,10 +685,10 @@ bool ADC::get_interrupt_flag(Interrupt_Flags flag) {
     };
 
     switch (flag) {
-    case Interrupt_Flags::INTR_FLAG_WDE: return check_flag(CTL0_Bits::WDEIE, flag);
-    case Interrupt_Flags::INTR_FLAG_EOC: return check_flag(CTL0_Bits::EOCIE, flag);
-    case Interrupt_Flags::INTR_FLAG_EOIC: return check_flag(CTL0_Bits::EOICIE, flag);
-    default: return false;
+        case Interrupt_Flags::INTR_FLAG_WDE: return check_flag(CTL0_Bits::WDEIE, flag);
+        case Interrupt_Flags::INTR_FLAG_EOC: return check_flag(CTL0_Bits::EOCIE, flag);
+        case Interrupt_Flags::INTR_FLAG_EOIC: return check_flag(CTL0_Bits::EOICIE, flag);
+        default: return false;
     }
 }
 
@@ -700,7 +699,7 @@ bool ADC::get_interrupt_flag(Interrupt_Flags flag) {
  * STAT register. It is used to reset the status of interrupt flags
  * after they have been handled, ensuring no residual flags remain set.
  *
- * @param flag The interrupt flag to clear. Must be one of the 
+ * @param flag The interrupt flag to clear. Must be one of the
  *             Interrupt_Flags enumeration values.
  */
 void ADC::clear_interrupt_flag(Interrupt_Flags flag) {
@@ -714,7 +713,7 @@ void ADC::clear_interrupt_flag(Interrupt_Flags flag) {
  * or disabling the specified interrupt type. It modifies the control register
  * to reflect the desired interrupt configuration.
  *
- * @param type The type of interrupt to configure. Must be a value from the 
+ * @param type The type of interrupt to configure. Must be a value from the
  *             Interrupt_Type enumeration.
  * @param enable Set to true to enable the interrupt or false to disable it.
  */
@@ -738,51 +737,25 @@ inline void ADC::set_sampling_time(ADC_Channel channel, ADC_Sample_Time sample_t
         return;
     }
 
-    uint32_t reg_sample = 0U;
     const uint32_t chan = static_cast<uint32_t>(channel);
     const uint32_t sampt = static_cast<uint32_t>(sample_time);
+    const uint32_t shift = (channel >= ADC_Channel::CHANNEL_10) ? (chan - 10U) * 3U : chan * 3U;
+    const ADC_Regs reg = (channel >= ADC_Channel::CHANNEL_10) ? ADC_Regs::SAMPT0 : ADC_Regs::SAMPT1;
 
-    // Channels 10-17
-    if (channel >= ADC_Channel::CHANNEL_10) {
-        reg_sample = read_register<uint32_t>(*this, ADC_Regs::SAMPT0);
-        reg_sample &= ~(static_cast<uint32_t>(0x7U) << ((chan - 10U) * 3U));
-        reg_sample |= (sampt << ((chan - 10U) * 3U));
-        write_register(*this, ADC_Regs::SAMPT0, reg_sample);
-    // Channels 0-9
-    } else {
-        reg_sample = read_register<uint32_t>(*this, ADC_Regs::SAMPT1);
-        reg_sample &= ~(static_cast<uint32_t>(0x7U) << (chan * 3U));
-        reg_sample |= (sampt << (chan * 3U));
-        write_register(*this, ADC_Regs::SAMPT1, reg_sample);
-    }
+    const uint32_t mask = ~(static_cast<uint32_t>(0x7U) << shift);
+    uint32_t reg_value = read_register<uint32_t>(*this, reg);
+    reg_value = (reg_value & mask) | (sampt << shift);
+    write_register(*this, reg, reg_value);
 
-    volatile uint32_t wait_count = 0U;
+    // Handle temperature sensor channels
     if (channel == ADC_Channel::CHANNEL_16 || channel == ADC_Channel::CHANNEL_17) {
         set_temperature_voltage_reference_enable(true);
-        wait_count = ((RCU_I.get_system_clock() / 1'000'000U) * 10U);
-        while (wait_count != 0U) {
-            wait_count = wait_count - 1U;
+        // Calculate delay cycles
+        const uint32_t delay_cycles = (RCU_I.get_system_clock() / 100'000U); // Simplified from (1M * 10)
+        for (uint32_t i = 0; i < delay_cycles; ++i) {
+            __asm__ volatile("nop");
         }
     }
-}
-
-/**
- * @brief Configures a regular sequence rank with a specified channel.
- *
- * This function modifies the regular sequence register (RSQ0, RSQ1, or RSQ2) to
- * set the specified rank to the given ADC channel. The rank is specified as a
- * number from 0 to 3, and the channel is given as a member of the ADC_Channel
- * enumeration.
- *
- * @param reg The regular sequence register to configure (RSQ0, RSQ1, or RSQ2).
- * @param rank The rank to configure (0-3).
- * @param channel The ADC channel to associate with the specified rank.
- * @return The modified regular sequence register value.
- */
-inline uint32_t ADC::configure_channel(uint32_t reg, uint8_t rank, ADC_Channel channel) {
-    reg &= ~(static_cast<uint32_t>(0x1FU) << (rank * 5U));
-    reg |= (static_cast<uint32_t>(channel) << (rank * 5U));
-    return reg;
 }
 
 ///////////////////////////// OPERATIONAL MODE SPECIFIC METHODS /////////////////////////////
@@ -806,8 +779,8 @@ inline void ADC::setup_regular_conversion() {
     write_bit_range(*this, ADC_Regs::RSQ0, static_cast<uint32_t>(RSQX_Bits::RL), Clear);
     // Disable conflicting modes
     write_bits_sequence(*this, ADC_Regs::CTL0,
-               static_cast<uint32_t>(CTL0_Bits::DISRC), false,
-               static_cast<uint32_t>(CTL0_Bits::SM), false);
+                        static_cast<uint32_t>(CTL0_Bits::DISRC), false,
+                        static_cast<uint32_t>(CTL0_Bits::SM), false);
     write_bit_range(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::SYNCM), Clear);
     write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::CTN), false);
 }
@@ -828,8 +801,8 @@ inline void ADC::cleanup_regular_conversion() {
     write_register(*this, ADC_Regs::SAMPT1, Clear);
     write_bit_range(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::ETSRC), Clear);
     write_bits_sequence(*this, ADC_Regs::CTL1,
-               static_cast<uint32_t>(CTL1_Bits::ETERC), false,
-               static_cast<uint32_t>(CTL1_Bits::SWRCST), false);
+                        static_cast<uint32_t>(CTL1_Bits::ETERC), false,
+                        static_cast<uint32_t>(CTL1_Bits::SWRCST), false);
 }
 
 /**
@@ -864,12 +837,12 @@ uint32_t ADC::start_regular_single_conversion(ADC_Channel channel, ADC_Sample_Ti
 
     // Basic 16bit oversampling
     write_bit_ranges(*this, ADC_Regs::OVSAMPCTL,
-               static_cast<uint32_t>(OVSAMPCTL_Bits::OVSR), static_cast<uint32_t>(Oversampling_Ratio::OVERSAMPLING_RATIO_MUL16),
-               static_cast<uint32_t>(OVSAMPCTL_Bits::OVSS), static_cast<uint32_t>(Oversampling_Shift::OVERSAMPLING_SHIFT_4BIT));
+                     static_cast<uint32_t>(OVSAMPCTL_Bits::OVSR), static_cast<uint32_t>(Oversampling_Ratio::OVERSAMPLING_RATIO_MUL16),
+                     static_cast<uint32_t>(OVSAMPCTL_Bits::OVSS), static_cast<uint32_t>(Oversampling_Shift::OVERSAMPLING_SHIFT_4BIT));
     // Enable oversampling
     write_bits_sequence(*this, ADC_Regs::OVSAMPCTL,
-               static_cast<uint32_t>(OVSAMPCTL_Bits::TOVS), false,
-               static_cast<uint32_t>(OVSAMPCTL_Bits::OVSEN), true);
+                        static_cast<uint32_t>(OVSAMPCTL_Bits::TOVS), false,
+                        static_cast<uint32_t>(OVSAMPCTL_Bits::OVSEN), true);
 
     // Set alignment
     write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::DAL), false);
@@ -917,8 +890,8 @@ inline void ADC::calibration_delay() {
     }
 
     volatile uint32_t wait_count = ((RCU_I.get_system_clock() /
-                   (RCU_I.get_clock_frequency(rcu::Clock_Frequency::CK_APB2) / prescaler_))
-                   * Calibration_Delay_Cycles);
+                                    (RCU_I.get_clock_frequency(rcu::Clock_Frequency::CK_APB2) / prescaler_))
+                                    * Calibration_Delay_Cycles);
 
     while (wait_count != 0) {
         wait_count = wait_count - 1U;
@@ -939,30 +912,30 @@ inline uint32_t ADC::get_prescaler_value() {
     rcu::ADC_Prescaler adc_prescaler = RCU_I.get_adc_prescaler();
 
     switch (adc_prescaler) {
-    case rcu::ADC_Prescaler::CKAPB2_DIV2:
-    case rcu::ADC_Prescaler::CKAPB2_DIV2B:
-        return 2U;
-    case rcu::ADC_Prescaler::CKAPB2_DIV4:
-        return 4U;
-    case rcu::ADC_Prescaler::CKAPB2_DIV6:
-    case rcu::ADC_Prescaler::CKAHB_DIV6:
-        return 6U;
-    case rcu::ADC_Prescaler::CKAPB2_DIV8:
-    case rcu::ADC_Prescaler::CKAPB2_DIV8B:
-        return 8U;
-    case rcu::ADC_Prescaler::CKAPB2_DIV12:
-        return 12U;
-    case rcu::ADC_Prescaler::CKAPB2_DIV16:
-        return 16U;
-    case rcu::ADC_Prescaler::CKAHB_DIV5:
-        return 5U;
-    case rcu::ADC_Prescaler::CKAHB_DIV10:
-        return 10U;
-    case rcu::ADC_Prescaler::CKAHB_DIV20:
-        return 20U;
-    case rcu::ADC_Prescaler::INVALID:
-    default:
-        return 0U;
+        case rcu::ADC_Prescaler::CKAPB2_DIV2:
+        case rcu::ADC_Prescaler::CKAPB2_DIV2B:
+            return 2U;
+        case rcu::ADC_Prescaler::CKAPB2_DIV4:
+            return 4U;
+        case rcu::ADC_Prescaler::CKAPB2_DIV6:
+        case rcu::ADC_Prescaler::CKAHB_DIV6:
+            return 6U;
+        case rcu::ADC_Prescaler::CKAPB2_DIV8:
+        case rcu::ADC_Prescaler::CKAPB2_DIV8B:
+            return 8U;
+        case rcu::ADC_Prescaler::CKAPB2_DIV12:
+            return 12U;
+        case rcu::ADC_Prescaler::CKAPB2_DIV16:
+            return 16U;
+        case rcu::ADC_Prescaler::CKAHB_DIV5:
+            return 5U;
+        case rcu::ADC_Prescaler::CKAHB_DIV10:
+            return 10U;
+        case rcu::ADC_Prescaler::CKAHB_DIV20:
+            return 20U;
+        case rcu::ADC_Prescaler::INVALID:
+        default:
+            return 0U;
     }
 }
 

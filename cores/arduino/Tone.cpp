@@ -62,12 +62,12 @@ static void timerTonePinInit(pin_size_t pin, uint32_t frequency, uint32_t durati
         pinInfo.count = (duration > 0) ? ((toneFreq * duration) / 1000) : -1;
 
         setPinOp(pinInfo.pin, createPackedPinOps(
-            gpio::Pin_Mode::OUTPUT_PUSHPULL,
-            gpio::Output_Speed::SPEED_MAX,
-            gpio::Pin_Remap_Select::NO_REMAP,
-            0U,
-            0U
-        ));
+                     gpio::Pin_Mode::OUTPUT_PUSHPULL,
+                     gpio::Output_Speed::SPEED_MAX,
+                     gpio::Pin_Remap_Select::NO_REMAP,
+                     0U,
+                     0U
+                 ));
         toneInstance.setChannelMode(0U, InputOutputMode::TIMING, NO_PIN);
         toneInstance.setRolloverValue(toneFreq, TimerFormat::HERTZ);
         toneInstance.attachInterrupt(toneHandler);
@@ -78,7 +78,7 @@ static void timerTonePinInit(pin_size_t pin, uint32_t frequency, uint32_t durati
 /**
  * @brief Stops the Tone timer and resets the associated pin configuration.
  *
- * This function deinitializes the Tone timer instance and sets the pin to input floating mode 
+ * This function deinitializes the Tone timer instance and sets the pin to input floating mode
  * if a valid pin is configured.
  */
 static void timerTonePinDeinit() {
@@ -86,12 +86,12 @@ static void timerTonePinDeinit() {
 
     if (pinInfo.pin != NO_PIN && pinInfo.pin <= MAX_PIN_NUM) {
         setPinOp(pinInfo.pin, createPackedPinOps(
-            gpio::Pin_Mode::INPUT_FLOATING,
-            gpio::Output_Speed::SPEED_MAX,
-            gpio::Pin_Remap_Select::NO_REMAP,
-            0,
-            0
-        ));
+                     gpio::Pin_Mode::INPUT_FLOATING,
+                     gpio::Output_Speed::SPEED_MAX,
+                     gpio::Pin_Remap_Select::NO_REMAP,
+                     0,
+                     0
+                 ));
         pinInfo.pin = NO_PIN;
     }
 }

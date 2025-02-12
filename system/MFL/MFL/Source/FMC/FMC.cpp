@@ -31,7 +31,7 @@ FMC::FMC() {}
 
 /**
  * @brief Unlock the FMC memory regions.
- * 
+ *
  * This function unlocks the FMC memory regions by writing the unlock keys to the
  * FMC_KEY0 and FMC_KEY1 registers. This function checks if the memory regions are
  * already unlocked and only writes the keys if they are not.
@@ -52,7 +52,7 @@ void FMC::unlock() {
 
 /**
  * @brief Unlock the FMC bank0 memory region.
- * 
+ *
  * This function unlocks the FMC memory region of bank0 by writing the unlock keys to the
  * FMC_KEY0 register. This function checks if the memory region is already unlocked and only
  * writes the keys if it is not.
@@ -66,7 +66,7 @@ void FMC::unlock_bank0() {
 
 /**
  * @brief Unlock the FMC bank1 memory region.
- * 
+ *
  * This function unlocks the FMC memory region of bank1 by writing the unlock keys to the
  * FMC_KEY1 register. This function checks if the memory region is already unlocked and only
  * writes the keys if it is not.
@@ -80,7 +80,7 @@ void FMC::unlock_bank1() {
 
 /**
  * @brief Lock the FMC bank0 and bank1 memory regions.
- * 
+ *
  * This function locks the FMC memory regions of bank0 and bank1 by setting the LK bit in
  * the FMC_CTL0 and FMC_CTL1 registers. This prevents any further write operations to the
  * FMC memory regions.
@@ -95,7 +95,7 @@ void FMC::lock(void) {
 
 /**
  * @brief Lock the FMC bank0 memory region.
- * 
+ *
  * This function locks the FMC memory region of bank0 by setting the LK bit in
  * the FMC_CTL0 register. This prevents any further write operations to the
  * FMC bank0 memory region.
@@ -106,7 +106,7 @@ void FMC::lock_bank0(void) {
 
 /**
  * @brief Lock the FMC bank1 memory region.
- * 
+ *
  * This function locks the FMC memory region of bank1 by setting the LK bit in
  * the FMC_CTL1 register. This prevents any further write operations to the
  * FMC bank1 memory region.
@@ -117,14 +117,14 @@ void FMC::lock_bank1(void) {
 
 /**
  * @brief Perform a mass erase on the FMC.
- * 
+ *
  * This function performs a mass erase on the FMC by setting the MER bit and the
  * START bit in the FMC_CTL0 and FMC_CTL1 registers. The function waits until the
  * erase operation is complete and then clears the MER bit.
- * 
+ *
  * If the FMC has a size greater than the size of bank0, the function will also
  * perform a mass erase on bank1.
- * 
+ *
  * @return The state of the FMC after the mass erase operation.
  */
 FMC_Error_Type FMC::mass_erase() {
@@ -133,8 +133,8 @@ FMC_Error_Type FMC::mass_erase() {
 
     if (state == FMC_Error_Type::READY) {
         write_bits_sequence(*this, FMC_Regs::CTL0,
-                   static_cast<uint32_t>(CTL0_Bits::MER), true,
-                   static_cast<uint32_t>(CTL0_Bits::START), true);
+                            static_cast<uint32_t>(CTL0_Bits::MER), true,
+                            static_cast<uint32_t>(CTL0_Bits::START), true);
         // Wait until ready
         timeout = reinterpret_cast<uint32_t>(Timeout_Count);
         state = ready_wait_bank0(timeout);
@@ -146,8 +146,8 @@ FMC_Error_Type FMC::mass_erase() {
         state = ready_wait_bank1(timeout);
         if (state == FMC_Error_Type::READY) {
             write_bits_sequence(*this, FMC_Regs::CTL1,
-                       static_cast<uint32_t>(CTL1_Bits::MER), true,
-                       static_cast<uint32_t>(CTL1_Bits::START), true);
+                                static_cast<uint32_t>(CTL1_Bits::MER), true,
+                                static_cast<uint32_t>(CTL1_Bits::START), true);
             // Wait until ready
             timeout = reinterpret_cast<uint32_t>(Timeout_Count);
             state = ready_wait_bank1(timeout);
@@ -160,14 +160,14 @@ FMC_Error_Type FMC::mass_erase() {
 
 /**
  * @brief Erase a page in the FMC.
- * 
+ *
  * This function erases a page in the FMC by setting the PER bit and the
  * START bit in the FMC_CTL0 or FMC_CTL1 registers, depending on the address
  * and size of the FMC. The function waits until the erase operation is complete
  * and then returns the state of the FMC.
- * 
+ *
  * @param[in] address The address of the page to erase.
- * 
+ *
  * @return The state of the FMC after the erase operation.
  */
 FMC_Error_Type FMC::erase_page(uint32_t address) {
@@ -190,11 +190,11 @@ FMC_Error_Type FMC::erase_page(uint32_t address) {
 
 /**
  * @brief Erase the entire Bank 0 in the FMC.
- * 
+ *
  * This function erases the entire Bank 0 in the FMC by setting the MER bit and
  * the START bit in the FMC_CTL0 register. The function waits until the erase
  * operation is complete and then returns the state of the FMC.
- * 
+ *
  * @return The state of the FMC after the erase operation.
  */
 FMC_Error_Type FMC::erase_bank0() {
@@ -204,8 +204,8 @@ FMC_Error_Type FMC::erase_bank0() {
     state = ready_wait_bank0(timeout);
     if (state == FMC_Error_Type::READY) {
         write_bits_sequence(*this, FMC_Regs::CTL0,
-                   static_cast<uint32_t>(CTL0_Bits::MER), true,
-                   static_cast<uint32_t>(CTL0_Bits::START), true);
+                            static_cast<uint32_t>(CTL0_Bits::MER), true,
+                            static_cast<uint32_t>(CTL0_Bits::START), true);
         // Wait until ready
         timeout = reinterpret_cast<uint32_t>(Timeout_Count);
         state = ready_wait_bank0(timeout);
@@ -217,11 +217,11 @@ FMC_Error_Type FMC::erase_bank0() {
 
 /**
  * @brief Erase the entire Bank 1 in the FMC.
- * 
+ *
  * This function erases the entire Bank 1 in the FMC by setting the MER bit and
  * the START bit in the FMC_CTL1 register. The function waits until the erase
  * operation is complete and then returns the state of the FMC.
- * 
+ *
  * @return The state of the FMC after the erase operation.
  */
 FMC_Error_Type FMC::erase_bank1() {
@@ -231,8 +231,8 @@ FMC_Error_Type FMC::erase_bank1() {
     state = ready_wait_bank1(timeout);
     if (state == FMC_Error_Type::READY) {
         write_bits_sequence(*this, FMC_Regs::CTL1,
-                   static_cast<uint32_t>(CTL1_Bits::MER), true,
-                   static_cast<uint32_t>(CTL1_Bits::START), true);
+                            static_cast<uint32_t>(CTL1_Bits::MER), true,
+                            static_cast<uint32_t>(CTL1_Bits::START), true);
         // Wait until ready
         timeout = reinterpret_cast<uint32_t>(Timeout_Count);
         state = ready_wait_bank1(timeout);
@@ -244,13 +244,13 @@ FMC_Error_Type FMC::erase_bank1() {
 
 /**
  * @brief Programs a word to the FMC.
- * 
+ *
  * This function programs a word to the FMC at the specified address. The
  * function determines which bank to use based on the address and the size of the
  * FMC. If the address is within the range of Bank 0, the function will use Bank 0
  * otherwise it will use Bank 1. The function waits until the program operation is
  * complete and then returns the state of the FMC.
- * 
+ *
  * @param address The address to program the word to.
  * @param data The data to be programmed.
  * @return The state of the FMC after the program operation.
@@ -275,13 +275,13 @@ FMC_Error_Type FMC::program_word(uint32_t address, uint32_t data) {
 
 /**
  * @brief Programs a halfword to the FMC.
- * 
+ *
  * This function programs a halfword to the FMC at the specified address. The
  * function determines which bank to use based on the address and the size of the
  * FMC. If the address is within the range of Bank 0, the function will use Bank 0
  * otherwise it will use Bank 1. The function waits until the program operation is
  * complete and then returns the state of the FMC.
- * 
+ *
  * @param address The address to program the halfword to.
  * @param data The data to be programmed.
  * @return The state of the FMC after the program operation.
@@ -306,13 +306,13 @@ FMC_Error_Type FMC::program_halfword(uint32_t address, uint16_t data) {
 
 /**
  * @brief Reprograms a word in the FMC.
- * 
+ *
  * This function reprograms a word in the FMC at the specified address. The
  * function determines which bank to use based on the address and the size of the
  * FMC. If the address is within the range of Bank 0, the function will use Bank 0
  * otherwise it will use Bank 1. The function waits until the reprogramming
  * operation is complete and then returns the state of the FMC.
- * 
+ *
  * @param address The address to reprogram the word at.
  * @param data The data to be reprogrammed.
  * @return The state of the FMC after the reprogramming operation.
@@ -339,11 +339,11 @@ FMC_Error_Type FMC::reprogram_word(uint32_t address, uint32_t data) {
 
 /**
  * @brief Sets the wait state of the FMC.
- * 
+ *
  * This function sets the wait state of the FMC to the specified value. The
  * wait state is used to control the amount of time the FMC waits after a
  * programming operation before doing another operation.
- * 
+ *
  * @param wait The wait state to set the FMC to.
  */
 void FMC::set_wait_state(Wait_State wait) {
@@ -352,14 +352,14 @@ void FMC::set_wait_state(Wait_State wait) {
 
 /**
  * @brief Gets the state of Bank 0 of the FMC.
- * 
+ *
  * This function reads the state of Bank 0 of the FMC and returns it as a
  * FMC_Error_Type. The state can be one of the following values:
  *     - FMC_Error_Type::READY: Bank 0 is ready.
  *     - FMC_Error_Type::BUSY: Bank 0 is busy.
  *     - FMC_Error_Type::WP_ERROR: Bank 0 is in write protection error.
  *     - FMC_Error_Type::PG_ERROR: Bank 0 is in programming error.
- * 
+ *
  * @return The state of Bank 0 of the FMC.
  */
 FMC_Error_Type FMC::get_bank0_state() {
@@ -378,14 +378,14 @@ FMC_Error_Type FMC::get_bank0_state() {
 
 /**
  * @brief Gets the state of Bank 1 of the FMC.
- * 
+ *
  * This function reads the state of Bank 1 of the FMC and returns it as a
  * FMC_Error_Type. The state can be one of the following values:
  *     - FMC_Error_Type::READY: Bank 1 is ready.
  *     - FMC_Error_Type::BUSY: Bank 1 is busy.
  *     - FMC_Error_Type::WP_ERROR: Bank 1 is in write protection error.
  *     - FMC_Error_Type::PG_ERROR: Bank 1 is in programming error.
- * 
+ *
  * @return The state of Bank 1 of the FMC.
  */
 FMC_Error_Type FMC::get_bank1_state() {
@@ -404,11 +404,11 @@ FMC_Error_Type FMC::get_bank1_state() {
 
 /**
  * @brief Waits for Bank 0 of the FMC to become ready.
- * 
+ *
  * This function checks the state of Bank 0 of the FMC and waits until it is
  * no longer busy or the specified timeout is reached. If the timeout is reached
  * while Bank 0 is still busy, the state is set to FMC_Error_Type::TIMEOUT.
- * 
+ *
  * @param timeout The maximum number of cycles to wait for Bank 0 to become ready.
  * @return The state of Bank 0 of the FMC, either ready, timeout, or an error state.
  */
@@ -429,11 +429,11 @@ FMC_Error_Type FMC::ready_wait_bank0(uint32_t timeout) {
 
 /**
  * @brief Waits for Bank 1 of the FMC to become ready.
- * 
+ *
  * This function checks the state of Bank 1 of the FMC and waits until it is
  * no longer busy or the specified timeout is reached. If the timeout is reached
  * while Bank 1 is still busy, the state is set to FMC_Error_Type::TIMEOUT.
- * 
+ *
  * @param timeout The maximum number of cycles to wait for Bank 1 to become ready.
  * @return The state of Bank 1 of the FMC, either ready, timeout, or an error state.
  */
@@ -454,11 +454,11 @@ FMC_Error_Type FMC::ready_wait_bank1(uint32_t timeout) {
 
 /**
  * @brief Retrieves the status of a specified flag in the FMC.
- * 
+ *
  * This function returns the current status of a specified status flag
  * within the FMC module. It checks the flag's state using the internal
  * mechanism provided by get_value.
- * 
+ *
  * @param flag The status flag to be checked, specified as a Status_Flags
  *             enumeration value.
  * @return True if the specified flag is set, otherwise false.
@@ -483,11 +483,11 @@ void FMC::clear_flag(Status_Flags flag) {
 
 /**
  * @brief Retrieves the status of a specified interrupt flag in the FMC.
- * 
+ *
  * This function checks the status of a given interrupt flag within the FMC
  * module. It checks the flag's state using the internal mechanism provided by
  * get_value.
- * 
+ *
  * @param flag The interrupt flag to be checked, specified as an Interrupt_Flags
  *             enumeration value.
  * @return True if the specified flag is set, otherwise false.
@@ -657,7 +657,7 @@ FMC_Error_Type FMC::program_halfword_to_bank(uint32_t address, uint16_t data,
  */
 template<typename T>
 FMC_Error_Type FMC::erase_word_bank(uint32_t address, uint32_t timeout,
-               FMC_Regs control_reg, T erase_bit, T start_bit, FMC_Regs address_reg) {
+                                    FMC_Regs control_reg, T erase_bit, T start_bit, FMC_Regs address_reg) {
     FMC_Error_Type state = FMC_Error_Type::READY;
 
     state = (control_reg == FMC_Regs::CTL0) ? ready_wait_bank0(timeout) : ready_wait_bank1(timeout);

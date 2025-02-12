@@ -83,30 +83,30 @@ private:
 
     inline EXMC_Regs get_snctl_offset(Block_Number block) {
         switch (block) {
-        case Block_Number::BLOCK0: return EXMC_Regs::SNCTL0;
-        case Block_Number::BLOCK1: return EXMC_Regs::SNCTL1;
-        case Block_Number::BLOCK2: return EXMC_Regs::SNCTL2;
-        case Block_Number::BLOCK3: return EXMC_Regs::SNCTL3;
-        default: return EXMC_Regs::SNCTL0;
+            case Block_Number::BLOCK0: return EXMC_Regs::SNCTL0;
+            case Block_Number::BLOCK1: return EXMC_Regs::SNCTL1;
+            case Block_Number::BLOCK2: return EXMC_Regs::SNCTL2;
+            case Block_Number::BLOCK3: return EXMC_Regs::SNCTL3;
+            default: return EXMC_Regs::SNCTL0;
         }
     }
     inline EXMC_Regs get_sntcfg_offset(Block_Number block) {
         switch (block) {
-        case Block_Number::BLOCK0: return EXMC_Regs::SNTCFG0;
-        case Block_Number::BLOCK1: return EXMC_Regs::SNTCFG1;
-        case Block_Number::BLOCK2: return EXMC_Regs::SNTCFG2;
-        case Block_Number::BLOCK3: return EXMC_Regs::SNTCFG3;
-        default: return EXMC_Regs::SNTCFG0;
+            case Block_Number::BLOCK0: return EXMC_Regs::SNTCFG0;
+            case Block_Number::BLOCK1: return EXMC_Regs::SNTCFG1;
+            case Block_Number::BLOCK2: return EXMC_Regs::SNTCFG2;
+            case Block_Number::BLOCK3: return EXMC_Regs::SNTCFG3;
+            default: return EXMC_Regs::SNTCFG0;
         }
     }
 
     inline EXMC_Regs get_snwtcfg_offset(Block_Number block) {
         switch (block) {
-        case Block_Number::BLOCK0: return EXMC_Regs::SNWTCFG0;
-        case Block_Number::BLOCK1: return EXMC_Regs::SNWTCFG1;
-        case Block_Number::BLOCK2: return EXMC_Regs::SNWTCFG2;
-        case Block_Number::BLOCK3: return EXMC_Regs::SNWTCFG3;
-        default: return EXMC_Regs::SNWTCFG0;
+            case Block_Number::BLOCK0: return EXMC_Regs::SNWTCFG0;
+            case Block_Number::BLOCK1: return EXMC_Regs::SNWTCFG1;
+            case Block_Number::BLOCK2: return EXMC_Regs::SNWTCFG2;
+            case Block_Number::BLOCK3: return EXMC_Regs::SNWTCFG3;
+            default: return EXMC_Regs::SNWTCFG0;
         }
     }
 

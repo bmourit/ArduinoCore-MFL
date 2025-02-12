@@ -15,9 +15,9 @@ RealTimeClock& RealTimeClock::get_instance() {
 }
 
 RealTimeClock::RealTimeClock() :
-       rtc_(rtc::RTC::get_instance()),
-       time_(),
-       Callbacks_{nullptr, nullptr, nullptr}
+    rtc_(rtc::RTC::get_instance()),
+    time_(),
+    Callbacks_{nullptr, nullptr, nullptr}
 {
     RCU_I.set_rtc_source(rcu::RTC_Source::RTCSRC_LXTAL);
     time_ = { 1970U, 1U, 1U, 0U, 0U, 0U, };
@@ -43,8 +43,6 @@ void RealTimeClock::init() {
     uint32_t priority_group = NVIC_GetPriorityGrouping();
     NVIC_SetPriority(RTC_Alarm_IRQn, NVIC_EncodePriority(priority_group, irqPriority, irqSubPriority));
     NVIC_EnableIRQ(RTC_Alarm_IRQn);
-
-    //backup_domain_enable();
 }
 
 void RealTimeClock::setTime(Time_Set* time) {
@@ -94,17 +92,17 @@ void RealTimeClock::setAlarm(uint32_t offset, Alarm_Format format) {
     uint32_t seconds = 0;
 
     switch (format) {
-    case Alarm_Format::ALARM_S:
-        seconds = offset;
-        break;
-    case Alarm_Format::ALARM_M:
-        seconds = offset * SecondsPerMinute;
-        break;
-    case Alarm_Format::ALARM_H:
-        seconds = offset * SecondsPerHour;
-        break;
-    default:
-        break;
+        case Alarm_Format::ALARM_S:
+            seconds = offset;
+            break;
+        case Alarm_Format::ALARM_M:
+            seconds = offset * SecondsPerMinute;
+            break;
+        case Alarm_Format::ALARM_H:
+            seconds = offset * SecondsPerHour;
+            break;
+        default:
+            break;
     }
 
     rtc_.lwoff_wait();
@@ -140,22 +138,22 @@ void RealTimeClock::attachInterrupt(RTCCallback callback, Interrupt_Type type) {
     rtc::Interrupt_Type interrupt;
 
     switch (type) {
-    case Interrupt_Type::INTR_SECOND:
-        this->Callbacks_[0] = callback;
-        interrupt = rtc::Interrupt_Type::INTR_SCIE;
-        break;
-    case Interrupt_Type::INTR_ALARM:
-        this->Callbacks_[1] = callback;
-        interrupt = rtc::Interrupt_Type::INTR_ALRMIE;
-        exti::EXTI& EXTI_I = exti::EXTI::get_instance();
-        EXTI_I.init(exti::EXTI_Line::EXTI17, exti::EXTI_Mode::EXTI_INTERRUPT, exti::EXTI_Trigger::TRIG_RISING);
-        break;
-    case Interrupt_Type::INTR_OVERFLOW:
-        this->Callbacks_[2] = callback;
-        interrupt = rtc::Interrupt_Type::INTR_OVIE;
-        break;
-    default:
-        break;
+        case Interrupt_Type::INTR_SECOND:
+            this->Callbacks_[0] = callback;
+            interrupt = rtc::Interrupt_Type::INTR_SCIE;
+            break;
+        case Interrupt_Type::INTR_ALARM:
+            this->Callbacks_[1] = callback;
+            interrupt = rtc::Interrupt_Type::INTR_ALRMIE;
+            exti::EXTI& EXTI_I = exti::EXTI::get_instance();
+            EXTI_I.init(exti::EXTI_Line::EXTI17, exti::EXTI_Mode::EXTI_INTERRUPT, exti::EXTI_Trigger::TRIG_RISING);
+            break;
+        case Interrupt_Type::INTR_OVERFLOW:
+            this->Callbacks_[2] = callback;
+            interrupt = rtc::Interrupt_Type::INTR_OVIE;
+            break;
+        default:
+            break;
     }
     rtc_.set_interrupt_enable(interrupt, true);
 }
@@ -164,20 +162,20 @@ void RealTimeClock::detachInterrupt(Interrupt_Type type) {
     rtc::Interrupt_Type interrupt;
 
     switch (type) {
-    case Interrupt_Type::INTR_SECOND:
-        interrupt = rtc::Interrupt_Type::INTR_SCIE;
-        this->Callbacks_[0] = nullptr;
-        break;
-    case Interrupt_Type::INTR_ALARM:
-        interrupt = rtc::Interrupt_Type::INTR_ALRMIE;
-        this->Callbacks_[1] = nullptr;
-        break;
-    case Interrupt_Type::INTR_OVERFLOW:
-        interrupt = rtc::Interrupt_Type::INTR_OVIE;
-        this->Callbacks_[2] = nullptr;
-        break;
-    default:
-        break;
+        case Interrupt_Type::INTR_SECOND:
+            interrupt = rtc::Interrupt_Type::INTR_SCIE;
+            this->Callbacks_[0] = nullptr;
+            break;
+        case Interrupt_Type::INTR_ALARM:
+            interrupt = rtc::Interrupt_Type::INTR_ALRMIE;
+            this->Callbacks_[1] = nullptr;
+            break;
+        case Interrupt_Type::INTR_OVERFLOW:
+            interrupt = rtc::Interrupt_Type::INTR_OVIE;
+            this->Callbacks_[2] = nullptr;
+            break;
+        default:
+            break;
     }
 
     rtc_.set_interrupt_enable(interrupt, false);
@@ -185,23 +183,23 @@ void RealTimeClock::detachInterrupt(Interrupt_Type type) {
 
 void RealTimeClock::interruptHandler(Interrupt_Type type) {
     switch (type) {
-    case Interrupt_Type::INTR_SECOND:
-        if (this->Callbacks_[0] != nullptr) {
-            this->Callbacks_[0]();
-        }
-        break;
-    case Interrupt_Type::INTR_ALARM:
-        if (this->Callbacks_[1] != nullptr) {
-            this->Callbacks_[1]();
-        }
-        break;
-    case Interrupt_Type::INTR_OVERFLOW:
-        if (this->Callbacks_[2] != nullptr) {
-            this->Callbacks_[2]();
-        }
-        break;
-    default:
-        break;
+        case Interrupt_Type::INTR_SECOND:
+            if (this->Callbacks_[0] != nullptr) {
+                this->Callbacks_[0]();
+            }
+            break;
+        case Interrupt_Type::INTR_ALARM:
+            if (this->Callbacks_[1] != nullptr) {
+                this->Callbacks_[1]();
+            }
+            break;
+        case Interrupt_Type::INTR_OVERFLOW:
+            if (this->Callbacks_[2] != nullptr) {
+                this->Callbacks_[2]();
+            }
+            break;
+        default:
+            break;
     }
 }
 

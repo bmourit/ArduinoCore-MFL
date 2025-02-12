@@ -71,7 +71,7 @@
 
 
 #ifndef F_CPU
-#define F_CPU   120'000'000U
+    #define F_CPU   120'000'000U
 #endif
 
 template<typename T>

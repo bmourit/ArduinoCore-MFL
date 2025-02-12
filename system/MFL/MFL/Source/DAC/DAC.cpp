@@ -50,11 +50,11 @@ void DAC::reset() {
 /**
  * @brief Enables the specified DAC internal device.
  *
- * This function sets the enable bit in the DAC control register for the 
+ * This function sets the enable bit in the DAC control register for the
  * specified internal device. If the device is invalid, the function returns
  * without making any changes.
  *
- * @param instance The internal DAC device to enable. Must be a value from 
+ * @param instance The internal DAC device to enable. Must be a value from
  *                 the Internal_Device enumeration.
  */
 void DAC::enable(Internal_Device instance) {
@@ -63,8 +63,8 @@ void DAC::enable(Internal_Device instance) {
     }
 
     const uint32_t bits = (instance == Internal_Device::DAC0_BASE) ?
-                            static_cast<uint32_t>(CTL_Bits::DEN0) :
-                            static_cast<uint32_t>(CTL_Bits::DEN1);
+                          static_cast<uint32_t>(CTL_Bits::DEN0) :
+                          static_cast<uint32_t>(CTL_Bits::DEN1);
 
     write_bit(*this, DAC_Regs::CTL, bits, true);
 }
@@ -72,11 +72,11 @@ void DAC::enable(Internal_Device instance) {
 /**
  * @brief Disables the specified DAC internal device.
  *
- * This function clears the enable bit in the DAC control register for the 
+ * This function clears the enable bit in the DAC control register for the
  * specified internal device. If the device is invalid, the function returns
  * without making any changes.
  *
- * @param instance The internal DAC device to disable. Must be a value from 
+ * @param instance The internal DAC device to disable. Must be a value from
  *                 the Internal_Device enumeration.
  */
 void DAC::disable(Internal_Device instance) {
@@ -85,8 +85,8 @@ void DAC::disable(Internal_Device instance) {
     }
 
     const uint32_t bits = (instance == Internal_Device::DAC0_BASE) ?
-                            static_cast<uint32_t>(CTL_Bits::DEN0) :
-                            static_cast<uint32_t>(CTL_Bits::DEN1);
+                          static_cast<uint32_t>(CTL_Bits::DEN0) :
+                          static_cast<uint32_t>(CTL_Bits::DEN1);
 
     write_bit(*this, DAC_Regs::CTL, bits, false);
 }
@@ -108,8 +108,8 @@ void DAC::set_enable(Internal_Device instance, bool enable) {
     }
 
     const uint32_t bits = (instance == Internal_Device::DAC0_BASE) ?
-                            static_cast<uint32_t>(CTL_Bits::DEN0) :
-                            static_cast<uint32_t>(CTL_Bits::DEN1);
+                          static_cast<uint32_t>(CTL_Bits::DEN0) :
+                          static_cast<uint32_t>(CTL_Bits::DEN1);
 
     write_bit(*this, DAC_Regs::CTL, bits, enable);
 }
@@ -131,8 +131,8 @@ void DAC::set_dma_enable(Internal_Device instance, bool enable) {
     }
 
     const uint32_t bits = (instance == Internal_Device::DAC0_BASE) ?
-                            static_cast<uint32_t>(CTL_Bits::DDMAEN0) :
-                            static_cast<uint32_t>(CTL_Bits::DDMAEN1);
+                          static_cast<uint32_t>(CTL_Bits::DDMAEN0) :
+                          static_cast<uint32_t>(CTL_Bits::DDMAEN1);
 
     write_bit(*this, DAC_Regs::CTL, bits, enable);
 }
@@ -154,8 +154,8 @@ void DAC::set_output_buffer_enable(Internal_Device instance, bool enable) {
     }
 
     const uint32_t bits = (instance == Internal_Device::DAC0_BASE) ?
-                            static_cast<uint32_t>(CTL_Bits::DBOFF0) :
-                            static_cast<uint32_t>(CTL_Bits::DBOFF1);
+                          static_cast<uint32_t>(CTL_Bits::DBOFF0) :
+                          static_cast<uint32_t>(CTL_Bits::DBOFF1);
 
     write_bit(*this, DAC_Regs::CTL, bits, enable);
 }
@@ -179,12 +179,12 @@ uint16_t DAC::get_output_value(Internal_Device instance) {
     }
 
     const DAC_Regs reg = (instance == Internal_Device::DAC0_BASE) ?
-                            DAC_Regs::DAC0_DO :
-                            DAC_Regs::DAC1_DO;
+                         DAC_Regs::DAC0_DO :
+                         DAC_Regs::DAC1_DO;
 
     const uint32_t bits = (instance == Internal_Device::DAC0_BASE) ?
-                            static_cast<uint32_t>(DAC0_DO_Bits::DAC0_DO) :
-                            static_cast<uint32_t>(DAC1_DO_Bits::DAC1_DO);
+                          static_cast<uint32_t>(DAC0_DO_Bits::DAC0_DO) :
+                          static_cast<uint32_t>(DAC1_DO_Bits::DAC1_DO);
 
     return read_bit16_range(*this, reg, bits);
 }
@@ -239,17 +239,17 @@ void DAC::set_data(Internal_Device instance, Data_Align align, uint16_t data) {
     };
 
     switch (align) {
-    case Data_Align::RIGHT_12B:
-        write_bit_range(*this, R12DH_Regs[static_cast<size_t>(instance)], R12DH_Bits[static_cast<size_t>(instance)], static_cast<uint32_t>(data));
-        break;
-    case Data_Align::LEFT_12B:
-        write_bit_range(*this, L12DH_Regs[static_cast<size_t>(instance)], L12DH_Bits[static_cast<size_t>(instance)], static_cast<uint32_t>(data));
-        break;
-    case Data_Align::RIGHT_8B:
-        write_bit_range(*this, R8DH_Regs[static_cast<size_t>(instance)], R8DH_Bits[static_cast<size_t>(instance)], static_cast<uint32_t>(data));
-        break;
-    default:
-        break;
+        case Data_Align::RIGHT_12B:
+            write_bit_range(*this, R12DH_Regs[static_cast<size_t>(instance)], R12DH_Bits[static_cast<size_t>(instance)], static_cast<uint32_t>(data));
+            break;
+        case Data_Align::LEFT_12B:
+            write_bit_range(*this, L12DH_Regs[static_cast<size_t>(instance)], L12DH_Bits[static_cast<size_t>(instance)], static_cast<uint32_t>(data));
+            break;
+        case Data_Align::RIGHT_8B:
+            write_bit_range(*this, R8DH_Regs[static_cast<size_t>(instance)], R8DH_Bits[static_cast<size_t>(instance)], static_cast<uint32_t>(data));
+            break;
+        default:
+            break;
     }
 }
 
@@ -270,8 +270,8 @@ void DAC::set_trigger_enable(Internal_Device instance, bool enable) {
     }
 
     const uint32_t bits = (instance == Internal_Device::DAC0_BASE) ?
-                            static_cast<uint32_t>(CTL_Bits::DTEN0) :
-                            static_cast<uint32_t>(CTL_Bits::DTEN1);
+                          static_cast<uint32_t>(CTL_Bits::DTEN0) :
+                          static_cast<uint32_t>(CTL_Bits::DTEN1);
 
     write_bit(*this, DAC_Regs::CTL, bits, enable);
 }
@@ -296,8 +296,8 @@ void DAC::set_trigger_source(Internal_Device instance, Trigger_Source source) {
     }
 
     const uint32_t bits = (instance == Internal_Device::DAC0_BASE) ?
-                            static_cast<uint32_t>(CTL_Bits::DTSEL0) :
-                            static_cast<uint32_t>(CTL_Bits::DTSEL1);
+                          static_cast<uint32_t>(CTL_Bits::DTSEL0) :
+                          static_cast<uint32_t>(CTL_Bits::DTSEL1);
 
     write_bit_range(*this, DAC_Regs::CTL, bits, static_cast<uint32_t>(source));
 }
@@ -321,8 +321,8 @@ void DAC::set_software_trigger_enable(Internal_Device instance, bool enable) {
     }
 
     const uint32_t bits = (instance == Internal_Device::DAC0_BASE) ?
-                            static_cast<uint32_t>(SWT_Bits::SWTR0) :
-                            static_cast<uint32_t>(SWT_Bits::SWTR1);
+                          static_cast<uint32_t>(SWT_Bits::SWTR0) :
+                          static_cast<uint32_t>(SWT_Bits::SWTR1);
 
     write_bit(*this, DAC_Regs::SWT, bits, enable);
 }
@@ -346,8 +346,8 @@ void DAC::set_wave_mode(Internal_Device instance, Wave_Type type) {
     }
 
     const uint32_t bits = (instance == Internal_Device::DAC0_BASE) ?
-                            static_cast<uint32_t>(CTL_Bits::DWM0) :
-                            static_cast<uint32_t>(CTL_Bits::DWM1);
+                          static_cast<uint32_t>(CTL_Bits::DWM0) :
+                          static_cast<uint32_t>(CTL_Bits::DWM1);
 
     write_bit_range(*this, DAC_Regs::CTL, bits, static_cast<uint32_t>(type));
 }
@@ -371,8 +371,8 @@ void DAC::set_wave_bit_width(Internal_Device instance, Bit_Width width) {
     }
 
     const uint32_t bits = (instance == Internal_Device::DAC0_BASE) ?
-                            static_cast<uint32_t>(CTL_Bits::DWBW0) :
-                            static_cast<uint32_t>(CTL_Bits::DWBW1);
+                          static_cast<uint32_t>(CTL_Bits::DWBW0) :
+                          static_cast<uint32_t>(CTL_Bits::DWBW1);
 
     write_bit_range(*this, DAC_Regs::CTL, bits, static_cast<uint32_t>(width));
 }
@@ -396,8 +396,8 @@ void DAC::set_lfsr_noise(Internal_Device instance, LFSR_Noise noise) {
     }
 
     const uint32_t bits = (instance == Internal_Device::DAC0_BASE) ?
-                            static_cast<uint32_t>(CTL_Bits::DWBW0) :
-                            static_cast<uint32_t>(CTL_Bits::DWBW1);
+                          static_cast<uint32_t>(CTL_Bits::DWBW0) :
+                          static_cast<uint32_t>(CTL_Bits::DWBW1);
 
     write_bit_range(*this, DAC_Regs::CTL, bits, static_cast<uint32_t>(noise));
 }
@@ -422,8 +422,8 @@ void DAC::set_triangle_amplitude(Internal_Device instance, Triangle_Amplitude am
     }
 
     const uint32_t bits = (instance == Internal_Device::DAC0_BASE) ?
-                            static_cast<uint32_t>(CTL_Bits::DWBW0) :
-                            static_cast<uint32_t>(CTL_Bits::DWBW1);
+                          static_cast<uint32_t>(CTL_Bits::DWBW0) :
+                          static_cast<uint32_t>(CTL_Bits::DWBW1);
 
     write_bit_range(*this, DAC_Regs::CTL, bits, static_cast<uint32_t>(amplitude));
 }
@@ -440,8 +440,8 @@ void DAC::set_triangle_amplitude(Internal_Device instance, Triangle_Amplitude am
  */
 void DAC::set_dual_mode_enable(bool enable) {
     write_bits_sequence(*this, DAC_Regs::CTL,
-               static_cast<uint32_t>(CTL_Bits::DEN0), enable,
-               static_cast<uint32_t>(CTL_Bits::DEN1), enable);
+                        static_cast<uint32_t>(CTL_Bits::DEN0), enable,
+                        static_cast<uint32_t>(CTL_Bits::DEN1), enable);
 }
 
 /**
@@ -456,8 +456,8 @@ void DAC::set_dual_mode_enable(bool enable) {
  */
 void DAC::set_dual_software_trigger_enable(bool enable) {
     write_bits_sequence(*this, DAC_Regs::SWT,
-               static_cast<uint32_t>(SWT_Bits::SWTR0), enable,
-               static_cast<uint32_t>(SWT_Bits::SWTR1), enable);
+                        static_cast<uint32_t>(SWT_Bits::SWTR0), enable,
+                        static_cast<uint32_t>(SWT_Bits::SWTR1), enable);
 }
 
 /**
@@ -473,8 +473,8 @@ void DAC::set_dual_software_trigger_enable(bool enable) {
  */
 void DAC::set_dual_output_buffer_enable(bool enable) {
     write_bits_sequence(*this, DAC_Regs::CTL,
-               static_cast<uint32_t>(CTL_Bits::DBOFF0), enable,
-               static_cast<uint32_t>(CTL_Bits::DBOFF1), enable);
+                        static_cast<uint32_t>(CTL_Bits::DBOFF0), enable,
+                        static_cast<uint32_t>(CTL_Bits::DBOFF1), enable);
 }
 
 /**
@@ -491,23 +491,23 @@ void DAC::set_dual_output_buffer_enable(bool enable) {
  */
 void DAC::set_dual_data(Data_Align align, uint16_t data0, uint16_t data1) {
     switch (align) {
-    case Data_Align::RIGHT_12B:
-        write_bit_ranges(*this, DAC_Regs::DACC_R12DH,
-                   static_cast<uint32_t>(DACC_R12DH_Bits::DAC0_DH), static_cast<uint32_t>(data0),
-                   static_cast<uint32_t>(DACC_R12DH_Bits::DAC1_DH), static_cast<uint32_t>(data1));
-        break;
-    case Data_Align::LEFT_12B:
-        write_bit_ranges(*this, DAC_Regs::DACC_L12DH,
-                   static_cast<uint32_t>(DACC_L12DH_Bits::DAC0_DH), static_cast<uint32_t>(data0),
-                   static_cast<uint32_t>(DACC_L12DH_Bits::DAC1_DH), static_cast<uint32_t>(data1));
-        break;
-    case Data_Align::RIGHT_8B:
-        write_bit_ranges(*this, DAC_Regs::DACC_R8DH,
-                   static_cast<uint32_t>(DACC_R8DH_Bits::DAC0_DH), static_cast<uint32_t>(data0),
-                   static_cast<uint32_t>(DACC_R8DH_Bits::DAC1_DH), static_cast<uint32_t>(data1));
-        break;
-    default:
-        break;
+        case Data_Align::RIGHT_12B:
+            write_bit_ranges(*this, DAC_Regs::DACC_R12DH,
+                             static_cast<uint32_t>(DACC_R12DH_Bits::DAC0_DH), static_cast<uint32_t>(data0),
+                             static_cast<uint32_t>(DACC_R12DH_Bits::DAC1_DH), static_cast<uint32_t>(data1));
+            break;
+        case Data_Align::LEFT_12B:
+            write_bit_ranges(*this, DAC_Regs::DACC_L12DH,
+                             static_cast<uint32_t>(DACC_L12DH_Bits::DAC0_DH), static_cast<uint32_t>(data0),
+                             static_cast<uint32_t>(DACC_L12DH_Bits::DAC1_DH), static_cast<uint32_t>(data1));
+            break;
+        case Data_Align::RIGHT_8B:
+            write_bit_ranges(*this, DAC_Regs::DACC_R8DH,
+                             static_cast<uint32_t>(DACC_R8DH_Bits::DAC0_DH), static_cast<uint32_t>(data0),
+                             static_cast<uint32_t>(DACC_R8DH_Bits::DAC1_DH), static_cast<uint32_t>(data1));
+            break;
+        default:
+            break;
     }
 }
 

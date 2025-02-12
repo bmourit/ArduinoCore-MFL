@@ -45,7 +45,7 @@ inline constexpr uint32_t REG_BIT_DEF(uint32_t start, uint32_t end) {
 // This should match the offset expected by the bootloader.
 // If no bootloader exists, use 0x00000000
 #ifndef VECT_TAB_OFFSET
-inline constexpr uintptr_t VECT_TAB_OFFSET = 0x00007000U;
+    inline constexpr uintptr_t VECT_TAB_OFFSET = 0x00007000U;
 #endif
 
 // DO NOT CHANGE THESE
@@ -53,7 +53,7 @@ inline constexpr uintptr_t NVIC_VECTTAB_SRAM = 0x20000000U;
 inline constexpr uintptr_t NVIC_VECTTAB_FLASH = 0x08000000U;
 
 #ifdef VECT_TAB_SRAM
-inline constexpr uintptr_t VTOR_ADDRESS = NVIC_VECTTAB_SRAM | VECT_TAB_OFFSET;
+    inline constexpr uintptr_t VTOR_ADDRESS = NVIC_VECTTAB_SRAM | VECT_TAB_OFFSET;
 #else
-inline constexpr uintptr_t VTOR_ADDRESS = NVIC_VECTTAB_FLASH | VECT_TAB_OFFSET;
+    inline constexpr uintptr_t VTOR_ADDRESS = NVIC_VECTTAB_FLASH | VECT_TAB_OFFSET;
 #endif

@@ -259,9 +259,9 @@ struct DMA_Clock_Config {
 };
 
 static inline constexpr std::array<DMA_Clock_Config, 2> DMA_pclk_index {{
-    {rcu::RCU_PCLK::PCLK_DMA0},
-    {rcu::RCU_PCLK::PCLK_DMA1}
-}};
+        {rcu::RCU_PCLK::PCLK_DMA0},
+        {rcu::RCU_PCLK::PCLK_DMA1}
+    }};
 
 struct DMA_Config {
     uint32_t count;

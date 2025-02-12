@@ -21,13 +21,13 @@
 
 #include <stdint.h>
 
-/// @brief Constants for bit operations.
+// Constants for bit operations
 inline constexpr uint32_t Clear = 0;
 inline constexpr uint32_t Set = 1;
 
 /**
  * @brief Reads a single bit from a register.
- * 
+ *
  * @tparam RegType The register type.
  * @tparam Instance The instance type containing the register.
  * @param instance The instance containing the register.
@@ -42,7 +42,7 @@ inline bool read_bit(const Instance& instance, RegType reg, uint32_t bitno) {
 
 /**
  * @brief Writes a single bit to a register.
- * 
+ *
  * @tparam RegType The register type.
  * @tparam Instance The instance type containing the register.
  * @param instance The instance containing the register.
@@ -62,7 +62,7 @@ inline void write_bit(const Instance& instance, RegType reg, uint32_t bitno, boo
 
 /**
  * @brief Writes a set of bits to a register.
- * 
+ *
  * @tparam RegType The register type.
  * @tparam Instance The instance type containing the register.
  * @param instance The instance containing the register.
@@ -82,7 +82,7 @@ inline void write_bits(const Instance& instance, RegType reg, uint32_t bits, boo
 
 /**
  * @brief Writes a sequence of bits to a register in the order of the bit numbers provided.
- * 
+ *
  * @tparam RegType The register type.
  * @tparam Instance The instance type containing the register.
  * @param instance The instance containing the register.
@@ -90,7 +90,7 @@ inline void write_bits(const Instance& instance, RegType reg, uint32_t bits, boo
  * @param bitno The first bit number to write to.
  * @param value The value to write to the bit at the given position.
  * @param args The remaining bit numbers and values to write to the register.
- * 
+ *
  * Example: write_bits_sequence(instance, reg, 1, true, 3, false, 5, true);
  *          writes true to bit 1, false to bit 3, and true to bit 5 in the given register.
  */
@@ -104,7 +104,7 @@ inline void write_bits_sequence(const Instance& instance, RegType reg, uint32_t 
 
 /**
  * @brief Atomically writes a single bit to a register.
- * 
+ *
  * @tparam RegType The register type.
  * @tparam Instance The instance type containing the register.
  * @param instance The instance containing the register.
@@ -119,7 +119,7 @@ inline void atomic_write_bit(const Instance& instance, RegType reg, uint32_t bit
 
 /**
  * @brief Reads a range of bits from a register.
- * 
+ *
  * @tparam RegType The register type.
  * @tparam Instance The instance type containing the register.
  * @param instance The instance containing the register.
@@ -136,7 +136,7 @@ inline uint32_t read_bit_range(const Instance& instance, RegType reg, uint32_t b
 
 /**
  * @brief Reads a 16-bit range from a register.
- * 
+ *
  * @tparam RegType The register type.
  * @tparam Instance The instance type containing the register.
  * @param instance The instance containing the register.
@@ -151,7 +151,7 @@ inline uint16_t read_bit16_range(const Instance& instance, RegType reg, uint32_t
 
 /**
  * @brief Reads an 8-bit range from a register.
- * 
+ *
  * @tparam RegType The register type.
  * @tparam Instance The instance type containing the register.
  * @param instance The instance containing the register.
@@ -166,7 +166,7 @@ inline uint8_t read_bit8_range(const Instance& instance, RegType reg, uint32_t b
 
 /**
  * @brief Writes a range of bits to a register.
- * 
+ *
  * @tparam RegType The register type.
  * @tparam Instance The instance type containing the register.
  * @param instance The instance containing the register.
@@ -185,7 +185,7 @@ inline void write_bit_range(const Instance& instance, RegType reg, uint32_t bits
 
 /**
  * @brief Atomically writes a range of bits to a register.
- * 
+ *
  * @tparam RegType The register type.
  * @tparam Instance The instance type containing the register.
  * @param instance The instance containing the register.
@@ -201,7 +201,7 @@ inline void atomic_write_bit_range(const Instance& instance, RegType reg, uint32
 
 /**
  * @brief Base case for writing multiple bit ranges: No-op when no arguments are provided.
- * 
+ *
  * @tparam RegType The register type.
  * @tparam Instance The instance type containing the register.
  * @param instance The instance containing the register.
@@ -214,7 +214,7 @@ inline void write_bit_ranges(const Instance& instance, RegType reg) {
 
 /**
  * @brief Recursively writes multiple bit ranges to a register.
- * 
+ *
  * @tparam RegType The register type.
  * @tparam Instance The instance type containing the register.
  * @tparam Args Variadic template arguments representing bit-value pairs.

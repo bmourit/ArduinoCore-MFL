@@ -29,7 +29,7 @@ SDIO& SDIO::get_instance() {
     return instance;
 }
 
-SDIO::SDIO() : 
+SDIO::SDIO() :
     config_(default_config),
     is_clock_enabled_(false)
 {
@@ -89,26 +89,26 @@ void SDIO::init(SDIO_Config config) {
     const uint32_t div = (divider >= 256U) ? (divider - 256U) : divider;
 
     constexpr uint32_t all_bits_mask = (
-        1U << static_cast<uint32_t>(CLKCTL_Bits::DIV8)) |
-        (DIV_Mask << DIV_Pos) |
-        (1U << static_cast<uint32_t>(CLKCTL_Bits::CLKEDGE)) |
-        (3U << BUSMODE_Pos) |
-        (1U << static_cast<uint32_t>(CLKCTL_Bits::CLKBYP)) |
-        (1U << static_cast<uint32_t>(CLKCTL_Bits::CLKPWRSAV)) |
-        (1U << static_cast<uint32_t>(CLKCTL_Bits::HWCLKEN)
-    );
+                                           1U << static_cast<uint32_t>(CLKCTL_Bits::DIV8)) |
+                                       (DIV_Mask << DIV_Pos) |
+                                       (1U << static_cast<uint32_t>(CLKCTL_Bits::CLKEDGE)) |
+                                       (3U << BUSMODE_Pos) |
+                                       (1U << static_cast<uint32_t>(CLKCTL_Bits::CLKBYP)) |
+                                       (1U << static_cast<uint32_t>(CLKCTL_Bits::CLKPWRSAV)) |
+                                       (1U << static_cast<uint32_t>(CLKCTL_Bits::HWCLKEN)
+                                       );
 
     uint32_t clkctl_val = read_register<uint32_t>(*this, SDIO_Regs::CLKCTL) & ~all_bits_mask;
 
     clkctl_val |= (
-        (use_div8 ? Set : Clear) << static_cast<uint32_t>(CLKCTL_Bits::DIV8)) |
-        (static_cast<uint16_t>(div) << DIV_Pos) |
-        (static_cast<uint32_t>(config_.clock_edge) << static_cast<uint32_t>(CLKCTL_Bits::CLKEDGE)) |
-        (static_cast<uint32_t>(config_.width) << BUSMODE_Pos) |
-        ((config_.enable_bypass ? Set : Clear) << static_cast<uint32_t>(CLKCTL_Bits::CLKBYP)) |
-        ((config_.enable_powersave ? Set : Clear) << static_cast<uint32_t>(CLKCTL_Bits::CLKPWRSAV)) |
-        ((config_.enable_hwclock ? Set : Clear) << static_cast<uint32_t>(CLKCTL_Bits::HWCLKEN)
-    );
+                      (use_div8 ? Set : Clear) << static_cast<uint32_t>(CLKCTL_Bits::DIV8)) |
+                  (static_cast<uint16_t>(div) << DIV_Pos) |
+                  (static_cast<uint32_t>(config_.clock_edge) << static_cast<uint32_t>(CLKCTL_Bits::CLKEDGE)) |
+                  (static_cast<uint32_t>(config_.width) << BUSMODE_Pos) |
+                  ((config_.enable_bypass ? Set : Clear) << static_cast<uint32_t>(CLKCTL_Bits::CLKBYP)) |
+                  ((config_.enable_powersave ? Set : Clear) << static_cast<uint32_t>(CLKCTL_Bits::CLKPWRSAV)) |
+                  ((config_.enable_hwclock ? Set : Clear) << static_cast<uint32_t>(CLKCTL_Bits::HWCLKEN)
+                  );
 
     write_register(*this, SDIO_Regs::CLKCTL, clkctl_val);
 }
@@ -126,12 +126,12 @@ void SDIO::interface_clock_configure(Clock_Edge edge, bool bypass, bool low_powe
     const uint32_t div = (divider >= 256) ? (divider - 256) : divider;
 
     constexpr uint32_t all_bits_mask = (
-        (1U << static_cast<uint32_t>(CLKCTL_Bits::DIV8)) |
-        (DIV_Mask << DIV_Pos) |
-        (1U << static_cast<uint32_t>(CLKCTL_Bits::CLKEDGE)) |
-        (1U << static_cast<uint32_t>(CLKCTL_Bits::CLKBYP)) |
-        (1U << static_cast<uint32_t>(CLKCTL_Bits::CLKPWRSAV))
-    );
+                                           (1U << static_cast<uint32_t>(CLKCTL_Bits::DIV8)) |
+                                           (DIV_Mask << DIV_Pos) |
+                                           (1U << static_cast<uint32_t>(CLKCTL_Bits::CLKEDGE)) |
+                                           (1U << static_cast<uint32_t>(CLKCTL_Bits::CLKBYP)) |
+                                           (1U << static_cast<uint32_t>(CLKCTL_Bits::CLKPWRSAV))
+                                       );
 
     uint32_t clkctl_val = read_register<uint32_t>(*this, SDIO_Regs::CLKCTL) & ~all_bits_mask;
 
@@ -210,7 +210,7 @@ void SDIO::set_power_mode(Power_Control power) {
  * @brief Retrieves the current power mode of the SDIO peripheral.
  *
  * This function reads the PWRCTL register and returns the current power mode
- * as specified by the Power_Control enumeration. The power mode determines 
+ * as specified by the Power_Control enumeration. The power mode determines
  * the voltage level of the SDIO interface.
  *
  * @return The current power mode, which is a value from the Power_Control
@@ -344,7 +344,7 @@ uint8_t SDIO::get_command_index() {
  * @return The 32-bit response value from the selected response register.
  */
 uint32_t SDIO::get_response(Response_Type type) {
-    return read_register<uint32_t>(*this, 
+    return read_register<uint32_t>(*this,
                                    (type == Response_Type::RESPONSE0) ? SDIO_Regs::RESP0 :
                                    (type == Response_Type::RESPONSE1) ? SDIO_Regs::RESP1 :
                                    (type == Response_Type::RESPONSE2) ? SDIO_Regs::RESP2 : SDIO_Regs::RESP3);
@@ -366,26 +366,26 @@ uint32_t SDIO::get_response(Response_Type type) {
  * @param enable Set to true to enable the data state machine, or false to disable it.
  */
 void SDIO::set_data_state_machine_and_send(uint32_t timeout, uint32_t length, Block_Size size,
-           Transfer_Mode mode, Transfer_Direction direction, bool enable)
+        Transfer_Mode mode, Transfer_Direction direction, bool enable)
 {
     // Write the timeout and data length
     write_register(*this, SDIO_Regs::DATATO, timeout);
     write_bit_range(*this, SDIO_Regs::DATALEN, static_cast<uint32_t>(DATALEN_Bits::DATALEN), length);
 
     constexpr uint32_t all_bits_mask = (
-        (BLKSZ_Mask << BLKSZ_Pos) |
-        (1U << static_cast<uint32_t>(DATACTL_Bits::TRANSMOD)) |
-        (1U << static_cast<uint32_t>(DATACTL_Bits::DATADIR))
-    );
+                                           (BLKSZ_Mask << BLKSZ_Pos) |
+                                           (1U << static_cast<uint32_t>(DATACTL_Bits::TRANSMOD)) |
+                                           (1U << static_cast<uint32_t>(DATACTL_Bits::DATADIR))
+                                       );
 
     uint32_t datactl_val = read_register<uint32_t>(*this, SDIO_Regs::DATACTL) & ~all_bits_mask;
 
     datactl_val |= (
-        (static_cast<uint32_t>(size) << BLKSZ_Pos) |
-        (static_cast<uint32_t>(mode) << static_cast<uint32_t>(DATACTL_Bits::TRANSMOD)) |
-        (static_cast<uint32_t>(direction) << static_cast<uint32_t>(DATACTL_Bits::DATADIR)) |
-        ((enable ? Set : Clear) << static_cast<uint32_t>(DATACTL_Bits::DATAEN))
-    );
+                       (static_cast<uint32_t>(size) << BLKSZ_Pos) |
+                       (static_cast<uint32_t>(mode) << static_cast<uint32_t>(DATACTL_Bits::TRANSMOD)) |
+                       (static_cast<uint32_t>(direction) << static_cast<uint32_t>(DATACTL_Bits::DATADIR)) |
+                       ((enable ? Set : Clear) << static_cast<uint32_t>(DATACTL_Bits::DATAEN))
+                   );
 
     write_register(*this, SDIO_Regs::DATACTL, datactl_val);
 }
@@ -473,7 +473,7 @@ void SDIO::write_fifo_word(uint32_t data) {
 /**
  * @brief Retrieves the current data word count in the data transfer.
  *
- * This function reads the DATACNT register to determine the number of 
+ * This function reads the DATACNT register to determine the number of
  * data words remaining to be transferred in the current data operation.
  *
  * @return The number of data words left to be transferred.
@@ -528,7 +528,7 @@ void SDIO::set_read_wait_enable(bool enable) {
  *
  * This function sets the RWSTOP bit in the DATACTL register to enable or
  * disable the stop read wait function for the SDIO peripheral. When enabled,
- * the SDIO peripheral will stop the read wait operation. When disabled, 
+ * the SDIO peripheral will stop the read wait operation. When disabled,
  * the stop read wait operation will not be activated.
  *
  * @param enable Set to true to enable the stop read wait function, false to disable it.

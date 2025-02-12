@@ -12,11 +12,11 @@ ExtiManager& ExtiManager::get_instance() {
 }
 
 std::array<exti_to_irq, maxExtiLines_> ExtiManager::irq_index {{
-    {0U, EXTI0_IRQn}, {1U, EXTI1_IRQn}, {2U, EXTI2_IRQn}, {3U, EXTI3_IRQn},
-    {4U, EXTI4_IRQn}, {5U, EXTI5_9_IRQn}, {6U, EXTI5_9_IRQn}, {7U, EXTI5_9_IRQn},
-    {8U, EXTI5_9_IRQn}, {9U, EXTI5_9_IRQn}, {10U, EXTI10_15_IRQn}, {11U, EXTI10_15_IRQn},
-    {12U, EXTI10_15_IRQn}, {13U, EXTI10_15_IRQn}, {14U, EXTI10_15_IRQn}, {15U, EXTI10_15_IRQn}
-}};
+        {0U, EXTI0_IRQn}, {1U, EXTI1_IRQn}, {2U, EXTI2_IRQn}, {3U, EXTI3_IRQn},
+        {4U, EXTI4_IRQn}, {5U, EXTI5_9_IRQn}, {6U, EXTI5_9_IRQn}, {7U, EXTI5_9_IRQn},
+        {8U, EXTI5_9_IRQn}, {9U, EXTI5_9_IRQn}, {10U, EXTI10_15_IRQn}, {11U, EXTI10_15_IRQn},
+        {12U, EXTI10_15_IRQn}, {13U, EXTI10_15_IRQn}, {14U, EXTI10_15_IRQn}, {15U, EXTI10_15_IRQn}
+    }};
 
 ExtiManager::ExtiManager() :
     exti_(exti::EXTI::get_instance()),
@@ -62,8 +62,8 @@ void ExtiManager::enablePinExtiInterrupt(pin_size_t pin, EXTICallback callback, 
     // NOTE:
     //  Only input only here as only input pins can have an exti
     if (currentMode != gpio::Pin_Mode::INPUT_FLOATING &&
-        currentMode != gpio::Pin_Mode::INPUT_PULLUP &&
-        currentMode != gpio::Pin_Mode::INPUT_PULLDOWN) {
+            currentMode != gpio::Pin_Mode::INPUT_PULLUP &&
+            currentMode != gpio::Pin_Mode::INPUT_PULLDOWN) {
         instance.set_pin_mode(pinNumber, gpio::Pin_Mode::INPUT_FLOATING);
     }
 
@@ -72,21 +72,21 @@ void ExtiManager::enablePinExtiInterrupt(pin_size_t pin, EXTICallback callback, 
     gpio::Source_Port sourcePort = gpio::Source_Port::INVALID;
 
     switch (gpioPort) {
-    case gpio::GPIO_Base::GPIOA_BASE:
-        sourcePort = gpio::Source_Port::SOURCE_IS_GPIOA;
-        break;
-    case gpio::GPIO_Base::GPIOB_BASE:
-        sourcePort = gpio::Source_Port::SOURCE_IS_GPIOB;
-        break;
-    case gpio::GPIO_Base::GPIOC_BASE:
-        sourcePort = gpio::Source_Port::SOURCE_IS_GPIOC;
-        break;
-    case gpio::GPIO_Base::GPIOD_BASE:
-        sourcePort = gpio::Source_Port::SOURCE_IS_GPIOD;
-        break;
-    case gpio::GPIO_Base::INVALID:
-    default:
-        break;
+        case gpio::GPIO_Base::GPIOA_BASE:
+            sourcePort = gpio::Source_Port::SOURCE_IS_GPIOA;
+            break;
+        case gpio::GPIO_Base::GPIOB_BASE:
+            sourcePort = gpio::Source_Port::SOURCE_IS_GPIOB;
+            break;
+        case gpio::GPIO_Base::GPIOC_BASE:
+            sourcePort = gpio::Source_Port::SOURCE_IS_GPIOC;
+            break;
+        case gpio::GPIO_Base::GPIOD_BASE:
+            sourcePort = gpio::Source_Port::SOURCE_IS_GPIOD;
+            break;
+        case gpio::GPIO_Base::INVALID:
+        default:
+            break;
     }
 
     // Set the source
@@ -183,13 +183,13 @@ extern "C" {
     }
     void EXTI5_9_IRQHandler(void) {
         for (uint32_t i = static_cast<uint32_t>(gpio::Pin_Number::PIN_5);
-                   i <= static_cast<uint32_t>(gpio::Pin_Number::PIN_9); ++i) {
+                i <= static_cast<uint32_t>(gpio::Pin_Number::PIN_9); ++i) {
             ExtiManager::get_instance().handleCallback(static_cast<gpio::Pin_Number>(i));
         }
     }
     void EXTI10_15_IRQHandler(void) {
         for (uint32_t i = static_cast<uint32_t>(gpio::Pin_Number::PIN_10);
-                   i <= static_cast<uint32_t>(gpio::Pin_Number::PIN_15); ++i) {
+                i <= static_cast<uint32_t>(gpio::Pin_Number::PIN_15); ++i) {
             ExtiManager::get_instance().handleCallback(static_cast<gpio::Pin_Number>(i));
         }
     }

@@ -32,29 +32,29 @@ USART& get_instance_for_base() {
 
 Result<USART, USART_Error_Type> USART::get_instance(USART_Base Base) {
     switch (Base) {
-    case USART_Base::USART0_BASE:
-        return get_enum_instance<USART_Base, USART, USART_Error_Type>(
-                   Base, USART_Base::USART0_BASE, get_instance_for_base<USART_Base::USART0_BASE>()
-               );
-     case USART_Base::USART1_BASE:
-        return get_enum_instance<USART_Base, USART, USART_Error_Type>(
-                   Base, USART_Base::USART1_BASE, get_instance_for_base<USART_Base::USART1_BASE>()
-               );
-    case USART_Base::USART2_BASE:
-        return get_enum_instance<USART_Base, USART, USART_Error_Type>(
-                   Base, USART_Base::USART2_BASE, get_instance_for_base<USART_Base::USART2_BASE>()
-               );
-    case USART_Base::UART3_BASE:
-        return get_enum_instance<USART_Base, USART, USART_Error_Type>(
-                   Base, USART_Base::UART3_BASE, get_instance_for_base<USART_Base::UART3_BASE>()
-               );
-    case USART_Base::UART4_BASE:
-        return get_enum_instance<USART_Base, USART, USART_Error_Type>(
-                   Base, USART_Base::UART4_BASE, get_instance_for_base<USART_Base::UART4_BASE>()
-               );
-    case USART_Base::INVALID:
-    default:
-        return RETURN_RESULT(USART, USART_Error_Type::INVALID_USART);
+        case USART_Base::USART0_BASE:
+            return get_enum_instance<USART_Base, USART, USART_Error_Type>(
+                       Base, USART_Base::USART0_BASE, get_instance_for_base<USART_Base::USART0_BASE>()
+                   );
+        case USART_Base::USART1_BASE:
+            return get_enum_instance<USART_Base, USART, USART_Error_Type>(
+                       Base, USART_Base::USART1_BASE, get_instance_for_base<USART_Base::USART1_BASE>()
+                   );
+        case USART_Base::USART2_BASE:
+            return get_enum_instance<USART_Base, USART, USART_Error_Type>(
+                       Base, USART_Base::USART2_BASE, get_instance_for_base<USART_Base::USART2_BASE>()
+                   );
+        case USART_Base::UART3_BASE:
+            return get_enum_instance<USART_Base, USART, USART_Error_Type>(
+                       Base, USART_Base::UART3_BASE, get_instance_for_base<USART_Base::UART3_BASE>()
+                   );
+        case USART_Base::UART4_BASE:
+            return get_enum_instance<USART_Base, USART, USART_Error_Type>(
+                       Base, USART_Base::UART4_BASE, get_instance_for_base<USART_Base::UART4_BASE>()
+                   );
+        case USART_Base::INVALID:
+        default:
+            return RETURN_RESULT(USART, USART_Error_Type::INVALID_USART);
     }
 }
 
@@ -113,7 +113,7 @@ void USART::reset() {
  *
  * This function should be called immediately after creating a USART
  * instance, or when the configuration needs to be changed.
- * 
+ *
  * @param config The configuration structure for the USART.
  */
 void USART::init(USART_Config config) {
@@ -122,7 +122,7 @@ void USART::init(USART_Config config) {
 
     // Set USART configuration parameters
     write_bit(*this, USART_Regs::CTL0,
-               static_cast<uint32_t>(CTL0_Bits::WL), config.word_length == Word_Length::WL_9BITS);
+              static_cast<uint32_t>(CTL0_Bits::WL), config.word_length == Word_Length::WL_9BITS);
     write_bit_range(*this, USART_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::PMEN), static_cast<uint32_t>(config.parity));
     write_bit_range(*this, USART_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::STB), static_cast<uint32_t>(config.stop_bits));
     set_baudrate(config.baudrate);
@@ -137,7 +137,7 @@ void USART::init(USART_Config config) {
 
 /**
  * @brief Releases and disables the USART peripheral
- * 
+ *
  * Releases the USART peripheral by disabling the USART and resetting its
  * configuration to the default state. This function will also clear all
  * status flags and disable all interrupts. This function should be
@@ -148,33 +148,33 @@ void USART::init(USART_Config config) {
  */
 void USART::release() {
     constexpr uint32_t all_stat0_flags = ((1U << static_cast<uint32_t>(STAT0_Bits::PERR)) |
-                                      (1U << static_cast<uint32_t>(STAT0_Bits::FERR)) |
-                                      (1U << static_cast<uint32_t>(STAT0_Bits::NERR)) |
-                                      (1U << static_cast<uint32_t>(STAT0_Bits::ORERR)) |
-                                      (1U << static_cast<uint32_t>(STAT0_Bits::IDLEF)) |
-                                      (1U << static_cast<uint32_t>(STAT0_Bits::RBNE)) |
-                                      (1U << static_cast<uint32_t>(STAT0_Bits::TC)) |
-                                      (1U << static_cast<uint32_t>(STAT0_Bits::TBE)) |
-                                      (1U << static_cast<uint32_t>(STAT0_Bits::LBDF)) |
-                                      (1U << static_cast<uint32_t>(STAT0_Bits::CTSF)));
+                                          (1U << static_cast<uint32_t>(STAT0_Bits::FERR)) |
+                                          (1U << static_cast<uint32_t>(STAT0_Bits::NERR)) |
+                                          (1U << static_cast<uint32_t>(STAT0_Bits::ORERR)) |
+                                          (1U << static_cast<uint32_t>(STAT0_Bits::IDLEF)) |
+                                          (1U << static_cast<uint32_t>(STAT0_Bits::RBNE)) |
+                                          (1U << static_cast<uint32_t>(STAT0_Bits::TC)) |
+                                          (1U << static_cast<uint32_t>(STAT0_Bits::TBE)) |
+                                          (1U << static_cast<uint32_t>(STAT0_Bits::LBDF)) |
+                                          (1U << static_cast<uint32_t>(STAT0_Bits::CTSF)));
 
     constexpr uint32_t all_stat1_flags = ((1U << static_cast<uint32_t>(STAT1_Bits::RTF)) |
-                                      (1U << static_cast<uint32_t>(STAT1_Bits::EBF)) |
-                                      (1U << static_cast<uint32_t>(STAT1_Bits::BSY)));
+                                          (1U << static_cast<uint32_t>(STAT1_Bits::EBF)) |
+                                          (1U << static_cast<uint32_t>(STAT1_Bits::BSY)));
 
     constexpr uint32_t all_ctl0_intr = ((1U << static_cast<uint32_t>(CTL0_Bits::PERRIE)) |
-                                    (1U << static_cast<uint32_t>(CTL0_Bits::TBEIE)) |
-                                    (1U << static_cast<uint32_t>(CTL0_Bits::TCIE)) |
-                                    (1U << static_cast<uint32_t>(CTL0_Bits::RBNEIE)) |
-                                    (1U << static_cast<uint32_t>(CTL0_Bits::IDLEIE)));
+                                        (1U << static_cast<uint32_t>(CTL0_Bits::TBEIE)) |
+                                        (1U << static_cast<uint32_t>(CTL0_Bits::TCIE)) |
+                                        (1U << static_cast<uint32_t>(CTL0_Bits::RBNEIE)) |
+                                        (1U << static_cast<uint32_t>(CTL0_Bits::IDLEIE)));
 
     constexpr uint32_t all_ctl3_intr = ((1U << static_cast<uint32_t>(CTL3_Bits::EBIE)) |
-                                    (1U << static_cast<uint32_t>(CTL3_Bits::RTIE)));
+                                        (1U << static_cast<uint32_t>(CTL3_Bits::RTIE)));
 
     // Clear flags
     write_bits(*this, USART_Regs::STAT0, all_stat0_flags, false);
     write_bits(*this, USART_Regs::STAT1, all_stat1_flags, false);
-    
+
     // Disable interrupts
     write_bits(*this, USART_Regs::CTL0, all_ctl0_intr, false);
     write_bit(*this, USART_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::LBDIE), false);
@@ -232,8 +232,8 @@ void USART::set_baudrate(uint32_t baudrate) {
  */
 void USART::set_parity(Parity_Mode parity) {
     write_bit_ranges(*this, USART_Regs::CTL0,
-               static_cast<uint32_t>(CTL0_Bits::PMEN), Clear,
-               static_cast<uint32_t>(CTL0_Bits::PMEN), static_cast<uint32_t>(parity));
+                     static_cast<uint32_t>(CTL0_Bits::PMEN), Clear,
+                     static_cast<uint32_t>(CTL0_Bits::PMEN), static_cast<uint32_t>(parity));
 }
 
 /**
@@ -246,8 +246,8 @@ void USART::set_parity(Parity_Mode parity) {
  */
 void USART::set_word_length(Word_Length word_length) {
     write_bits_sequence(*this, USART_Regs::CTL0,
-               static_cast<uint32_t>(CTL0_Bits::WL), false,
-               static_cast<uint32_t>(CTL0_Bits::WL), word_length == Word_Length::WL_9BITS);
+                        static_cast<uint32_t>(CTL0_Bits::WL), false,
+                        static_cast<uint32_t>(CTL0_Bits::WL), word_length == Word_Length::WL_9BITS);
 }
 
 /**
@@ -261,8 +261,8 @@ void USART::set_word_length(Word_Length word_length) {
  */
 void USART::set_stop_bits(Stop_Bits stop_bits) {
     write_bit_ranges(*this, USART_Regs::CTL1,
-               static_cast<uint32_t>(CTL1_Bits::STB), Clear,
-               static_cast<uint32_t>(CTL1_Bits::STB), static_cast<uint32_t>(stop_bits));
+                     static_cast<uint32_t>(CTL1_Bits::STB), Clear,
+                     static_cast<uint32_t>(CTL1_Bits::STB), static_cast<uint32_t>(stop_bits));
 }
 
 /**
@@ -312,31 +312,31 @@ void USART::disable() {
  */
 void USART::set_direction(Direction_Mode direction) {
     switch (direction) {
-    case Direction_Mode::RX_MODE:
-        write_bits_sequence(*this, USART_Regs::CTL0,
-                   static_cast<uint32_t>(CTL0_Bits::REN), false,
-                   static_cast<uint32_t>(CTL0_Bits::TEN), false,
-                   static_cast<uint32_t>(CTL0_Bits::REN), true);
-        break;
-    case Direction_Mode::TX_MODE:
-        write_bits_sequence(*this, USART_Regs::CTL0,
-                   static_cast<uint32_t>(CTL0_Bits::REN), false,
-                   static_cast<uint32_t>(CTL0_Bits::TEN), false,
-                   static_cast<uint32_t>(CTL0_Bits::TEN), true);
-        break;
-    case Direction_Mode::RXTX_MODE:
-        write_bits_sequence(*this, USART_Regs::CTL0,
-                   static_cast<uint32_t>(CTL0_Bits::REN), false,
-                   static_cast<uint32_t>(CTL0_Bits::TEN), false,
-                   static_cast<uint32_t>(CTL0_Bits::REN), true,
-                   static_cast<uint32_t>(CTL0_Bits::TEN), true);
-        break;
-    case Direction_Mode::RXTX_OFF:
-    default:
-        write_bits_sequence(*this, USART_Regs::CTL0,
-                   static_cast<uint32_t>(CTL0_Bits::REN), false,
-                   static_cast<uint32_t>(CTL0_Bits::TEN), false);
-        break;
+        case Direction_Mode::RX_MODE:
+            write_bits_sequence(*this, USART_Regs::CTL0,
+                                static_cast<uint32_t>(CTL0_Bits::REN), false,
+                                static_cast<uint32_t>(CTL0_Bits::TEN), false,
+                                static_cast<uint32_t>(CTL0_Bits::REN), true);
+            break;
+        case Direction_Mode::TX_MODE:
+            write_bits_sequence(*this, USART_Regs::CTL0,
+                                static_cast<uint32_t>(CTL0_Bits::REN), false,
+                                static_cast<uint32_t>(CTL0_Bits::TEN), false,
+                                static_cast<uint32_t>(CTL0_Bits::TEN), true);
+            break;
+        case Direction_Mode::RXTX_MODE:
+            write_bits_sequence(*this, USART_Regs::CTL0,
+                                static_cast<uint32_t>(CTL0_Bits::REN), false,
+                                static_cast<uint32_t>(CTL0_Bits::TEN), false,
+                                static_cast<uint32_t>(CTL0_Bits::REN), true,
+                                static_cast<uint32_t>(CTL0_Bits::TEN), true);
+            break;
+        case Direction_Mode::RXTX_OFF:
+        default:
+            write_bits_sequence(*this, USART_Regs::CTL0,
+                                static_cast<uint32_t>(CTL0_Bits::REN), false,
+                                static_cast<uint32_t>(CTL0_Bits::TEN), false);
+            break;
     }
 }
 
@@ -350,8 +350,8 @@ void USART::set_direction(Direction_Mode direction) {
  */
 void USART::set_msb(MSBF_Mode msbf) {
     write_bits_sequence(*this, USART_Regs::CTL3,
-               static_cast<uint32_t>(CTL3_Bits::MSBF), false,
-               static_cast<uint32_t>(CTL3_Bits::MSBF), msbf == MSBF_Mode::MSBF_MSB);
+                        static_cast<uint32_t>(CTL3_Bits::MSBF), false,
+                        static_cast<uint32_t>(CTL3_Bits::MSBF), msbf == MSBF_Mode::MSBF_MSB);
 }
 
 /**
@@ -367,17 +367,17 @@ void USART::set_msb(MSBF_Mode msbf) {
  */
 void USART::set_inversion_method_enable(Inversion_Method method, bool enable) {
     switch (method) {
-    case Inversion_Method::DATA:
-        write_bit(*this, USART_Regs::CTL3, static_cast<uint32_t>(CTL3_Bits::DINV), enable);
-        break;
-    case Inversion_Method::TRANSMISSION:
-        write_bit(*this, USART_Regs::CTL3, static_cast<uint32_t>(CTL3_Bits::TINV), enable);
-        break;
-    case Inversion_Method::RECEPTION:
-        write_bit(*this, USART_Regs::CTL3, static_cast<uint32_t>(CTL3_Bits::RINV), enable);
-        break;
-    default:
-        break;
+        case Inversion_Method::DATA:
+            write_bit(*this, USART_Regs::CTL3, static_cast<uint32_t>(CTL3_Bits::DINV), enable);
+            break;
+        case Inversion_Method::TRANSMISSION:
+            write_bit(*this, USART_Regs::CTL3, static_cast<uint32_t>(CTL3_Bits::TINV), enable);
+            break;
+        case Inversion_Method::RECEPTION:
+            write_bit(*this, USART_Regs::CTL3, static_cast<uint32_t>(CTL3_Bits::RINV), enable);
+            break;
+        default:
+            break;
     }
 }
 
@@ -408,8 +408,8 @@ void USART::set_rx_timeout_enable(bool enable) {
  */
 void USART::set_rx_timeout_threshold(uint32_t timeout) {
     write_bit_ranges(*this, USART_Regs::RT,
-               static_cast<uint32_t>(RT_Bits::RT), Clear,
-               static_cast<uint32_t>(RT_Bits::RT), timeout);
+                     static_cast<uint32_t>(RT_Bits::RT), Clear,
+                     static_cast<uint32_t>(RT_Bits::RT), timeout);
 }
 
 /**
@@ -471,8 +471,8 @@ uint8_t USART::receive_data8() {
  */
 void USART::set_wakeup_address(uint8_t address) {
     write_bit_ranges(*this, USART_Regs::CTL1,
-               static_cast<uint32_t>(CTL1_Bits::ADDR), Clear,
-               static_cast<uint32_t>(CTL1_Bits::ADDR), static_cast<uint32_t>(address));
+                     static_cast<uint32_t>(CTL1_Bits::ADDR), Clear,
+                     static_cast<uint32_t>(CTL1_Bits::ADDR), static_cast<uint32_t>(address));
 }
 
 /**
@@ -502,8 +502,8 @@ void USART::mute_mode_enable(bool enable) {
  */
 void USART::set_mute_mode_wakeup(Wakeup_Mode wakeup_mode) {
     write_bits_sequence(*this, USART_Regs::CTL0,
-               static_cast<uint32_t>(CTL0_Bits::WM), false,
-               static_cast<uint32_t>(CTL0_Bits::WM), wakeup_mode == Wakeup_Mode::WM_ADDR);
+                        static_cast<uint32_t>(CTL0_Bits::WM), false,
+                        static_cast<uint32_t>(CTL0_Bits::WM), wakeup_mode == Wakeup_Mode::WM_ADDR);
 }
 
 /**
@@ -546,9 +546,9 @@ void USART::set_synchronous_clock_enable(bool enable) {
  */
 void USART::synchronous_clock_configure(Pulse_Length length, Clock_Phase phase, Clock_Polarity polarity) {
     write_bits_sequence(*this, USART_Regs::CTL1,
-               static_cast<uint32_t>(CTL1_Bits::CPH), phase == Clock_Phase::SECOND_CLOCK,
-               static_cast<uint32_t>(CTL1_Bits::CPL), polarity == Clock_Polarity::POLARITY_HIGH,
-               static_cast<uint32_t>(CTL1_Bits::CLEN), length == Pulse_Length::EXT_PULSE_ENABLE);
+                        static_cast<uint32_t>(CTL1_Bits::CPH), phase == Clock_Phase::SECOND_CLOCK,
+                        static_cast<uint32_t>(CTL1_Bits::CPL), polarity == Clock_Polarity::POLARITY_HIGH,
+                        static_cast<uint32_t>(CTL1_Bits::CLEN), length == Pulse_Length::EXT_PULSE_ENABLE);
 }
 
 /**
@@ -869,7 +869,7 @@ void USART::set_interrupt_priority(uint8_t prepriority, uint8_t subpriority) {
  */
 void USART::set_interrupt_enable(Interrupt_Type type, bool enable) {
     if (type == Interrupt_Type::INTR_COUNT ||
-        static_cast<size_t>(type) >= static_cast<size_t>(Interrupt_Type::INTR_COUNT)) {
+            static_cast<size_t>(type) >= static_cast<size_t>(Interrupt_Type::INTR_COUNT)) {
         return;
     }
     const auto& config = interrupt_config[static_cast<size_t>(type)];
@@ -880,7 +880,7 @@ void USART::set_interrupt_enable(Interrupt_Type type, bool enable) {
 /**
  * @brief Registers an interrupt callback for the specified interrupt type in
  *        the USART peripheral.
- * 
+ *
  * Registers an interrupt callback for the specified interrupt type in the USART
  * peripheral. The interrupt callback is called when the specified interrupt
  * occurs. The callback is called with the USART instance as its only parameter.
@@ -891,8 +891,8 @@ void USART::set_interrupt_enable(Interrupt_Type type, bool enable) {
  *                 parameter of type USART&.
  */
 void USART::register_interrupt_callback(Interrupt_Type type, IRQCallback callback) {
-    if (type == Interrupt_Type::INTR_COUNT || 
-        static_cast<size_t>(type) >= static_cast<size_t>(Interrupt_Type::INTR_COUNT)) {
+    if (type == Interrupt_Type::INTR_COUNT ||
+            static_cast<size_t>(type) >= static_cast<size_t>(Interrupt_Type::INTR_COUNT)) {
         return;
     }
     interrupt_callbacks_[static_cast<size_t>(type)] = callback;
@@ -988,8 +988,10 @@ void USART::handle_rx_interrupt() {
     rx_buffer_.write(data);
     config_.last_data = data;
 
+    // Set the state to IDLE
     config_.state = USART_State::IDLE;
 
+    // Call the registered callback if available
     const auto rx_callback = interrupt_callbacks_[static_cast<size_t>(Interrupt_Type::INTR_RBNEIE)];
     if (rx_callback) {
         rx_callback();
@@ -1012,10 +1014,10 @@ void USART::handle_tx_interrupt() {
     if (tx_buffer_.read(data)) {
         send_data(data);
         config_.state = USART_State::IDLE;
-    	const auto tx_callback = interrupt_callbacks_[static_cast<size_t>(Interrupt_Type::INTR_TBEIE)];
-    	if (tx_callback) {
+        const auto tx_callback = interrupt_callbacks_[static_cast<size_t>(Interrupt_Type::INTR_TBEIE)];
+        if (tx_callback) {
             tx_callback();
-    	}
+        }
         set_interrupt_enable(Interrupt_Type::INTR_TBEIE, true);
     } else {
         config_.state = USART_State::IDLE;
@@ -1100,7 +1102,7 @@ void USART::prepare_receive_interrupts() {
  */
 bool USART::usart_receive_interrupt(uint8_t& data) {
     while (config_.state == USART_State::BUSY_COMPLETION ||
-           config_.state == USART_State::BUSY_TRANSMIT) {
+            config_.state == USART_State::BUSY_TRANSMIT) {
     }
     set_interrupt_enable(Interrupt_Type::INTR_ERRIE, true);
     set_interrupt_enable(Interrupt_Type::INTR_RBNEIE, true);
@@ -1123,7 +1125,7 @@ bool USART::usart_transmit_interrupt(uint8_t data) {
     // write to the txbuffer if there is space, otherwise
     // just wait for state transition.
     while (config_.state == USART_State::BUSY_COMPLETION ||
-           config_.state == USART_State::BUSY_RECEIVE) {
+            config_.state == USART_State::BUSY_RECEIVE) {
         if (!tx_buffer_.isFull()) {
             tx_buffer_.write(data);
         }

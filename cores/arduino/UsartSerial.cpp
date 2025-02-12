@@ -67,8 +67,8 @@ UsartSerial& UsartSerial::get_instance(usart::USART_Base Base, pin_size_t rxPin,
 std::array<bool, static_cast<size_t>(usart::USART_Base::INVALID)> UsartSerial::dataTransmitted_ = {false};
 
 std::array<usart_to_irq, maxNumUsart_> UsartSerial::usart_irq {{
-    {0U, USART0_IRQn}, {1U, USART1_IRQn}, {2U, USART2_IRQn}, {3U, UART3_IRQn}, {4U, UART4_IRQn}
-}};
+        {0U, USART0_IRQn}, {1U, USART1_IRQn}, {2U, USART2_IRQn}, {3U, UART3_IRQn}, {4U, UART4_IRQn}
+    }};
 
 UsartSerial::UsartSerial(usart::USART_Base Base, pin_size_t rxPin, pin_size_t txPin) :
     base_(Base),
@@ -191,7 +191,7 @@ int UsartSerial::peek() {
             return -1;
         }
         while (usart_.get_config().state != usart::USART_State::IDLE) {
-        // Wait for the USART to become idle
+            // Wait for the USART to become idle
         }
     }
     updateRxDmaBuffer();
@@ -273,7 +273,7 @@ size_t UsartSerial::write(uint8_t byte) {
  * Waits until the USART is idle and updates the DMA RX buffer head by subtracting
  * the current transfer count from the total RX buffer size. This is used to
  * synchronize the DMA transfer count with the actual RX buffer size.
- * 
+ *
  * NOTE:
  *  This function does only adjustes to buffer in DMA mode and
  *  is skipped in IRQ context.
@@ -319,8 +319,8 @@ void UsartSerial::configurePins() {
     // RX pin
     auto rxPinOps = getPinOpsByPeripheral(UART_RX_PinOps, base_);
 #ifdef SERIAL_PIN_RX
-        // RX pin override defined in Variant.h
-        rxPinOps = getPinOpsByPin(UART_RX_PinOps, SERIAL_PIN_RX);
+    // RX pin override defined in Variant.h
+    rxPinOps = getPinOpsByPin(UART_RX_PinOps, SERIAL_PIN_RX);
 #endif
     if (customRxPin_ != NO_PIN) {
         rxPinOps = getPinOpsByPin(UART_RX_PinOps, customRxPin_);
@@ -368,9 +368,9 @@ void UsartSerial::configurePins() {
 /**
  * @brief Validates and configures the DMA settings for the USART.
  *
- * Checks the current DMA mode set in the configuration, and if DMA is enabled 
- * for RX, it calls the function to enable DMA reception. Logs a debug message 
- * if unsupported DMA modes are detected. If DMA is not enabled, the function 
+ * Checks the current DMA mode set in the configuration, and if DMA is enabled
+ * for RX, it calls the function to enable DMA reception. Logs a debug message
+ * if unsupported DMA modes are detected. If DMA is not enabled, the function
  * exits without making changes.
  */
 void UsartSerial::checkDmaConfig() {
@@ -379,7 +379,7 @@ void UsartSerial::checkDmaConfig() {
     }
 
     if (usart_.get_config().dma_ops == usart::USART_DMA_Config::DMA_TX ||
-        usart_.get_config().dma_ops == usart::USART_DMA_Config::DMA_DUAL) {
+            usart_.get_config().dma_ops == usart::USART_DMA_Config::DMA_DUAL) {
         core_debug("DMA_TX and DMA_DUAL modes are not supported");
         return;
     }

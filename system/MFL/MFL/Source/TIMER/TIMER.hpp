@@ -62,7 +62,7 @@ public:
     // Set and get the auto reload value
     void set_auto_reload(uint16_t auto_reload);
     uint16_t get_auto_reload();
-    
+
     void set_pulse_mode(Pulse_Mode pulse);
     // DMA
     void dma_enable(DMA_Select dma);
@@ -159,7 +159,7 @@ private:
     }
     inline bool is_general_purpose_timer() const {
         return (base_ == TIMER_Base::TIMER1_BASE || base_ == TIMER_Base::TIMER2_BASE
-              || base_ == TIMER_Base::TIMER3_BASE || base_ == TIMER_Base::TIMER4_BASE);
+                || base_ == TIMER_Base::TIMER3_BASE || base_ == TIMER_Base::TIMER4_BASE);
     }
     inline bool is_basic_timer() const {
         return (base_ == TIMER_Base::TIMER5_BASE || base_ == TIMER_Base::TIMER6_BASE);

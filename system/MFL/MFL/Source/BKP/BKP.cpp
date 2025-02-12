@@ -67,8 +67,8 @@ void BKP::set_data(Backup_Data data_offset, uint16_t data) {
 
     // Use conditional operator to avoid branching
     reg_offset = (offset <= static_cast<uint32_t>(Backup_Data::DATA_9))
-        ? (0x04U + (offset - 1U) * 0x04U)
-        : (0x40U + (offset - 10U) * 0x04U);
+                 ? (0x04U + (offset - 1U) * 0x04U)
+                 : (0x40U + (offset - 10U) * 0x04U);
 
     // Early bounds check using single comparison
     if (offset <= static_cast<uint32_t>(Backup_Data::DATA_41)) {
@@ -92,17 +92,17 @@ void BKP::set_data(Backup_Data data_offset, uint16_t data) {
 uint16_t BKP::get_data(Backup_Data data_offset) {
     uint32_t offset = static_cast<uint32_t>(data_offset);
     uint32_t reg_offset;
-    
+
     // Use conditional operator for efficient register offset calculation
     reg_offset = (offset <= static_cast<uint32_t>(Backup_Data::DATA_9))
-        ? (0x04U + (offset - 1U) * 0x04U)
-        : (0x40U + (offset - 10U) * 0x04U);
-        
+                 ? (0x04U + (offset - 1U) * 0x04U)
+                 : (0x40U + (offset - 10U) * 0x04U);
+
     // Single bounds check for valid range
     if (offset <= static_cast<uint32_t>(Backup_Data::DATA_41)) {
         return *reinterpret_cast<volatile uint16_t*>(BKP_baseAddress + reg_offset);
     }
-    
+
     return 0U;
 }
 
@@ -150,7 +150,7 @@ void BKP::set_rtc_output_signal_enable(bool enable) {
  */
 void BKP::set_rtc_output_pulse(Output_Pulse pulse) {
     write_bit(*this, BKP_Regs::OCTL, static_cast<uint32_t>(OCTL_Bits::ROSEL),
-           (pulse == Output_Pulse::SECOND_PULSE) ? true : false);
+              (pulse == Output_Pulse::SECOND_PULSE) ? true : false);
 }
 
 /**
@@ -166,7 +166,7 @@ void BKP::set_rtc_output_pulse(Output_Pulse pulse) {
  */
 void BKP::set_rtc_clock_divider(Clock_Divider divider) {
     write_bit(*this, BKP_Regs::OCTL, static_cast<uint32_t>(OCTL_Bits::CCOSEL),
-           (divider == Clock_Divider::DIV_1) ? true : false);
+              (divider == Clock_Divider::DIV_1) ? true : false);
 }
 
 /**
@@ -181,7 +181,7 @@ void BKP::set_rtc_clock_divider(Clock_Divider divider) {
  */
 void BKP::set_rtc_clock_calibration_type(Calibration_Type type) {
     write_bit(*this, BKP_Regs::OCTL, static_cast<uint32_t>(OCTL_Bits::CALDIR),
-           (type == Calibration_Type::SPEED_UP) ? true : false);
+              (type == Calibration_Type::SPEED_UP) ? true : false);
 }
 
 /**
@@ -230,7 +230,7 @@ void BKP::set_tamper_detection_enable(bool enable) {
  */
 void BKP::set_tamper_level(Tamper_Level level) {
     write_bit(*this, BKP_Regs::TPCTL, static_cast<uint32_t>(TPCTL_Bits::TPAL),
-           level == Tamper_Level::ACTIVE_LOW ? true : false);
+              level == Tamper_Level::ACTIVE_LOW ? true : false);
 }
 
 /**

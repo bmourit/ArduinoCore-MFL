@@ -30,21 +30,21 @@ SPI& get_instance_for_base() {
 
 Result<SPI, SPI_Error_Type> SPI::get_instance(SPI_Base Base) {
     switch (Base) {
-    case SPI_Base::SPI0_BASE:
-        return get_enum_instance<SPI_Base, SPI, SPI_Error_Type>(
-                   Base, SPI_Base::SPI0_BASE, get_instance_for_base<SPI_Base::SPI0_BASE>()
-               );
-    case SPI_Base::SPI1_BASE:
-        return get_enum_instance<SPI_Base, SPI, SPI_Error_Type>(
-                   Base, SPI_Base::SPI1_BASE, get_instance_for_base<SPI_Base::SPI1_BASE>()
-               );
-    case SPI_Base::SPI2_BASE:
-        return get_enum_instance<SPI_Base, SPI, SPI_Error_Type>(
-                   Base, SPI_Base::SPI2_BASE, get_instance_for_base<SPI_Base::SPI2_BASE>()
-               );
-    case SPI_Base::INVALID:
-    default:
-        return RETURN_RESULT(SPI, SPI_Error_Type::INVALID_SPI);
+        case SPI_Base::SPI0_BASE:
+            return get_enum_instance<SPI_Base, SPI, SPI_Error_Type>(
+                       Base, SPI_Base::SPI0_BASE, get_instance_for_base<SPI_Base::SPI0_BASE>()
+                   );
+        case SPI_Base::SPI1_BASE:
+            return get_enum_instance<SPI_Base, SPI, SPI_Error_Type>(
+                       Base, SPI_Base::SPI1_BASE, get_instance_for_base<SPI_Base::SPI1_BASE>()
+                   );
+        case SPI_Base::SPI2_BASE:
+            return get_enum_instance<SPI_Base, SPI, SPI_Error_Type>(
+                       Base, SPI_Base::SPI2_BASE, get_instance_for_base<SPI_Base::SPI2_BASE>()
+                   );
+        case SPI_Base::INVALID:
+        default:
+            return RETURN_RESULT(SPI, SPI_Error_Type::INVALID_SPI);
     }
 }
 
@@ -86,25 +86,15 @@ void SPI::reset() {
  */
 void SPI::init(SPI_Config config) {
     // Frame format
-    if (config.frame_format == Frame_Format::FF_16BIT) {
-        write_bit(*this, SPI_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::FF16), true);
-    }
+    write_bit(*this, SPI_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::FF16), (config.frame_format == Frame_Format::FF_16BIT));
     // Polarity
-    if (config.polarity_pull == Clock_Polarity::PULL_HIGH) {
-        write_bit(*this, SPI_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::CKPL), true);
-    }
+    write_bit(*this, SPI_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::CKPL), (config.polarity_pull == Clock_Polarity::PULL_HIGH));
     // Clock phase
-    if (config.clock_phase == Clock_Phase::PHASE_SECOND_EDGE) {
-        write_bit(*this, SPI_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::CKPH), true);
-    }
+    write_bit(*this, SPI_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::CKPH), (config.clock_phase == Clock_Phase::PHASE_SECOND_EDGE));
     // MSBF
-    if (config.msbf == Endian_Type::LSBF) {
-        write_bit(*this, SPI_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::LF), true);
-    }
+    write_bit(*this, SPI_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::LF), (config.msbf == Endian_Type::LSBF));
     // NSS
-    if (config.nss_type == NSS_Type::SOFTWARE_NSS) {
-        write_bit(*this, SPI_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::SWNSSEN), true);
-    }
+    write_bit(*this, SPI_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::SWNSSEN), (config.nss_type == NSS_Type::SOFTWARE_NSS));
     // TODO:
     // 	Check this needed for initialization.
     // 	Datasheet says it isn't, but equivalent
@@ -114,41 +104,41 @@ void SPI::init(SPI_Config config) {
     // Set SPI operational mode
     // Operational_Mode in config file
     switch (config.operational_mode) {
-    case Operational_Mode::MFD_MODE:
-    case Operational_Mode::MTU_MODE:
-        write_bit(*this, SPI_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::MSTMOD), true);
-        break;
-    case Operational_Mode::MRU_MODE:
-        write_bits_sequence(*this, SPI_Regs::CTL0,
-                   static_cast<uint32_t>(CTL0_Bits::MSTMOD), true,
-                   static_cast<uint32_t>(CTL0_Bits::RO), true);
-        break;
-    case Operational_Mode::MTB_MODE:
-        write_bits_sequence(*this, SPI_Regs::CTL0,
-                   static_cast<uint32_t>(CTL0_Bits::MSTMOD), true,
-                   static_cast<uint32_t>(CTL0_Bits::BDEN), true,
-                   static_cast<uint32_t>(CTL0_Bits::BDOEN), true);
-        break;
-    case Operational_Mode::MRB_MODE:
-        write_bits_sequence(*this, SPI_Regs::CTL0,
-                   static_cast<uint32_t>(CTL0_Bits::MSTMOD), true,
-                   static_cast<uint32_t>(CTL0_Bits::BDEN), true);
-        break;
-    case Operational_Mode::SRU_MODE:
-        write_bit(*this, SPI_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::RO), true);
-        break;
-    case Operational_Mode::STB_MODE:
-        write_bits_sequence(*this, SPI_Regs::CTL0,
-                   static_cast<uint32_t>(CTL0_Bits::BDEN), true,
-                   static_cast<uint32_t>(CTL0_Bits::BDOEN), true);
-        break;
-    case Operational_Mode::SRB_MODE:
-        write_bit(*this, SPI_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::BDEN), true);
-        break;
-    case Operational_Mode::SFD_MODE:
-    case Operational_Mode::STU_MODE:
-    default:
-        break;
+        case Operational_Mode::MFD_MODE:
+        case Operational_Mode::MTU_MODE:
+            write_bit(*this, SPI_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::MSTMOD), true);
+            break;
+        case Operational_Mode::MRU_MODE:
+            write_bits_sequence(*this, SPI_Regs::CTL0,
+                                static_cast<uint32_t>(CTL0_Bits::MSTMOD), true,
+                                static_cast<uint32_t>(CTL0_Bits::RO), true);
+            break;
+        case Operational_Mode::MTB_MODE:
+            write_bits_sequence(*this, SPI_Regs::CTL0,
+                                static_cast<uint32_t>(CTL0_Bits::MSTMOD), true,
+                                static_cast<uint32_t>(CTL0_Bits::BDEN), true,
+                                static_cast<uint32_t>(CTL0_Bits::BDOEN), true);
+            break;
+        case Operational_Mode::MRB_MODE:
+            write_bits_sequence(*this, SPI_Regs::CTL0,
+                                static_cast<uint32_t>(CTL0_Bits::MSTMOD), true,
+                                static_cast<uint32_t>(CTL0_Bits::BDEN), true);
+            break;
+        case Operational_Mode::SRU_MODE:
+            write_bit(*this, SPI_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::RO), true);
+            break;
+        case Operational_Mode::STB_MODE:
+            write_bits_sequence(*this, SPI_Regs::CTL0,
+                                static_cast<uint32_t>(CTL0_Bits::BDEN), true,
+                                static_cast<uint32_t>(CTL0_Bits::BDOEN), true);
+            break;
+        case Operational_Mode::SRB_MODE:
+            write_bit(*this, SPI_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::BDEN), true);
+            break;
+        case Operational_Mode::SFD_MODE:
+        case Operational_Mode::STU_MODE:
+        default:
+            break;
     }
 
     // Store the config
@@ -219,11 +209,7 @@ void SPI::nss_internal_low() {
  * @param enabled Set to true to enable DMA, false to disable it.
  */
 void SPI::set_dma_enable(DMA_Direction dma, bool enabled) {
-    if (dma == DMA_Direction::DMA_TX) {
-        write_bit(*this, SPI_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::DMATEN), enabled);
-    } else {
-        write_bit(*this, SPI_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::DMAREN), enabled);
-    }
+    write_bit(*this, SPI_Regs::CTL1, static_cast<uint32_t>(dma), enabled);
 }
 
 /**
@@ -280,17 +266,10 @@ uint16_t SPI::data_receive() {
  *                            Direction_Mode::BIDIRECTIONAL_RECEIVE.
  */
 void SPI::bidirectional_transfer_config(Direction_Mode transfer_direction) {
-    if (transfer_direction == Direction_Mode::BIDIRECTIONAL_TRANSMIT) {
-        // Set bidirectional tx mode
-        write_bits_sequence(*this, SPI_Regs::CTL0,
-                   static_cast<uint32_t>(CTL0_Bits::BDOEN), true,
-                   static_cast<uint32_t>(CTL0_Bits::BDEN), true);
-    } else {
-        // Set bidirectional rx mode
-        write_bits_sequence(*this, SPI_Regs::CTL0,
-                   static_cast<uint32_t>(CTL0_Bits::BDOEN), false,
-                   static_cast<uint32_t>(CTL0_Bits::BDEN), true);
-    }
+    // Set bidirectional tx or rx mode
+    write_bits_sequence(*this, SPI_Regs::CTL0,
+                        static_cast<uint32_t>(CTL0_Bits::BDOEN), (transfer_direction == Direction_Mode::BIDIRECTIONAL_TRANSMIT),
+                        static_cast<uint32_t>(CTL0_Bits::BDEN), true);
 }
 
 /**
@@ -334,7 +313,7 @@ void SPI::set_crc_enable(bool enabled) {
 }
 
 /**
- * @brief Sets the CRCNT bit in the CTL0 register to true, which clears the 
+ * @brief Sets the CRCNT bit in the CTL0 register to true, which clears the
  *        current CRC calculation result and enables the next CRC calculation.
  */
 void SPI::set_crc_next() {
@@ -354,11 +333,8 @@ void SPI::set_crc_next() {
  * @return The 16-bit CRC value corresponding to the specified direction.
  */
 uint16_t SPI::get_crc(CRC_Direction crc) {
-    if (crc == CRC_Direction::CRC_TX) {
-        return static_cast<uint16_t>(read_register<uint32_t>(*this, SPI_Regs::TCRC));
-    } else {
-        return static_cast<uint16_t>(read_register<uint32_t>(*this, SPI_Regs::RCRC));
-    }
+    const SPI_Regs crc_reg = (crc == CRC_Direction::CRC_TX) ? SPI_Regs::TCRC : SPI_Regs::RCRC;
+    return static_cast<uint16_t>(read_register<uint32_t>(*this, crc_reg));
 }
 
 /**

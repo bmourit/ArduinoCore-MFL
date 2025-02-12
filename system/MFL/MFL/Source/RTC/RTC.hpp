@@ -56,6 +56,9 @@ public:
 private:
     RTC();
 
+    // Reference of the BPK instance
+    bkp::BKP& bkp_;
+
     // Prevent copying or assigning
     RTC(const RTC&) = delete;
     RTC& operator=(const RTC&) = delete;

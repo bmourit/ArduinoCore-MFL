@@ -59,7 +59,7 @@ void CRC::reset_data() {
 
 /**
  * @brief Retrieves the current CRC data register value.
- * 
+ *
  * @return The current value of the CRC data register.
  */
 uint32_t CRC::get_data() {

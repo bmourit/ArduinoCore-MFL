@@ -40,10 +40,10 @@ EXMC::EXMC() : nor_sram_config_(nor_sram_default_config),
 
 /**
  * @brief Reset the NOR/SRAM block given by `block`.
- * 
+ *
  * This function will reset the SNCTL, SNTCFG and SNWTCFG registers for the given block
  * to their default values. No other registers are affected.
- * 
+ *
  * @param block The block number to reset.
  */
 void EXMC::nor_sram_reset(Block_Number block) {
@@ -58,55 +58,55 @@ void EXMC::nor_sram_reset(Block_Number block) {
 
 /**
  * @brief Initialize the NOR/SRAM block configuration registers.
- * 
+ *
  * This function sets up the NOR/SRAM block by configuring the SNCTL and SNTCFG
  * registers based on the settings provided in the `nor_sram_config_` structure.
  * It handles both basic and extended mode configurations, setting the necessary
  * bit fields and ranges for asynchronous and synchronous operations.
- * 
+ *
  * The function writes the timing parameters, control settings, and mode configurations
  * to the respective registers, enabling features like address multiplexing, burst mode,
  * write enable, and asynchronous wait, according to the configuration.
- * 
+ *
  * In extended mode, it additionally configures the SNWTCFG register with the write timing
  * parameters. If not in extended mode, the function will reset the register to default.
  */
 void EXMC::nor_sram_init() {
     EXMC_Regs reg_offset = get_snctl_offset(nor_sram_config_.block);
-    
+
     write_bits_sequence(*this, reg_offset,
-               static_cast<uint32_t>(SNCTLX_Bits::NRMUX), nor_sram_config_.address_mux,
-               static_cast<uint32_t>(SNCTLX_Bits::NREN), false,
-               static_cast<uint32_t>(SNCTLX_Bits::SBRSTEN), nor_sram_config_.burst,
-               static_cast<uint32_t>(SNCTLX_Bits::NRWTPOL), (nor_sram_config_.polarity == Signal_Polarity::HIGH),
-               static_cast<uint32_t>(SNCTLX_Bits::WRAPEN), nor_sram_config_.wrap,
-               static_cast<uint32_t>(SNCTLX_Bits::NRWTCFG), (nor_sram_config_.nwait_active == NWAIT_Active::DURING),
-               static_cast<uint32_t>(SNCTLX_Bits::WREN), nor_sram_config_.memory_write,
-               static_cast<uint32_t>(SNCTLX_Bits::NRWTEN), nor_sram_config_.nwait_signal,
-               static_cast<uint32_t>(SNCTLX_Bits::EXMODEN), nor_sram_config_.extended_mode,
-               static_cast<uint32_t>(SNCTLX_Bits::ASYNCWAIT), nor_sram_config_.async_wait,
-               static_cast<uint32_t>(SNCTLX_Bits::SYNCWR), (nor_sram_config_.mode == Write_Mode::SYNC));
+                        static_cast<uint32_t>(SNCTLX_Bits::NRMUX), nor_sram_config_.address_mux,
+                        static_cast<uint32_t>(SNCTLX_Bits::NREN), false,
+                        static_cast<uint32_t>(SNCTLX_Bits::SBRSTEN), nor_sram_config_.burst,
+                        static_cast<uint32_t>(SNCTLX_Bits::NRWTPOL), (nor_sram_config_.polarity == Signal_Polarity::HIGH),
+                        static_cast<uint32_t>(SNCTLX_Bits::WRAPEN), nor_sram_config_.wrap,
+                        static_cast<uint32_t>(SNCTLX_Bits::NRWTCFG), (nor_sram_config_.nwait_active == NWAIT_Active::DURING),
+                        static_cast<uint32_t>(SNCTLX_Bits::WREN), nor_sram_config_.memory_write,
+                        static_cast<uint32_t>(SNCTLX_Bits::NRWTEN), nor_sram_config_.nwait_signal,
+                        static_cast<uint32_t>(SNCTLX_Bits::EXMODEN), nor_sram_config_.extended_mode,
+                        static_cast<uint32_t>(SNCTLX_Bits::ASYNCWAIT), nor_sram_config_.async_wait,
+                        static_cast<uint32_t>(SNCTLX_Bits::SYNCWR), (nor_sram_config_.mode == Write_Mode::SYNC));
     write_bit_ranges(*this, reg_offset,
-               static_cast<uint32_t>(SNCTLX_Bits::NRTP), static_cast<uint32_t>(nor_sram_config_.type),
-               static_cast<uint32_t>(SNCTLX_Bits::NRW), static_cast<uint32_t>(nor_sram_config_.width));
+                     static_cast<uint32_t>(SNCTLX_Bits::NRTP), static_cast<uint32_t>(nor_sram_config_.type),
+                     static_cast<uint32_t>(SNCTLX_Bits::NRW), static_cast<uint32_t>(nor_sram_config_.width));
 
     write_bit_ranges(*this, reg_offset,
-               static_cast<uint32_t>(SNTCFGX_Bits::ASET), nor_sram_config_.rw_timing->async_ast - 1,
-               static_cast<uint32_t>(SNTCFGX_Bits::AHLD), nor_sram_config_.rw_timing->async_aht - 1,
-               static_cast<uint32_t>(SNTCFGX_Bits::DSET), nor_sram_config_.rw_timing->async_dst - 1,
-               static_cast<uint32_t>(SNTCFGX_Bits::BUSLAT), nor_sram_config_.rw_timing->bus_latency - 1,
-               static_cast<uint32_t>(SNTCFGX_Bits::CKDIV), static_cast<uint32_t>(nor_sram_config_.rw_timing->divider),
-               static_cast<uint32_t>(SNTCFGX_Bits::DLAT), static_cast<uint32_t>(nor_sram_config_.rw_timing->sync_latency),
-               static_cast<uint32_t>(SNTCFGX_Bits::ASYNCMOD), static_cast<uint32_t>(nor_sram_config_.rw_timing->async_access));
+                     static_cast<uint32_t>(SNTCFGX_Bits::ASET), nor_sram_config_.rw_timing->async_ast - 1,
+                     static_cast<uint32_t>(SNTCFGX_Bits::AHLD), nor_sram_config_.rw_timing->async_aht - 1,
+                     static_cast<uint32_t>(SNTCFGX_Bits::DSET), nor_sram_config_.rw_timing->async_dst - 1,
+                     static_cast<uint32_t>(SNTCFGX_Bits::BUSLAT), nor_sram_config_.rw_timing->bus_latency - 1,
+                     static_cast<uint32_t>(SNTCFGX_Bits::CKDIV), static_cast<uint32_t>(nor_sram_config_.rw_timing->divider),
+                     static_cast<uint32_t>(SNTCFGX_Bits::DLAT), static_cast<uint32_t>(nor_sram_config_.rw_timing->sync_latency),
+                     static_cast<uint32_t>(SNTCFGX_Bits::ASYNCMOD), static_cast<uint32_t>(nor_sram_config_.rw_timing->async_access));
     write_bit(*this, reg_offset, static_cast<uint32_t>(SNCTLX_Bits::NREN), (nor_sram_config_.type == Memory_Type::NOR));
 
     if (nor_sram_config_.extended_mode == true) {
         write_bit_ranges(*this, reg_offset,
-                   static_cast<uint32_t>(SNWTCFGX_Bits::WASET), nor_sram_config_.write_timing->async_ast - 1,
-                   static_cast<uint32_t>(SNWTCFGX_Bits::WAHLD), nor_sram_config_.write_timing->async_aht - 1,
-                   static_cast<uint32_t>(SNWTCFGX_Bits::WDSET), nor_sram_config_.write_timing->async_dst - 1,
-                   static_cast<uint32_t>(SNWTCFGX_Bits::WBUSLAT), nor_sram_config_.write_timing->bus_latency - 1,
-                   static_cast<uint32_t>(SNWTCFGX_Bits::WASET), static_cast<uint32_t>(nor_sram_config_.write_timing->async_access));
+                         static_cast<uint32_t>(SNWTCFGX_Bits::WASET), nor_sram_config_.write_timing->async_ast - 1,
+                         static_cast<uint32_t>(SNWTCFGX_Bits::WAHLD), nor_sram_config_.write_timing->async_aht - 1,
+                         static_cast<uint32_t>(SNWTCFGX_Bits::WDSET), nor_sram_config_.write_timing->async_dst - 1,
+                         static_cast<uint32_t>(SNWTCFGX_Bits::WBUSLAT), nor_sram_config_.write_timing->bus_latency - 1,
+                         static_cast<uint32_t>(SNWTCFGX_Bits::WASET), static_cast<uint32_t>(nor_sram_config_.write_timing->async_access));
     } else {
         write_register(*this, reg_offset, Common_Reset);
     }
@@ -159,30 +159,30 @@ void EXMC::nand_init() {
     EXMC_Regs npctl_offset = get_npctl_offset(nand_config_.npc_block);
 
     write_bits_sequence(*this, npctl_offset,
-               static_cast<uint32_t>(NPCTLX_Bits::NDWTEN), nand_config_.wait,
-               static_cast<uint32_t>(NPCTLX_Bits::NDTP), true,
-               static_cast<uint32_t>(NPCTLX_Bits::ECCEN), nand_config_.ecc);
+                        static_cast<uint32_t>(NPCTLX_Bits::NDWTEN), nand_config_.wait,
+                        static_cast<uint32_t>(NPCTLX_Bits::NDTP), true,
+                        static_cast<uint32_t>(NPCTLX_Bits::ECCEN), nand_config_.ecc);
     write_bit_ranges(*this, npctl_offset,
-               static_cast<uint32_t>(NPCTLX_Bits::NDW), static_cast<uint32_t>(nand_config_.databus_width),
-               static_cast<uint32_t>(NPCTLX_Bits::ECCSZ), static_cast<uint32_t>(nand_config_.ecc_size),
-               static_cast<uint32_t>(NPCTLX_Bits::CTR), static_cast<uint32_t>(nand_config_.ctr_latency),
-               static_cast<uint32_t>(NPCTLX_Bits::ATR), static_cast<uint32_t>(nand_config_.atr_latency));
+                     static_cast<uint32_t>(NPCTLX_Bits::NDW), static_cast<uint32_t>(nand_config_.databus_width),
+                     static_cast<uint32_t>(NPCTLX_Bits::ECCSZ), static_cast<uint32_t>(nand_config_.ecc_size),
+                     static_cast<uint32_t>(NPCTLX_Bits::CTR), static_cast<uint32_t>(nand_config_.ctr_latency),
+                     static_cast<uint32_t>(NPCTLX_Bits::ATR), static_cast<uint32_t>(nand_config_.atr_latency));
 
     EXMC_Regs npctcfg_offset = get_npctcfg_offset(nand_config_.npc_block);
 
     write_bit_ranges(*this, npctcfg_offset,
-               static_cast<uint32_t>(NPCTCFGX_Bits::COMSET), nand_config_.common_timing->st - 1,
-               static_cast<uint32_t>(NPCTCFGX_Bits::COMWAIT), nand_config_.common_timing->wt - 1,
-               static_cast<uint32_t>(NPCTCFGX_Bits::COMHLD), nand_config_.common_timing->ht,
-               static_cast<uint32_t>(NPCTCFGX_Bits::COMHIZ), nand_config_.common_timing->dbhzt - 1);
+                     static_cast<uint32_t>(NPCTCFGX_Bits::COMSET), nand_config_.common_timing->st - 1,
+                     static_cast<uint32_t>(NPCTCFGX_Bits::COMWAIT), nand_config_.common_timing->wt - 1,
+                     static_cast<uint32_t>(NPCTCFGX_Bits::COMHLD), nand_config_.common_timing->ht,
+                     static_cast<uint32_t>(NPCTCFGX_Bits::COMHIZ), nand_config_.common_timing->dbhzt - 1);
 
     EXMC_Regs npatcfg_offset = get_npatcfg_offset(nand_config_.npc_block);
 
     write_bit_ranges(*this, npatcfg_offset,
-               static_cast<uint32_t>(NPATCFGX_Bits::ATTSET), nand_config_.attribute_timing->st - 1,
-               static_cast<uint32_t>(NPATCFGX_Bits::ATTWAIT), nand_config_.attribute_timing->wt - 1,
-               static_cast<uint32_t>(NPATCFGX_Bits::ATTHLD), nand_config_.attribute_timing->ht,
-               static_cast<uint32_t>(NPATCFGX_Bits::ATTHIZ), nand_config_.attribute_timing->dbhzt - 1);
+                     static_cast<uint32_t>(NPATCFGX_Bits::ATTSET), nand_config_.attribute_timing->st - 1,
+                     static_cast<uint32_t>(NPATCFGX_Bits::ATTWAIT), nand_config_.attribute_timing->wt - 1,
+                     static_cast<uint32_t>(NPATCFGX_Bits::ATTHLD), nand_config_.attribute_timing->ht,
+                     static_cast<uint32_t>(NPATCFGX_Bits::ATTHIZ), nand_config_.attribute_timing->dbhzt - 1);
 }
 
 /**
@@ -225,30 +225,30 @@ void EXMC::pccard_reset() {
  */
 void EXMC::pccard_init() {
     write_bit(*this, EXMC_Regs::NPCTL3,
-               static_cast<uint32_t>(NPCTLX_Bits::NDWTEN), pccard_config_.wait);
+              static_cast<uint32_t>(NPCTLX_Bits::NDWTEN), pccard_config_.wait);
 
     write_bit_ranges(*this, EXMC_Regs::NPCTL3,
-               static_cast<uint32_t>(NPCTLX_Bits::NDW), static_cast<uint32_t>(Bus_Width::WIDTH_16BITS),
-               static_cast<uint32_t>(NPCTLX_Bits::CTR), static_cast<uint32_t>(pccard_config_.ctr_latency),
-               static_cast<uint32_t>(NPCTLX_Bits::ATR), static_cast<uint32_t>(pccard_config_.atr_latency));
+                     static_cast<uint32_t>(NPCTLX_Bits::NDW), static_cast<uint32_t>(Bus_Width::WIDTH_16BITS),
+                     static_cast<uint32_t>(NPCTLX_Bits::CTR), static_cast<uint32_t>(pccard_config_.ctr_latency),
+                     static_cast<uint32_t>(NPCTLX_Bits::ATR), static_cast<uint32_t>(pccard_config_.atr_latency));
 
     write_bit_ranges(*this, EXMC_Regs::NPCTCFG3,
-               static_cast<uint32_t>(NPCTCFGX_Bits::COMSET), pccard_config_.common_timing->st - 1,
-               static_cast<uint32_t>(NPCTCFGX_Bits::COMWAIT), pccard_config_.common_timing->wt - 1,
-               static_cast<uint32_t>(NPCTCFGX_Bits::COMHLD), pccard_config_.common_timing->ht,
-               static_cast<uint32_t>(NPCTCFGX_Bits::COMHIZ), pccard_config_.common_timing->dbhzt - 1);
+                     static_cast<uint32_t>(NPCTCFGX_Bits::COMSET), pccard_config_.common_timing->st - 1,
+                     static_cast<uint32_t>(NPCTCFGX_Bits::COMWAIT), pccard_config_.common_timing->wt - 1,
+                     static_cast<uint32_t>(NPCTCFGX_Bits::COMHLD), pccard_config_.common_timing->ht,
+                     static_cast<uint32_t>(NPCTCFGX_Bits::COMHIZ), pccard_config_.common_timing->dbhzt - 1);
 
     write_bit_ranges(*this, EXMC_Regs::NPATCFG3,
-               static_cast<uint32_t>(NPATCFGX_Bits::ATTSET), pccard_config_.attribute_timing->st - 1,
-               static_cast<uint32_t>(NPATCFGX_Bits::ATTWAIT), pccard_config_.attribute_timing->wt - 1,
-               static_cast<uint32_t>(NPATCFGX_Bits::ATTHLD), pccard_config_.attribute_timing->ht,
-               static_cast<uint32_t>(NPATCFGX_Bits::ATTHIZ), pccard_config_.attribute_timing->dbhzt - 1);
+                     static_cast<uint32_t>(NPATCFGX_Bits::ATTSET), pccard_config_.attribute_timing->st - 1,
+                     static_cast<uint32_t>(NPATCFGX_Bits::ATTWAIT), pccard_config_.attribute_timing->wt - 1,
+                     static_cast<uint32_t>(NPATCFGX_Bits::ATTHLD), pccard_config_.attribute_timing->ht,
+                     static_cast<uint32_t>(NPATCFGX_Bits::ATTHIZ), pccard_config_.attribute_timing->dbhzt - 1);
 
     write_bit_ranges(*this, EXMC_Regs::PIOTCFG3,
-               static_cast<uint32_t>(PIOTCFG3_Bits::IOSET), pccard_config_.io_timing->st - 1,
-               static_cast<uint32_t>(PIOTCFG3_Bits::IOWAIT), pccard_config_.io_timing->wt - 1,
-               static_cast<uint32_t>(PIOTCFG3_Bits::IOHLD), pccard_config_.io_timing->ht,
-               static_cast<uint32_t>(PIOTCFG3_Bits::IOHIZ), pccard_config_.io_timing->dbhzt - 1);
+                     static_cast<uint32_t>(PIOTCFG3_Bits::IOSET), pccard_config_.io_timing->st - 1,
+                     static_cast<uint32_t>(PIOTCFG3_Bits::IOWAIT), pccard_config_.io_timing->wt - 1,
+                     static_cast<uint32_t>(PIOTCFG3_Bits::IOHLD), pccard_config_.io_timing->ht,
+                     static_cast<uint32_t>(PIOTCFG3_Bits::IOHIZ), pccard_config_.io_timing->dbhzt - 1);
 }
 
 /**
@@ -311,10 +311,10 @@ uint32_t EXMC::get_ecc(NPC_Block npc_block) {
 
 /**
  * @brief Retrieves the status of a specified flag for a given NAND Flash block.
- * 
- * This function reads the current status of a specified status flag 
+ *
+ * This function reads the current status of a specified status flag
  * from the interrupt enable register of the designated NAND Flash block.
- * 
+ *
  * @param npc_block The NAND Flash block from which to read the flag status.
  * @param flag The specific status flag to be checked.
  * @return True if the flag is set, otherwise false.
@@ -326,11 +326,11 @@ bool EXMC::get_flag(NPC_Block npc_block, Status_Flags flag) {
 
 /**
  * @brief Clears a specified status flag for a given NAND Flash block.
- * 
- * This function writes a 0 to the corresponding bit of the status flag in 
- * the interrupt enable register, effectively clearing the flag for the 
+ *
+ * This function writes a 0 to the corresponding bit of the status flag in
+ * the interrupt enable register, effectively clearing the flag for the
  * specified NAND Flash block.
- * 
+ *
  * @param npc_block The NAND Flash block for which the flag should be cleared.
  * @param flag The specific status flag to clear.
  */
@@ -341,10 +341,10 @@ void EXMC::clear_flag(NPC_Block npc_block, Status_Flags flag) {
 
 /**
  * @brief Retrieves the status of a specified interrupt flag for a given NAND Flash block.
- * 
+ *
  * This function reads the current status of a specified interrupt flag from the interrupt enable register of the designated NAND Flash block.
  * The function will return true if the flag is set, and the interrupt is enabled for the flag, otherwise false.
- * 
+ *
  * @param npc_block The NAND Flash block from which to read the interrupt flag status.
  * @param flag The specific interrupt flag to be checked.
  * @return True if the flag is set and the interrupt is enabled, otherwise false.
@@ -356,17 +356,17 @@ bool EXMC::get_interrupt_flag(NPC_Block npc_block, Interrupt_Flags flag) {
     bool flag_status = read_bit(*this, npinten_offset, static_cast<uint32_t>(flag));
 
     switch (flag) {
-    case Interrupt_Flags::INTR_FLAG_RISING:
-        intr_status = read_bit(*this, npinten_offset, static_cast<uint32_t>(Interrupt_Type::INTR_RISING_EN));
-        break;
-    case Interrupt_Flags::INTR_FLAG_LEVEL:
-        intr_status = read_bit(*this, npinten_offset, static_cast<uint32_t>(Interrupt_Type::INTR_LEVEL_EN));
-        break;
-    case Interrupt_Flags::INTR_FLAG_FALLING:
-        intr_status = read_bit(*this, npinten_offset, static_cast<uint32_t>(Interrupt_Type::INTR_FALLING_EN));
-        break;
-    default:
-        break;
+        case Interrupt_Flags::INTR_FLAG_RISING:
+            intr_status = read_bit(*this, npinten_offset, static_cast<uint32_t>(Interrupt_Type::INTR_RISING_EN));
+            break;
+        case Interrupt_Flags::INTR_FLAG_LEVEL:
+            intr_status = read_bit(*this, npinten_offset, static_cast<uint32_t>(Interrupt_Type::INTR_LEVEL_EN));
+            break;
+        case Interrupt_Flags::INTR_FLAG_FALLING:
+            intr_status = read_bit(*this, npinten_offset, static_cast<uint32_t>(Interrupt_Type::INTR_FALLING_EN));
+            break;
+        default:
+            break;
     }
 
     return (flag_status && intr_status);
@@ -374,11 +374,11 @@ bool EXMC::get_interrupt_flag(NPC_Block npc_block, Interrupt_Flags flag) {
 
 /**
  * @brief Clears a specified interrupt flag for a given NAND Flash block.
- * 
+ *
  * This function disables the interrupt for the specified flag by clearing the
  * interrupt enable bit for the flag in the interrupt enable register of the
  * designated NAND Flash block.
- * 
+ *
  * @param npc_block The NAND Flash block for which to clear the interrupt flag.
  * @param flag The specific interrupt flag to be cleared.
  */
@@ -389,12 +389,12 @@ void EXMC::clear_interrupt_flag(NPC_Block npc_block, Interrupt_Flags flag) {
 
 /**
  * @brief Enables or disables an interrupt for a specified NAND Flash block.
- * 
+ *
  * This function enables or disables interrupts for the specified type
  * for the given NAND Flash block. The interrupts are enabled or disabled
  * by setting or clearing the interrupt enable bit for the respective type
  * in the interrupt enable register of the designated NAND Flash block.
- * 
+ *
  * @param npc_block The NAND Flash block for which to enable or disable the interrupt.
  * @param type The specific interrupt type to enable or disable.
  * @param enable True to enable the interrupt, false to disable it.

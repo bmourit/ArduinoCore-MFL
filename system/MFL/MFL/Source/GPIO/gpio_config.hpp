@@ -238,11 +238,11 @@ struct GPIO_Clock_Config {
 };
 
 static inline constexpr std::array<GPIO_Clock_Config, 4> GPIO_pclk_index {{
-    {rcu::RCU_PCLK::PCLK_GPIOA, rcu::RCU_PCLK_Reset::PCLK_GPIOARST},
-    {rcu::RCU_PCLK::PCLK_GPIOB, rcu::RCU_PCLK_Reset::PCLK_GPIOBRST},
-    {rcu::RCU_PCLK::PCLK_GPIOC, rcu::RCU_PCLK_Reset::PCLK_GPIOCRST},
-    {rcu::RCU_PCLK::PCLK_GPIOD, rcu::RCU_PCLK_Reset::PCLK_GPIODRST}
-}};
+        {rcu::RCU_PCLK::PCLK_GPIOA, rcu::RCU_PCLK_Reset::PCLK_GPIOARST},
+        {rcu::RCU_PCLK::PCLK_GPIOB, rcu::RCU_PCLK_Reset::PCLK_GPIOBRST},
+        {rcu::RCU_PCLK::PCLK_GPIOC, rcu::RCU_PCLK_Reset::PCLK_GPIOCRST},
+        {rcu::RCU_PCLK::PCLK_GPIOD, rcu::RCU_PCLK_Reset::PCLK_GPIODRST}
+    }};
 
 struct Remap_Info {
     AFIO_Regs register_offset;
@@ -251,66 +251,66 @@ struct Remap_Info {
 };
 
 static inline constexpr std::array<Remap_Info, 59> remap_index {{
-    {AFIO_Regs::PCF0, REG_BIT_DEF(0, 0), Remap_Type::NONE},       			// SPI0 no remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(0, 0), Remap_Type::REMAP},       			// SPI0 remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(1, 1), Remap_Type::NONE},       			// I2C0 no remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(1, 1), Remap_Type::REMAP},       			// I2C0 remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(2, 2), Remap_Type::NONE},       			// USART0 no remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(2, 2), Remap_Type::REMAP},      			// USART0 remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(3, 3), Remap_Type::NONE},       			// USART1 no remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(3, 3), Remap_Type::REMAP},       			// USART1 remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(4, 5), Remap_Type::NONE},       			// USART2 no remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(4, 5), Remap_Type::PARTIAL},    			// USART2 partial remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(4, 5), Remap_Type::FULL},       			// USART2 full remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(6, 7), Remap_Type::NONE},       			// TIMER0 no remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(6, 7), Remap_Type::PARTIAL},    			// TIMER0 partial remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(6, 7), Remap_Type::FULL},       			// TIMER0 full remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(8, 9), Remap_Type::NONE},       			// TIMER1 no remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(8, 9), Remap_Type::PARTIAL},    			// TIMER1 partial remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(8, 9), Remap_Type::FULL},       			// TIMER1 full remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(10, 11), Remap_Type::NONE},     			// TIMER2 no remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(10, 11), Remap_Type::PARTIAL},  			// TIMER2 partial remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(10, 11), Remap_Type::FULL},     			// TIMER2 full remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(12, 12), Remap_Type::NONE},     			// TIMER3 no remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(12, 12), Remap_Type::REMAP},     			// TIMER3 remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(13, 14), Remap_Type::NONE},     			// CAN no remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(13, 14), Remap_Type::PARTIAL},  			// CAN partial remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(13, 14), Remap_Type::FULL},     			// CAN full remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(15, 15), Remap_Type::NONE},  				// PD01 no remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(15, 15), Remap_Type::REMAP},     			// PD01 remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(16, 16), Remap_Type::NONE},  				// TIMER4CH3 no iremap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(16, 16), Remap_Type::REMAP},				// TIMER4CH3 iremap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(17, 17), Remap_Type::NONE},  				// ADC0 ETRGINS no remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(17, 17), Remap_Type::REMAP},				// ADC0 ETRGINS remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(18, 18), Remap_Type::NONE},  				// ADC0 ETRGREG no remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(18, 18), Remap_Type::REMAP},				// ADC0 ETRGREG remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(19, 19), Remap_Type::NONE},  				// ADC1 ETRGINS no remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(19, 19), Remap_Type::REMAP},				// ADC1 ETRGINS remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(20, 20), Remap_Type::NONE},  				// ADC1 ETRGREG no remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(20, 20), Remap_Type::REMAP},				// ADC1 ETRGREG remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(24, 26), Remap_Type::FULL_SWJ},  			// FULL SWJ (JTAG-DP + SW-DP)
-    {AFIO_Regs::PCF0, REG_BIT_DEF(24, 26), Remap_Type::FULL_SWJ_NO_NJRST},	// FULL SWJ without NJTRST (JTAG-DP + SW-DP)
-    {AFIO_Regs::PCF0, REG_BIT_DEF(24, 26), Remap_Type::SWJ_DP_ONLY},		// SW-DP Only (JTAG-DP disabled)
-    {AFIO_Regs::PCF0, REG_BIT_DEF(24, 26), Remap_Type::ALL_DISABLED},		// All disabled (SW_DP and JTAG-DP both disabled)
-    {AFIO_Regs::PCF0, REG_BIT_DEF(28, 28), Remap_Type::NONE},				// SPI2 no remap
-    {AFIO_Regs::PCF0, REG_BIT_DEF(28, 28), Remap_Type::REMAP},				// SPI2 remap
-    {AFIO_Regs::PCF1, REG_BIT_DEF(5, 5), Remap_Type::NONE},					// TIMER8 no remap
-    {AFIO_Regs::PCF1, REG_BIT_DEF(5, 5), Remap_Type::REMAP},				// TIMER8 remap
-    {AFIO_Regs::PCF1, REG_BIT_DEF(6, 6), Remap_Type::NONE},					// TIMER9 no remap
-    {AFIO_Regs::PCF1, REG_BIT_DEF(6, 6), Remap_Type::REMAP},				// TIMER9 remap
-    {AFIO_Regs::PCF1, REG_BIT_DEF(7, 7), Remap_Type::NONE},					// TIMER10 no remap
-    {AFIO_Regs::PCF1, REG_BIT_DEF(7, 7), Remap_Type::REMAP},				// TIMER10 remap
-    {AFIO_Regs::PCF1, REG_BIT_DEF(8, 8), Remap_Type::NONE},					// TIMER12 no remap
-    {AFIO_Regs::PCF1, REG_BIT_DEF(8, 8), Remap_Type::REMAP},				// TIMER12 remap
-    {AFIO_Regs::PCF1, REG_BIT_DEF(9, 9), Remap_Type::NONE},					// TIMER13 no remap
-    {AFIO_Regs::PCF1, REG_BIT_DEF(9, 9), Remap_Type::REMAP},				// TIMER13 remap
-    {AFIO_Regs::PCF1, REG_BIT_DEF(10, 10), Remap_Type::NONE},				// EXMC NADV no remap
-    {AFIO_Regs::PCF1, REG_BIT_DEF(10, 10), Remap_Type::REMAP},				// EXMC_NADV remap
-    {AFIO_Regs::PCF1, REG_BIT_DEF(11, 12), Remap_Type::NONE},				// CTC no remap0
-    {AFIO_Regs::PCF1, REG_BIT_DEF(11, 12), Remap_Type::REMAP},				// CTC remap0
-    {AFIO_Regs::PCF1, REG_BIT_DEF(11, 12), Remap_Type::NONE},				// CTC no remap1
-    {AFIO_Regs::PCF1, REG_BIT_DEF(11, 12), Remap_Type::FULL}				// CTC remap1
-}};
+        {AFIO_Regs::PCF0, REG_BIT_DEF(0, 0), Remap_Type::NONE},       			// SPI0 no remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(0, 0), Remap_Type::REMAP},       			// SPI0 remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(1, 1), Remap_Type::NONE},       			// I2C0 no remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(1, 1), Remap_Type::REMAP},       			// I2C0 remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(2, 2), Remap_Type::NONE},       			// USART0 no remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(2, 2), Remap_Type::REMAP},      			// USART0 remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(3, 3), Remap_Type::NONE},       			// USART1 no remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(3, 3), Remap_Type::REMAP},       			// USART1 remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(4, 5), Remap_Type::NONE},       			// USART2 no remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(4, 5), Remap_Type::PARTIAL},    			// USART2 partial remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(4, 5), Remap_Type::FULL},       			// USART2 full remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(6, 7), Remap_Type::NONE},       			// TIMER0 no remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(6, 7), Remap_Type::PARTIAL},    			// TIMER0 partial remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(6, 7), Remap_Type::FULL},       			// TIMER0 full remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(8, 9), Remap_Type::NONE},       			// TIMER1 no remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(8, 9), Remap_Type::PARTIAL},    			// TIMER1 partial remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(8, 9), Remap_Type::FULL},       			// TIMER1 full remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(10, 11), Remap_Type::NONE},     			// TIMER2 no remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(10, 11), Remap_Type::PARTIAL},  			// TIMER2 partial remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(10, 11), Remap_Type::FULL},     			// TIMER2 full remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(12, 12), Remap_Type::NONE},     			// TIMER3 no remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(12, 12), Remap_Type::REMAP},     			// TIMER3 remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(13, 14), Remap_Type::NONE},     			// CAN no remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(13, 14), Remap_Type::PARTIAL},  			// CAN partial remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(13, 14), Remap_Type::FULL},     			// CAN full remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(15, 15), Remap_Type::NONE},  				// PD01 no remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(15, 15), Remap_Type::REMAP},     			// PD01 remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(16, 16), Remap_Type::NONE},  				// TIMER4CH3 no iremap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(16, 16), Remap_Type::REMAP},				// TIMER4CH3 iremap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(17, 17), Remap_Type::NONE},  				// ADC0 ETRGINS no remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(17, 17), Remap_Type::REMAP},				// ADC0 ETRGINS remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(18, 18), Remap_Type::NONE},  				// ADC0 ETRGREG no remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(18, 18), Remap_Type::REMAP},				// ADC0 ETRGREG remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(19, 19), Remap_Type::NONE},  				// ADC1 ETRGINS no remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(19, 19), Remap_Type::REMAP},				// ADC1 ETRGINS remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(20, 20), Remap_Type::NONE},  				// ADC1 ETRGREG no remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(20, 20), Remap_Type::REMAP},				// ADC1 ETRGREG remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(24, 26), Remap_Type::FULL_SWJ},  			// FULL SWJ (JTAG-DP + SW-DP)
+        {AFIO_Regs::PCF0, REG_BIT_DEF(24, 26), Remap_Type::FULL_SWJ_NO_NJRST},	// FULL SWJ without NJTRST (JTAG-DP + SW-DP)
+        {AFIO_Regs::PCF0, REG_BIT_DEF(24, 26), Remap_Type::SWJ_DP_ONLY},		// SW-DP Only (JTAG-DP disabled)
+        {AFIO_Regs::PCF0, REG_BIT_DEF(24, 26), Remap_Type::ALL_DISABLED},		// All disabled (SW_DP and JTAG-DP both disabled)
+        {AFIO_Regs::PCF0, REG_BIT_DEF(28, 28), Remap_Type::NONE},				// SPI2 no remap
+        {AFIO_Regs::PCF0, REG_BIT_DEF(28, 28), Remap_Type::REMAP},				// SPI2 remap
+        {AFIO_Regs::PCF1, REG_BIT_DEF(5, 5), Remap_Type::NONE},					// TIMER8 no remap
+        {AFIO_Regs::PCF1, REG_BIT_DEF(5, 5), Remap_Type::REMAP},				// TIMER8 remap
+        {AFIO_Regs::PCF1, REG_BIT_DEF(6, 6), Remap_Type::NONE},					// TIMER9 no remap
+        {AFIO_Regs::PCF1, REG_BIT_DEF(6, 6), Remap_Type::REMAP},				// TIMER9 remap
+        {AFIO_Regs::PCF1, REG_BIT_DEF(7, 7), Remap_Type::NONE},					// TIMER10 no remap
+        {AFIO_Regs::PCF1, REG_BIT_DEF(7, 7), Remap_Type::REMAP},				// TIMER10 remap
+        {AFIO_Regs::PCF1, REG_BIT_DEF(8, 8), Remap_Type::NONE},					// TIMER12 no remap
+        {AFIO_Regs::PCF1, REG_BIT_DEF(8, 8), Remap_Type::REMAP},				// TIMER12 remap
+        {AFIO_Regs::PCF1, REG_BIT_DEF(9, 9), Remap_Type::NONE},					// TIMER13 no remap
+        {AFIO_Regs::PCF1, REG_BIT_DEF(9, 9), Remap_Type::REMAP},				// TIMER13 remap
+        {AFIO_Regs::PCF1, REG_BIT_DEF(10, 10), Remap_Type::NONE},				// EXMC NADV no remap
+        {AFIO_Regs::PCF1, REG_BIT_DEF(10, 10), Remap_Type::REMAP},				// EXMC_NADV remap
+        {AFIO_Regs::PCF1, REG_BIT_DEF(11, 12), Remap_Type::NONE},				// CTC no remap0
+        {AFIO_Regs::PCF1, REG_BIT_DEF(11, 12), Remap_Type::REMAP},				// CTC remap0
+        {AFIO_Regs::PCF1, REG_BIT_DEF(11, 12), Remap_Type::NONE},				// CTC no remap1
+        {AFIO_Regs::PCF1, REG_BIT_DEF(11, 12), Remap_Type::FULL}				// CTC remap1
+    }};
 
 struct Exti_Source_Info {
     AFIO_Regs reg;
@@ -318,23 +318,23 @@ struct Exti_Source_Info {
 };
 
 static inline constexpr std::array<Exti_Source_Info, 16> source_index {{
-    {AFIO_Regs::EXTISS0, REG_BIT_DEF(0, 3)},
-    {AFIO_Regs::EXTISS0, REG_BIT_DEF(4, 7)},
-    {AFIO_Regs::EXTISS0, REG_BIT_DEF(8, 11)},
-    {AFIO_Regs::EXTISS0, REG_BIT_DEF(12, 15)},
-    {AFIO_Regs::EXTISS1, REG_BIT_DEF(0, 3)},
-    {AFIO_Regs::EXTISS1, REG_BIT_DEF(4, 7)},
-    {AFIO_Regs::EXTISS1, REG_BIT_DEF(8, 11)},
-    {AFIO_Regs::EXTISS1, REG_BIT_DEF(12, 15)},
-    {AFIO_Regs::EXTISS2, REG_BIT_DEF(0, 3)},
-    {AFIO_Regs::EXTISS2, REG_BIT_DEF(4, 7)},
-    {AFIO_Regs::EXTISS2, REG_BIT_DEF(8, 11)},
-    {AFIO_Regs::EXTISS2, REG_BIT_DEF(12, 15)},
-    {AFIO_Regs::EXTISS3, REG_BIT_DEF(0, 3)},
-    {AFIO_Regs::EXTISS3, REG_BIT_DEF(4, 7)},
-    {AFIO_Regs::EXTISS3, REG_BIT_DEF(8, 11)},
-    {AFIO_Regs::EXTISS3, REG_BIT_DEF(12, 15)},
-}};
+        {AFIO_Regs::EXTISS0, REG_BIT_DEF(0, 3)},
+        {AFIO_Regs::EXTISS0, REG_BIT_DEF(4, 7)},
+        {AFIO_Regs::EXTISS0, REG_BIT_DEF(8, 11)},
+        {AFIO_Regs::EXTISS0, REG_BIT_DEF(12, 15)},
+        {AFIO_Regs::EXTISS1, REG_BIT_DEF(0, 3)},
+        {AFIO_Regs::EXTISS1, REG_BIT_DEF(4, 7)},
+        {AFIO_Regs::EXTISS1, REG_BIT_DEF(8, 11)},
+        {AFIO_Regs::EXTISS1, REG_BIT_DEF(12, 15)},
+        {AFIO_Regs::EXTISS2, REG_BIT_DEF(0, 3)},
+        {AFIO_Regs::EXTISS2, REG_BIT_DEF(4, 7)},
+        {AFIO_Regs::EXTISS2, REG_BIT_DEF(8, 11)},
+        {AFIO_Regs::EXTISS2, REG_BIT_DEF(12, 15)},
+        {AFIO_Regs::EXTISS3, REG_BIT_DEF(0, 3)},
+        {AFIO_Regs::EXTISS3, REG_BIT_DEF(4, 7)},
+        {AFIO_Regs::EXTISS3, REG_BIT_DEF(8, 11)},
+        {AFIO_Regs::EXTISS3, REG_BIT_DEF(12, 15)},
+    }};
 
 
 ///////////////////////////// CONSTANTS /////////////////////////////

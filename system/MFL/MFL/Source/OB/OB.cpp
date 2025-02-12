@@ -75,14 +75,14 @@ FMC_Error_Type OB::ob_erase() {
 
     if (state == FMC_Error_Type::READY) {
         write_bits_sequence(*this, FMC_Regs::CTL0,
-                   static_cast<uint32_t>(CTL0_Bits::OBER), true,
-                   static_cast<uint32_t>(CTL0_Bits::START), true);
+                            static_cast<uint32_t>(CTL0_Bits::OBER), true,
+                            static_cast<uint32_t>(CTL0_Bits::START), true);
         // Wait until ready
         state = ob_ready_wait_bank0(timeout);
         if (state == FMC_Error_Type::READY) {
             write_bits_sequence(*this, FMC_Regs::CTL0,
-                       static_cast<uint32_t>(CTL0_Bits::OBER), false,
-                       static_cast<uint32_t>(CTL0_Bits::OBPG), true);
+                                static_cast<uint32_t>(CTL0_Bits::OBER), false,
+                                static_cast<uint32_t>(CTL0_Bits::OBPG), true);
             write_bit_range(*this, OB_Regs::SPC, static_cast<uint32_t>(SPC_Bits::SPC), value);
             // Wait until ready
             state = ob_ready_wait_bank0(timeout);
@@ -192,14 +192,14 @@ FMC_Error_Type OB::set_ob_security_protection(OB_Security_Type type) {
 
     if (state == FMC_Error_Type::READY) {
         write_bits_sequence(*this, FMC_Regs::CTL0,
-                   static_cast<uint32_t>(CTL0_Bits::OBER), true,
-                   static_cast<uint32_t>(CTL0_Bits::START), true);
+                            static_cast<uint32_t>(CTL0_Bits::OBER), true,
+                            static_cast<uint32_t>(CTL0_Bits::START), true);
         // Wait until ready
         state = ob_ready_wait_bank0(timeout);
         if (state == FMC_Error_Type::READY) {
             write_bits_sequence(*this, FMC_Regs::CTL0,
-                       static_cast<uint32_t>(CTL0_Bits::OBER), false,
-                       static_cast<uint32_t>(CTL0_Bits::OBPG), true);
+                                static_cast<uint32_t>(CTL0_Bits::OBER), false,
+                                static_cast<uint32_t>(CTL0_Bits::OBPG), true);
             write_bit_range(*this, OB_Regs::SPC, static_cast<uint32_t>(SPC_Bits::SPC), static_cast<uint32_t>(type));
             // Wait until ready
             state = ob_ready_wait_bank0(timeout);
@@ -219,7 +219,7 @@ FMC_Error_Type OB::set_ob_security_protection(OB_Security_Type type) {
 /**
  * @brief Check the current security protection status.
  *
- * This function reads the security protection bit from the Option Bytes 
+ * This function reads the security protection bit from the Option Bytes
  * status register to determine if security protection is enabled.
  *
  * @return True if security protection is enabled, false otherwise.

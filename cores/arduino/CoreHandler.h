@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdarg.h>
 #ifdef CORE_DEBUG
-#include <stdio.h>
+    #include <stdio.h>
 #endif
 
 // Arduino core version number
@@ -14,7 +14,7 @@
 
 // libc porting layers for GCC
 #if defined(__GNUC__)
-#define WEAK  __attribute__((weak))
+    #define WEAK  __attribute__((weak))
 #endif
 
 #ifdef __cplusplus

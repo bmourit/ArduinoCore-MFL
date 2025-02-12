@@ -85,7 +85,7 @@ void delayMicroseconds(unsigned int usec) {
     } while (numTicks > elapsedTicks);
 }
 
-void tickIncrement() { 
+void tickIncrement() {
     msTickCount_ = msTickCount_ + 1U;
 }
 

@@ -67,8 +67,8 @@ void setPinOp(gpio::GPIO_Base port, gpio::Pin_Number pin, uint32_t packedPinOps)
 inline constexpr gpio::GPIO_Base getPortFromPin(pin_size_t pin);
 inline constexpr gpio::Pin_Number getPinInPort(pin_size_t pin);
 inline constexpr uint32_t createPackedPinOps(gpio::Pin_Mode mode, gpio::Output_Speed speed,
-           gpio::Pin_Remap_Select remap = gpio::Pin_Remap_Select::NO_REMAP, 
-           uint8_t channel = 0U, uint8_t chon = 0U);
+        gpio::Pin_Remap_Select remap = gpio::Pin_Remap_Select::NO_REMAP,
+        uint8_t channel = 0U, uint8_t chon = 0U);
 
 
 /////////////////////////////// PIN IN PINOPS ///////////////////////////////

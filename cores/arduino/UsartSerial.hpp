@@ -86,14 +86,14 @@ protected:
         uint16_t parity = config & SERIAL_PARITY_MASK;
         return (parity == SERIAL_PARITY_EVEN) ? usart::Parity_Mode::PM_EVEN :
                (parity == SERIAL_PARITY_ODD)  ? usart::Parity_Mode::PM_ODD :
-                                               usart::Parity_Mode::PM_NONE;
+               usart::Parity_Mode::PM_NONE;
     }
 
     inline usart::Stop_Bits get_stop_bits(uint16_t config) {
         uint16_t stop = config & SERIAL_STOP_BIT_MASK;
         return (stop == SERIAL_STOP_BIT_1_5) ? usart::Stop_Bits::STB_1_5BIT :
                (stop == SERIAL_STOP_BIT_2)   ? usart::Stop_Bits::STB_2BIT :
-                                              usart::Stop_Bits::STB_1BIT;
+               usart::Stop_Bits::STB_1BIT;
     }
 
     inline usart::Word_Length get_word_length(uint16_t config) {
@@ -114,10 +114,10 @@ protected:
     }
 
     inline const dma::DMA_Base get_dma_base() {
-        return (base_ <= usart::USART_Base::USART2_BASE) ? 
+        return (base_ <= usart::USART_Base::USART2_BASE) ?
                dma::DMA_Base::DMA0_BASE :
-               (base_ <= usart::USART_Base::UART4_BASE) ? 
-               dma::DMA_Base::DMA1_BASE : 
+               (base_ <= usart::USART_Base::UART4_BASE) ?
+               dma::DMA_Base::DMA1_BASE :
                dma::DMA_Base::INVALID;
     }
 
@@ -130,8 +130,8 @@ protected:
             dma::DMA_Channel::CHANNEL2   // UART4
         };
         auto idx = static_cast<size_t>(base_);
-        return (idx < sizeof(channel_map) / sizeof(channel_map[0])) ? 
-               channel_map[idx] : 
+        return (idx < sizeof(channel_map) / sizeof(channel_map[0])) ?
+               channel_map[idx] :
                dma::DMA_Channel::INVALID;
     }
 

@@ -28,7 +28,7 @@
 namespace arduino {
 
 #ifndef WIRE_BUFFER_LENGTH
-#define WIRE_BUFFER_LENGTH 32
+    #define WIRE_BUFFER_LENGTH 32
 #endif
 
 class TwoWire : public HardwareI2C {

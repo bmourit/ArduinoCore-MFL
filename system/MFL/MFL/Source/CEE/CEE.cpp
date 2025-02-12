@@ -32,7 +32,7 @@ CEE::CEE() {}
  * @brief Enables or disables the code execution enhancement bit.
  *
  * This function sets or clears the CEE_EN bit in the CEE register
- * to enable or disable the code execution enhancement mode. 
+ * to enable or disable the code execution enhancement mode.
  *
  * @param enable Set to true to enable the code execution enhancement, false to disable it.
  */

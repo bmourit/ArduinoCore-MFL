@@ -31,63 +31,63 @@ DMA& get_instance_for_base() {
 Result<DMA, DMA_Error_Type> DMA::get_instance(DMA_Base Base, DMA_Channel Channel) {
     if (Base == DMA_Base::DMA0_BASE) {
         switch (Channel) {
-        case DMA_Channel::CHANNEL0:
-            return get_enum_instance<DMA_Base, DMA, DMA_Error_Type>(
-                       Base, DMA_Base::DMA0_BASE, get_instance_for_base<DMA_Base::DMA0_BASE, DMA_Channel::CHANNEL0>()
-                   );
-        case DMA_Channel::CHANNEL1:
-            return get_enum_instance<DMA_Base, DMA, DMA_Error_Type>(
-                       Base, DMA_Base::DMA0_BASE, get_instance_for_base<DMA_Base::DMA0_BASE, DMA_Channel::CHANNEL1>()
-                   );
-        case DMA_Channel::CHANNEL2:
-            return get_enum_instance<DMA_Base, DMA, DMA_Error_Type>(
-                       Base, DMA_Base::DMA0_BASE, get_instance_for_base<DMA_Base::DMA0_BASE, DMA_Channel::CHANNEL2>()
-                   );
-        case DMA_Channel::CHANNEL3:
-        return get_enum_instance<DMA_Base, DMA, DMA_Error_Type>(
-                       Base, DMA_Base::DMA0_BASE, get_instance_for_base<DMA_Base::DMA0_BASE, DMA_Channel::CHANNEL3>()
-                   );
-        case DMA_Channel::CHANNEL4:
-            return get_enum_instance<DMA_Base, DMA, DMA_Error_Type>(
-                       Base, DMA_Base::DMA0_BASE, get_instance_for_base<DMA_Base::DMA0_BASE, DMA_Channel::CHANNEL4>()
-                   );
-        case DMA_Channel::CHANNEL5:
-            return get_enum_instance<DMA_Base, DMA, DMA_Error_Type>(
-                       Base, DMA_Base::DMA0_BASE, get_instance_for_base<DMA_Base::DMA0_BASE, DMA_Channel::CHANNEL5>()
-                   );
-        case DMA_Channel::CHANNEL6:
-            return get_enum_instance<DMA_Base, DMA, DMA_Error_Type>(
-                       Base, DMA_Base::DMA0_BASE, get_instance_for_base<DMA_Base::DMA0_BASE, DMA_Channel::CHANNEL6>()
-                   );
-        case DMA_Channel::INVALID:
-        default:
-            return RETURN_RESULT(DMA, DMA_Error_Type::INVALID_DMA);
+            case DMA_Channel::CHANNEL0:
+                return get_enum_instance<DMA_Base, DMA, DMA_Error_Type>(
+                           Base, DMA_Base::DMA0_BASE, get_instance_for_base<DMA_Base::DMA0_BASE, DMA_Channel::CHANNEL0>()
+                       );
+            case DMA_Channel::CHANNEL1:
+                return get_enum_instance<DMA_Base, DMA, DMA_Error_Type>(
+                           Base, DMA_Base::DMA0_BASE, get_instance_for_base<DMA_Base::DMA0_BASE, DMA_Channel::CHANNEL1>()
+                       );
+            case DMA_Channel::CHANNEL2:
+                return get_enum_instance<DMA_Base, DMA, DMA_Error_Type>(
+                           Base, DMA_Base::DMA0_BASE, get_instance_for_base<DMA_Base::DMA0_BASE, DMA_Channel::CHANNEL2>()
+                       );
+            case DMA_Channel::CHANNEL3:
+                return get_enum_instance<DMA_Base, DMA, DMA_Error_Type>(
+                           Base, DMA_Base::DMA0_BASE, get_instance_for_base<DMA_Base::DMA0_BASE, DMA_Channel::CHANNEL3>()
+                       );
+            case DMA_Channel::CHANNEL4:
+                return get_enum_instance<DMA_Base, DMA, DMA_Error_Type>(
+                           Base, DMA_Base::DMA0_BASE, get_instance_for_base<DMA_Base::DMA0_BASE, DMA_Channel::CHANNEL4>()
+                       );
+            case DMA_Channel::CHANNEL5:
+                return get_enum_instance<DMA_Base, DMA, DMA_Error_Type>(
+                           Base, DMA_Base::DMA0_BASE, get_instance_for_base<DMA_Base::DMA0_BASE, DMA_Channel::CHANNEL5>()
+                       );
+            case DMA_Channel::CHANNEL6:
+                return get_enum_instance<DMA_Base, DMA, DMA_Error_Type>(
+                           Base, DMA_Base::DMA0_BASE, get_instance_for_base<DMA_Base::DMA0_BASE, DMA_Channel::CHANNEL6>()
+                       );
+            case DMA_Channel::INVALID:
+            default:
+                return RETURN_RESULT(DMA, DMA_Error_Type::INVALID_DMA);
         }
     } else if (Base == DMA_Base::DMA1_BASE) {
         switch (Channel) {
-        case DMA_Channel::CHANNEL0:
-            return get_enum_instance<DMA_Base, DMA, DMA_Error_Type>(
-                       Base, DMA_Base::DMA1_BASE, get_instance_for_base<DMA_Base::DMA1_BASE, DMA_Channel::CHANNEL0>()
-                   );
-        case DMA_Channel::CHANNEL1:
-            return get_enum_instance<DMA_Base, DMA, DMA_Error_Type>(
-                       Base, DMA_Base::DMA1_BASE, get_instance_for_base<DMA_Base::DMA1_BASE, DMA_Channel::CHANNEL1>()
-                   );
-        case DMA_Channel::CHANNEL2:
-            return get_enum_instance<DMA_Base, DMA, DMA_Error_Type>(
-                       Base, DMA_Base::DMA1_BASE, get_instance_for_base<DMA_Base::DMA1_BASE, DMA_Channel::CHANNEL2>()
-                   );
-        case DMA_Channel::CHANNEL3:
-            return get_enum_instance<DMA_Base, DMA, DMA_Error_Type>(
-                       Base, DMA_Base::DMA1_BASE, get_instance_for_base<DMA_Base::DMA1_BASE, DMA_Channel::CHANNEL3>()
-                   );
-        case DMA_Channel::CHANNEL4:
-            return get_enum_instance<DMA_Base, DMA, DMA_Error_Type>(
-                       Base, DMA_Base::DMA1_BASE, get_instance_for_base<DMA_Base::DMA1_BASE, DMA_Channel::CHANNEL4>()
-                   );
-        case DMA_Channel::INVALID:
-        default:
-            return RETURN_RESULT(DMA, DMA_Error_Type::INVALID_DMA);
+            case DMA_Channel::CHANNEL0:
+                return get_enum_instance<DMA_Base, DMA, DMA_Error_Type>(
+                           Base, DMA_Base::DMA1_BASE, get_instance_for_base<DMA_Base::DMA1_BASE, DMA_Channel::CHANNEL0>()
+                       );
+            case DMA_Channel::CHANNEL1:
+                return get_enum_instance<DMA_Base, DMA, DMA_Error_Type>(
+                           Base, DMA_Base::DMA1_BASE, get_instance_for_base<DMA_Base::DMA1_BASE, DMA_Channel::CHANNEL1>()
+                       );
+            case DMA_Channel::CHANNEL2:
+                return get_enum_instance<DMA_Base, DMA, DMA_Error_Type>(
+                           Base, DMA_Base::DMA1_BASE, get_instance_for_base<DMA_Base::DMA1_BASE, DMA_Channel::CHANNEL2>()
+                       );
+            case DMA_Channel::CHANNEL3:
+                return get_enum_instance<DMA_Base, DMA, DMA_Error_Type>(
+                           Base, DMA_Base::DMA1_BASE, get_instance_for_base<DMA_Base::DMA1_BASE, DMA_Channel::CHANNEL3>()
+                       );
+            case DMA_Channel::CHANNEL4:
+                return get_enum_instance<DMA_Base, DMA, DMA_Error_Type>(
+                           Base, DMA_Base::DMA1_BASE, get_instance_for_base<DMA_Base::DMA1_BASE, DMA_Channel::CHANNEL4>()
+                       );
+            case DMA_Channel::INVALID:
+            default:
+                return RETURN_RESULT(DMA, DMA_Error_Type::INVALID_DMA);
         }
     }
     return RETURN_RESULT(DMA, DMA_Error_Type::INVALID_DMA);
@@ -130,13 +130,13 @@ void DMA::init(DMA_Config config) {
     write_bit(*this, cached_offsets_.ctl, static_cast<uint32_t>(CHXCTL_Bits::CHEN), false);
     // Set parameters
     write_bit_ranges(*this, cached_offsets_.ctl,
-               static_cast<uint32_t>(CHXCTL_Bits::PRIO), static_cast<uint32_t>(config_.channel_priority),
-               static_cast<uint32_t>(CHXCTL_Bits::MWIDTH), static_cast<uint32_t>(config_.memory_bit_width),
-               static_cast<uint32_t>(CHXCTL_Bits::PWIDTH), static_cast<uint32_t>(config_.peripheral_bit_width));
+                     static_cast<uint32_t>(CHXCTL_Bits::PRIO), static_cast<uint32_t>(config_.channel_priority),
+                     static_cast<uint32_t>(CHXCTL_Bits::MWIDTH), static_cast<uint32_t>(config_.memory_bit_width),
+                     static_cast<uint32_t>(CHXCTL_Bits::PWIDTH), static_cast<uint32_t>(config_.peripheral_bit_width));
     write_bits_sequence(*this, cached_offsets_.ctl,
-               static_cast<uint32_t>(CHXCTL_Bits::PNAGA), (config_.peripheral_increase == Increase_Mode::INCREASE_ENABLE),
-               static_cast<uint32_t>(CHXCTL_Bits::MNAGA), (config_.memory_increase == Increase_Mode::INCREASE_ENABLE),
-               static_cast<uint32_t>(CHXCTL_Bits::DIR), (config_.direction == Transfer_Direction::M2P));
+                        static_cast<uint32_t>(CHXCTL_Bits::PNAGA), (config_.peripheral_increase == Increase_Mode::INCREASE_ENABLE),
+                        static_cast<uint32_t>(CHXCTL_Bits::MNAGA), (config_.memory_increase == Increase_Mode::INCREASE_ENABLE),
+                        static_cast<uint32_t>(CHXCTL_Bits::DIR), (config_.direction == Transfer_Direction::M2P));
 
     // Addresses
     write_register(*this, cached_offsets_.maddr, config_.memory_address);
@@ -222,7 +222,7 @@ void DMA::set_channel_enable(bool enable) {
  */
 void DMA::set_data_address(Data_Type type, uint32_t address) {
     DMA_Regs offset = (type == Data_Type::PERIPHERAL_ADDRESS) ?
-           cached_offsets_.paddr : cached_offsets_.maddr;
+                      cached_offsets_.paddr : cached_offsets_.maddr;
     write_register(*this, offset, address);
 }
 
@@ -287,8 +287,8 @@ void DMA::set_channel_priority(Channel_Priority priority) {
  */
 void DMA::set_bit_width(Data_Type type, Bit_Width width) {
     write_bit_range(*this, cached_offsets_.ctl, (type == Data_Type::PERIPHERAL_ADDRESS) ?
-          static_cast<uint32_t>(CHXCTL_Bits::PWIDTH) : static_cast<uint32_t>(CHXCTL_Bits::MWIDTH),
-          static_cast<uint32_t>(width));
+                    static_cast<uint32_t>(CHXCTL_Bits::PWIDTH) : static_cast<uint32_t>(CHXCTL_Bits::MWIDTH),
+                    static_cast<uint32_t>(width));
 }
 
 /**
@@ -305,9 +305,9 @@ void DMA::set_bit_width(Data_Type type, Bit_Width width) {
  */
 void DMA::set_increase_mode_enable(Data_Type type, bool enable) {
     write_bit(*this, cached_offsets_.ctl, (type == Data_Type::PERIPHERAL_ADDRESS) ?
-          static_cast<uint32_t>(CHXCTL_Bits::PNAGA) :
-          static_cast<uint32_t>(CHXCTL_Bits::MNAGA),
-          enable);
+              static_cast<uint32_t>(CHXCTL_Bits::PNAGA) :
+              static_cast<uint32_t>(CHXCTL_Bits::MNAGA),
+              enable);
 }
 
 /**
@@ -324,7 +324,7 @@ void DMA::set_increase_mode_enable(Data_Type type, bool enable) {
  */
 void DMA::set_transfer_direction(Transfer_Direction direction) {
     write_bit(*this, cached_offsets_.ctl, static_cast<uint32_t>(CHXCTL_Bits::DIR),
-           (direction == Transfer_Direction::M2P));
+              (direction == Transfer_Direction::M2P));
 }
 
 /**
@@ -337,10 +337,10 @@ void DMA::set_transfer_direction(Transfer_Direction direction) {
 void DMA::set_transfer_abandon() {
     // Disable interrupts
     write_bits_sequence(*this, cached_offsets_.ctl,
-                   static_cast<uint32_t>(Interrupt_Type::INTR_FTFIE), false,
-                   static_cast<uint32_t>(Interrupt_Type::INTR_HTFIE), false,
-                   static_cast<uint32_t>(Interrupt_Type::INTR_ERRIE), false,
-                   static_cast<uint32_t>(CHXCTL_Bits::CHEN), false);
+                        static_cast<uint32_t>(Interrupt_Type::INTR_FTFIE), false,
+                        static_cast<uint32_t>(Interrupt_Type::INTR_HTFIE), false,
+                        static_cast<uint32_t>(Interrupt_Type::INTR_ERRIE), false,
+                        static_cast<uint32_t>(CHXCTL_Bits::CHEN), false);
     // Disable channel
     write_bit(*this, cached_offsets_.ctl, static_cast<uint32_t>(CHXCTL_Bits::CHEN), false);
     // Clear all flags
@@ -423,11 +423,11 @@ bool DMA::get_interrupt_flag(Interrupt_Flags flag) {
     INTF_Bits bits = INTF_Bits::INVALID;
 
     switch (flag) {
-    case Interrupt_Flags::INTR_FLAG_GIF: bits = get_channel_bits_from_flag(Status_Flags::FLAG_GIF); break;
-    case Interrupt_Flags::INTR_FLAG_FTFIF: bits = get_channel_bits_from_flag(Status_Flags::FLAG_FTFIF); break;
-    case Interrupt_Flags::INTR_FLAG_HTFIF: bits = get_channel_bits_from_flag(Status_Flags::FLAG_HTFIF); break;
-    case Interrupt_Flags::INTR_FLAG_ERRIF: bits = get_channel_bits_from_flag(Status_Flags::FLAG_ERRIF); break;
-    default: break;
+        case Interrupt_Flags::INTR_FLAG_GIF: bits = get_channel_bits_from_flag(Status_Flags::FLAG_GIF); break;
+        case Interrupt_Flags::INTR_FLAG_FTFIF: bits = get_channel_bits_from_flag(Status_Flags::FLAG_FTFIF); break;
+        case Interrupt_Flags::INTR_FLAG_HTFIF: bits = get_channel_bits_from_flag(Status_Flags::FLAG_HTFIF); break;
+        case Interrupt_Flags::INTR_FLAG_ERRIF: bits = get_channel_bits_from_flag(Status_Flags::FLAG_ERRIF); break;
+        default: break;
     }
 
     if (cached_offsets_.ctl == DMA_Regs::INVALID || bits == INTF_Bits::INVALID) {
@@ -436,7 +436,7 @@ bool DMA::get_interrupt_flag(Interrupt_Flags flag) {
 
     bool intr_flag = read_bit(*this, DMA_Regs::INTF, static_cast<uint32_t>(bits));
     bool intr_enable = (flag != Interrupt_Flags::INTR_FLAG_GIF) ?
-               read_bit(*this, cached_offsets_.ctl, static_cast<uint32_t>(flag)) : false;
+                       read_bit(*this, cached_offsets_.ctl, static_cast<uint32_t>(flag)) : false;
 
     return (intr_flag && intr_enable);
 }
@@ -454,11 +454,11 @@ void DMA::clear_interrupt_flag(Interrupt_Flags flag) {
     Status_Flags status_flag = Status_Flags::INVALID;
 
     switch (flag) {
-    case Interrupt_Flags::INTR_FLAG_GIF: status_flag = Status_Flags::FLAG_GIF; break;
-    case Interrupt_Flags::INTR_FLAG_FTFIF: status_flag = Status_Flags::FLAG_FTFIF; break;
-    case Interrupt_Flags::INTR_FLAG_HTFIF: status_flag = Status_Flags::FLAG_HTFIF; break;
-    case Interrupt_Flags::INTR_FLAG_ERRIF: status_flag = Status_Flags::FLAG_ERRIF; break;
-    default: break;
+        case Interrupt_Flags::INTR_FLAG_GIF: status_flag = Status_Flags::FLAG_GIF; break;
+        case Interrupt_Flags::INTR_FLAG_FTFIF: status_flag = Status_Flags::FLAG_FTFIF; break;
+        case Interrupt_Flags::INTR_FLAG_HTFIF: status_flag = Status_Flags::FLAG_HTFIF; break;
+        case Interrupt_Flags::INTR_FLAG_ERRIF: status_flag = Status_Flags::FLAG_ERRIF; break;
+        default: break;
     }
 
     INTF_Bits bits = get_channel_bits_from_flag(status_flag);
@@ -519,10 +519,10 @@ inline INTF_Bits DMA::get_channel_bits_from_flag(Status_Flags flag) {
     };
 
     switch (flag) {
-    case Status_Flags::FLAG_GIF: return gif_map[static_cast<size_t>(channel_)];
-    case Status_Flags::FLAG_FTFIF: return ftfif_map[static_cast<size_t>(channel_)];
-    case Status_Flags::FLAG_HTFIF: return htfif_map[static_cast<size_t>(channel_)];
-    case Status_Flags::FLAG_ERRIF: return errif_map[static_cast<size_t>(channel_)];
+        case Status_Flags::FLAG_GIF: return gif_map[static_cast<size_t>(channel_)];
+        case Status_Flags::FLAG_FTFIF: return ftfif_map[static_cast<size_t>(channel_)];
+        case Status_Flags::FLAG_HTFIF: return htfif_map[static_cast<size_t>(channel_)];
+        case Status_Flags::FLAG_ERRIF: return errif_map[static_cast<size_t>(channel_)];
     case Status_Flags::INVALID: default: return INTF_Bits::INVALID;
     }
 }
@@ -560,10 +560,10 @@ inline DMA_Regs DMA::get_channel_offset_from_reg(Channel_Regs reg) {
         DMA_Regs::CH6MADDR
     };
     switch (reg) {
-    case Channel_Regs::CHXCTL: return chxctl_map[static_cast<size_t>(channel_)];
-    case Channel_Regs::CHXCNT: return chxcnt_map[static_cast<size_t>(channel_)];
-    case Channel_Regs::CHXPADDR: return chxpaddr_map[static_cast<size_t>(channel_)];
-    case Channel_Regs::CHXMADDR: return chxmaddr_map[static_cast<size_t>(channel_)];
+        case Channel_Regs::CHXCTL: return chxctl_map[static_cast<size_t>(channel_)];
+        case Channel_Regs::CHXCNT: return chxcnt_map[static_cast<size_t>(channel_)];
+        case Channel_Regs::CHXPADDR: return chxpaddr_map[static_cast<size_t>(channel_)];
+        case Channel_Regs::CHXMADDR: return chxmaddr_map[static_cast<size_t>(channel_)];
     case Channel_Regs::INVALID: default: return DMA_Regs::INVALID;
     }
 }

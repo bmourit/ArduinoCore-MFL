@@ -14,7 +14,7 @@
  * @param packedPinOps The packed 32-bit pin configuration value
  */
 void setPinOp(pin_size_t pin, uint32_t packedPinOps) {
-    gpio::Pin_Remap_Select remap = getPackedPinRemap(packedPinOps); 
+    gpio::Pin_Remap_Select remap = getPackedPinRemap(packedPinOps);
     if (remap != gpio::Pin_Remap_Select::NO_REMAP) {
         gpio::AFIO::get_instance().set_remap(remap);
     }

@@ -25,7 +25,7 @@
 namespace arduino {
 
 SPIClassMFL& SPIClassMFL::get_instance(spi::SPI_Base Base, pin_size_t mosiPin,
-           pin_size_t misoPin, pin_size_t sclkPin, pin_size_t sselPin)
+                                       pin_size_t misoPin, pin_size_t sclkPin, pin_size_t sselPin)
 {
     switch (Base) {
         case spi::SPI_Base::SPI0_BASE: {
@@ -53,7 +53,7 @@ SPIClassMFL& SPIClassMFL::get_instance(spi::SPI_Base Base, pin_size_t mosiPin,
 }
 
 SPIClassMFL::SPIClassMFL(spi::SPI_Base Base, pin_size_t mosiPin,
-           pin_size_t misoPin, pin_size_t sclkPin, pin_size_t sselPin) :
+                         pin_size_t misoPin, pin_size_t sclkPin, pin_size_t sselPin) :
     base_(Base),
     spi_(spi::SPI::get_instance(Base).value()),
     customMosiPin_(mosiPin),
@@ -253,22 +253,22 @@ void SPIClassMFL::notUsingInterrupt(int interruptNumber) {
  */
 void SPIClassMFL::setDataMode(SPIMode dataMode) {
     switch (dataMode) {
-    case SPI_MODE0:
-        config_.polarity_pull = spi::Clock_Polarity::PULL_LOW;
-        config_.clock_phase = spi::Clock_Phase::PHASE_FIRST_EDGE;
-        break;
-    case SPI_MODE1:
-        config_.polarity_pull = spi::Clock_Polarity::PULL_LOW;
-        config_.clock_phase = spi::Clock_Phase::PHASE_SECOND_EDGE;
-        break;
-    case SPI_MODE2:
-        config_.polarity_pull = spi::Clock_Polarity::PULL_HIGH;
-        config_.clock_phase = spi::Clock_Phase::PHASE_FIRST_EDGE;
-        break;
-    case SPI_MODE3:
-        config_.polarity_pull = spi::Clock_Polarity::PULL_HIGH;
-        config_.clock_phase = spi::Clock_Phase::PHASE_SECOND_EDGE;
-        break;
+        case SPI_MODE0:
+            config_.polarity_pull = spi::Clock_Polarity::PULL_LOW;
+            config_.clock_phase = spi::Clock_Phase::PHASE_FIRST_EDGE;
+            break;
+        case SPI_MODE1:
+            config_.polarity_pull = spi::Clock_Polarity::PULL_LOW;
+            config_.clock_phase = spi::Clock_Phase::PHASE_SECOND_EDGE;
+            break;
+        case SPI_MODE2:
+            config_.polarity_pull = spi::Clock_Polarity::PULL_HIGH;
+            config_.clock_phase = spi::Clock_Phase::PHASE_FIRST_EDGE;
+            break;
+        case SPI_MODE3:
+            config_.polarity_pull = spi::Clock_Polarity::PULL_HIGH;
+            config_.clock_phase = spi::Clock_Phase::PHASE_SECOND_EDGE;
+            break;
     }
     spi_.init(config_);
 }
@@ -310,7 +310,7 @@ void SPIClassMFL::setClockDivider(uint32_t clock) {
                            (div <= 32)  ? spi::PCLK_Divider::PCLK_32 :
                            (div <= 64)  ? spi::PCLK_Divider::PCLK_64 :
                            (div <= 128) ? spi::PCLK_Divider::PCLK_128 :
-                                          spi::PCLK_Divider::PCLK_256;
+                           spi::PCLK_Divider::PCLK_256;
 
     /*if (div <= 2) config_.pclk_divider = spi::PCLK_Divider::PCLK_2;
     else if (div <= 4) config_.pclk_divider = spi::PCLK_Divider::PCLK_4;

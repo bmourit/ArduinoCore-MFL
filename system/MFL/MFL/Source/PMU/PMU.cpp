@@ -20,6 +20,7 @@
 #include "PMU.hpp"
 #include "F303RE.hpp"
 #include "RCU.hpp"
+#include <array>
 
 namespace pmu {
 
@@ -39,7 +40,7 @@ PMU::PMU() : is_clock_enabled_(false) {
 
 /**
  * @brief Resets the PMU peripheral by toggling the reset control.
- * 
+ *
  * This function enables the peripheral clock reset for the PMU,
  * then disables it, effectively resetting all registers to their
  * default values.
@@ -51,20 +52,20 @@ void PMU::reset() {
 
 /**
  * @brief Enables low voltage detection (LVD) for the PMU with the specified threshold.
- * 
+ *
  * @param threshold The LVD threshold level to be set, defined by the LVD_Threshold enum.
- * 
+ *
  * This function enables the LVD by setting the LVDEN bit in the CTL register.
  * The LVDT bits are configured to the specified threshold level.
  */
 void PMU::lvd_enable(LVD_Threshold threshold) {
     // Reset
     write_bits_sequence(*this, PMU_Regs::CTL,
-               static_cast<uint32_t>(CTL_Bits::LVDEN), false,
-               static_cast<uint32_t>(CTL_Bits::LVDEN), true);
+                        static_cast<uint32_t>(CTL_Bits::LVDEN), false,
+                        static_cast<uint32_t>(CTL_Bits::LVDEN), true);
     write_bit_ranges(*this, PMU_Regs::CTL,
-               static_cast<uint32_t>(CTL_Bits::LVDT), Clear,
-               static_cast<uint32_t>(CTL_Bits::LVDT), static_cast<uint32_t>(threshold));
+                     static_cast<uint32_t>(CTL_Bits::LVDT), Clear,
+                     static_cast<uint32_t>(CTL_Bits::LVDT), static_cast<uint32_t>(threshold));
 }
 
 /**
@@ -79,9 +80,9 @@ void PMU::lvd_disable() {
 
 /**
  * @brief Sets the output voltage level for the low-dropout regulator (LDO).
- * 
+ *
  * @param level The output voltage level to be set, defined by the Output_Voltage enum.
- * 
+ *
  * This function sets the LDOVS bits in the CTL register to the specified output voltage level.
  * The LDOVS bits control the output voltage level of the LDO, which is used to power the CPU, peripherals,
  * and other components on the board.
@@ -132,7 +133,7 @@ void PMU::set_high_driver_enable(bool enable) {
  * low driver mode when the system enters deep sleep. When enabled, the low
  * driver mode helps reduce power consumption during deep sleep states.
  *
- * @param enable Set to true to enable low driver mode during deep sleep, 
+ * @param enable Set to true to enable low driver mode during deep sleep,
  *               false to disable it.
  */
 void PMU::set_low_driver_on_deep_sleep_enable(bool enable) {
@@ -193,8 +194,8 @@ void PMU::set_driver_on_normal_power(Power_Driver driver) {
  */
 void PMU::set_standby_enable() {
     write_bits_sequence(*this, PMU_Regs::CTL,
-               static_cast<uint32_t>(CTL_Bits::STBMOD), true,
-               static_cast<uint32_t>(CTL_Bits::WURST), true);
+                        static_cast<uint32_t>(CTL_Bits::STBMOD), true,
+                        static_cast<uint32_t>(CTL_Bits::WURST), true);
 
     set_standby_mode();
 }
@@ -236,11 +237,11 @@ void PMU::set_deep_sleep_enable(Power_Driver driver, PMU_Commands cmd, bool enab
 
     write_bit_range(*this, PMU_Regs::CTL, static_cast<uint32_t>(CTL_Bits::LDEN), Clear);
     write_bits_sequence(*this, PMU_Regs::CTL,
-               static_cast<uint32_t>(CTL_Bits::STBMOD), false,
-               static_cast<uint32_t>(CTL_Bits::LDOLP), false,
-               static_cast<uint32_t>(CTL_Bits::LDNP), false,
-               static_cast<uint32_t>(CTL_Bits::LDLP), false,
-               static_cast<uint32_t>(CTL_Bits::LDOLP), (driver == Power_Driver::LOW_DRIVER));
+                        static_cast<uint32_t>(CTL_Bits::STBMOD), false,
+                        static_cast<uint32_t>(CTL_Bits::LDOLP), false,
+                        static_cast<uint32_t>(CTL_Bits::LDNP), false,
+                        static_cast<uint32_t>(CTL_Bits::LDLP), false,
+                        static_cast<uint32_t>(CTL_Bits::LDOLP), (driver == Power_Driver::LOW_DRIVER));
     // low drive mode config in deep-sleep mode
     if (enable) {
         if (driver == Power_Driver::NORMAL_DRIVER) {
@@ -304,111 +305,127 @@ void PMU::clear_flag(Clear_Flags flag) {
     }
 }
 
+/**
+ * Sets the sleep mode command for the PMU.
+ *
+ * @param value The sleep mode command value. 1 for WFI, 2 for WFE.
+ *
+ * This function sets the sleep mode command by calling either the __WFI() or
+ * __WFE() intrinsic functions. If the value is invalid, the function will return
+ * without doing anything.
+ */
+void PMU::set_sleep_mode_command(uint8_t value) {
+    constexpr uint8_t MIN_VALUE = 1;
+    constexpr uint8_t MAX_VALUE = 2;
+
+    if (value < MIN_VALUE || value > MAX_VALUE) {
+        return;
+    }
+
+    // Clear sleepdeep bit of Cortex-M4 SCR
+    SCB->SCR &= ~static_cast<uint32_t>(SCB_SCR_SLEEPDEEP_Msk);
+
+    // Enter sleep mode using appropriate command
+    if (value == MIN_VALUE) {
+        __WFI();
+    } else {
+        __WFE();
+    }
+}
+
+/**
+ * Sets the deep sleep mode command for the PMU.
+ *
+ * This function sets the deep sleep mode command by calling either the __WFI() or
+ * __WFE() intrinsic functions. If the value is invalid, the function will return
+ * without doing anything.
+ *
+ * Before calling the deep sleep command, the function will save the current
+ * values of the registers at addresses 0xE000E010, 0xE000E100, 0xE000E104, and
+ * 0xE000E108, and then restore them after waking up from deep sleep mode.
+ *
+ * @param value The deep sleep mode command value. 1 for WFI, 2 for WFE.
+ */
+void PMU::set_deep_sleep_mode_command(uint8_t value) {
+    constexpr uint8_t MIN_VALUE = 1;
+    constexpr uint8_t MAX_VALUE = 2;
+
+    if (value < MIN_VALUE || value > MAX_VALUE) {
+        return;
+    }
+
+    static std::array<uint32_t, 4> register_snapshot;
+
+    // Set sleepdeep bit of Cortex-M4 SCR
+    SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
+
+    // Store register values
+    volatile uint32_t* const SYSTICK_CTRL = reinterpret_cast<uint32_t*>(0xE000E010);
+    volatile uint32_t* const NVIC_ISER0 = reinterpret_cast<uint32_t*>(0xE000E100);
+    volatile uint32_t* const NVIC_ISER1 = reinterpret_cast<uint32_t*>(0xE000E104);
+    volatile uint32_t* const NVIC_ISER2 = reinterpret_cast<uint32_t*>(0xE000E108);
+
+    register_snapshot[0] = *SYSTICK_CTRL;
+    register_snapshot[1] = *NVIC_ISER0;
+    register_snapshot[2] = *NVIC_ISER1;
+    register_snapshot[3] = *NVIC_ISER2;
+
+    // Configure registers for deep sleep
+    *SYSTICK_CTRL &= 0x00010004;
+    *(reinterpret_cast<uint32_t*>(0xE000E180)) = 0XFF7FF83D;
+    *(reinterpret_cast<uint32_t*>(0xE000E184)) = 0XFFFFF8FF;
+    *(reinterpret_cast<uint32_t*>(0xE000E188)) = 0xFFFFFFFF;
+
+    // Enter deep sleep using appropriate command
+    if (value == MIN_VALUE) {
+        __WFI();
+    } else {
+        __SEV();
+        __WFE();
+        __WFE();
+    }
+
+    // Restore register values
+    *SYSTICK_CTRL = register_snapshot[0];
+    *NVIC_ISER0 = register_snapshot[1];
+    *NVIC_ISER1 = register_snapshot[2];
+    *NVIC_ISER2 = register_snapshot[3];
+
+    // Reset sleepdeep bit of Cortex-M4 SCR
+    SCB->SCR &= ~static_cast<uint32_t>(SCB_SCR_SLEEPDEEP_Msk);
+}
+
+/**
+ * Puts the device into standby mode.
+ *
+ * This function puts the device into standby mode by setting the
+ * sleepdeep bit in the System Control Register (SCB->SCR) and
+ * configuring the System Tick Timer (SYSTICK) to wake up the
+ * device when a System Tick interrupt occurs.
+ *
+ * The device will wake up when a System Tick interrupt occurs
+ * and the WAKEUP bit in the SYSTICK Control and Status Register
+ * (SYSTICK_CTRL) is set.
+ */
+void PMU::set_standby_mode(void) {
+    // Set sleepdeep bit of Cortex-M4 SCR
+    SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
+
+    // Configure system registers for standby mode
+    volatile uint32_t* const SYSTICK_CTRL = reinterpret_cast<uint32_t*>(0xE000E010U);
+    volatile uint32_t* const NVIC_ICER0 = reinterpret_cast<uint32_t*>(0xE000E180U);
+    volatile uint32_t* const NVIC_ICER1 = reinterpret_cast<uint32_t*>(0xE000E184U);
+    volatile uint32_t* const NVIC_ICER2 = reinterpret_cast<uint32_t*>(0xE000E188U);
+
+    *SYSTICK_CTRL &= 0x00010004U;
+    *NVIC_ICER0 = 0XFFFFFFF7U;
+    *NVIC_ICER1 = 0XFFFFFDFFU;
+    *NVIC_ICER2 = 0xFFFFFFFFU;
+
+    __WFI();
+}
+
 
 } // namespace pmu
 
 pmu::PMU& PMU_I = pmu::PMU::get_instance();
-
-
-extern "C" {
-
-    /**
-     * Sets the sleep mode command for the PMU.
-     *
-     * @param value The sleep mode command value. 1 for WFI, 2 for WFE.
-     *
-     * This function sets the sleep mode command by calling either the __WFI() or
-     * __WFE() intrinsic functions. If the value is invalid, the function will return
-     * without doing anything.
-     */
-    void set_sleep_mode_command(uint8_t value) {
-        if ((value < 1) || (value > 2)) {
-            return;
-        }
-
-        // Clear sleepdeep bit of Cortex-M4 SCR
-        SCB->SCR &= ~(static_cast<uint32_t>(SCB_SCR_SLEEPDEEP_Msk));
-
-        if (value == 1) {
-            __WFI();
-        } else if (value == 2) {
-            __WFE();
-        }
-    }
-
-    /**
-     * Sets the deep sleep mode command for the PMU.
-     *
-     * This function sets the deep sleep mode command by calling either the __WFI() or
-     * __WFE() intrinsic functions. If the value is invalid, the function will return
-     * without doing anything.
-     *
-     * Before calling the deep sleep command, the function will save the current
-     * values of the registers at addresses 0xE000E010, 0xE000E100, 0xE000E104, and
-     * 0xE000E108, and then restore them after waking up from deep sleep mode.
-     *
-     * @param value The deep sleep mode command value. 1 for WFI, 2 for WFE.
-     */
-    void set_deep_sleep_mode_command(uint8_t value) {
-        if ((value < 1) || (value > 2)) {
-            return;
-        }
-
-        static uint32_t register_snapshot[4];
-
-        // Set sleepdeep bit of Cortex-M4 SCR
-        SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
-
-        register_snapshot[0] = (*(volatile uint32_t *)(0xE000E010));
-        register_snapshot[1] = (*(volatile uint32_t *)(0xE000E100));
-        register_snapshot[2] = (*(volatile uint32_t *)(0xE000E104));
-        register_snapshot[3] = (*(volatile uint32_t *)(0xE000E108));
-
-        (*(volatile uint32_t *)(0xE000E010)) &= 0x00010004;
-        (*(volatile uint32_t *)(0xE000E180)) = 0XFF7FF83D;
-        (*(volatile uint32_t *)(0xE000E184)) = 0XFFFFF8FF;
-        (*(volatile uint32_t *)(0xE000E188)) = 0xFFFFFFFF;
-
-        // select WFI or WFE command to enter deepsleep mode
-        if (value == 1) {
-            __WFI();
-        } else if (value == 2) {
-            __SEV();
-            __WFE();
-            __WFE();
-        }
-
-        (*(volatile uint32_t *)(0xE000E010)) = register_snapshot[0];
-        (*(volatile uint32_t *)(0xE000E100)) = register_snapshot[1];
-        (*(volatile uint32_t *)(0xE000E104)) = register_snapshot[2];
-        (*(volatile uint32_t *)(0xE000E108)) = register_snapshot[3];
-
-        // Reset sleepdeep bit of Cortex-M4 SCR
-        SCB->SCR &= ~((uint32_t)SCB_SCR_SLEEPDEEP_Msk);
-    }
-
-    /**
-     * Puts the device into standby mode.
-     *
-     * This function puts the device into standby mode by setting the
-     * sleepdeep bit in the System Control Register (SCB->SCR) and
-     * configuring the System Tick Timer (SYSTICK) to wake up the
-     * device when a System Tick interrupt occurs.
-     *
-     * The device will wake up when a System Tick interrupt occurs
-     * and the WAKEUP bit in the SYSTICK Control and Status Register
-     * (SYSTICK_CTRL) is set.
-     */
-    void set_standby_mode(void) {
-        // Set sleepdeep bit of Cortex-M4 SCR
-        SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
-
-        (*(volatile uint32_t *)(0xE000E010U)) &= 0x00010004U;
-        (*(volatile uint32_t *)(0xE000E180U)) = 0XFFFFFFF7U;
-        (*(volatile uint32_t *)(0xE000E184U)) = 0XFFFFFDFFU;
-        (*(volatile uint32_t *)(0xE000E188U)) = 0xFFFFFFFFU;
-
-        __WFI();
-    }
-
-} // extern "C"

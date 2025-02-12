@@ -88,19 +88,19 @@ void attachInterruptParam(pin_size_t pin, voidFuncPtrParam callback, PinStatus m
     exti::EXTI_Trigger type = exti::EXTI_Trigger::TRIG_NONE;
 
     switch (mode) {
-    case RISING:
-    case HIGH:
-        type = exti::EXTI_Trigger::TRIG_RISING;
-        break;
-    case FALLING:
-    case LOW:
-        type = exti::EXTI_Trigger::TRIG_FALLING;
-        break;
-    case CHANGE:
-        type = exti::EXTI_Trigger::TRIG_BOTH;
-        break;
-    default:
-        break;
+        case RISING:
+        case HIGH:
+            type = exti::EXTI_Trigger::TRIG_RISING;
+            break;
+        case FALLING:
+        case LOW:
+            type = exti::EXTI_Trigger::TRIG_FALLING;
+            break;
+        case CHANGE:
+            type = exti::EXTI_Trigger::TRIG_BOTH;
+            break;
+        default:
+            break;
     }
 
     callbackStorage[slotIndex] = CallbackWrapper{callback, param};

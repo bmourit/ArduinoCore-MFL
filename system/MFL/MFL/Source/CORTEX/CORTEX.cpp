@@ -112,8 +112,8 @@ void CORTEX::set_nvic_priority_group(Priority_Group group) {
  * NVIC_SetPriority() to set the priority of the interrupt request.
  */
 void CORTEX::set_nvic_priority(uint8_t irq, uint8_t preemption_priority, uint8_t sub_priority) {
-  uint32_t priority_group = NVIC_GetPriorityGrouping();
-  NVIC_SetPriority(static_cast<IRQn_Type>(irq), NVIC_EncodePriority(priority_group, preemption_priority, sub_priority));
+    uint32_t priority_group = NVIC_GetPriorityGrouping();
+    NVIC_SetPriority(static_cast<IRQn_Type>(irq), NVIC_EncodePriority(priority_group, preemption_priority, sub_priority));
 }
 
 /**
@@ -128,11 +128,11 @@ void CORTEX::set_nvic_priority(uint8_t irq, uint8_t preemption_priority, uint8_t
  * request is invalid (i.e. >= 0), the function returns without action.
  */
 void CORTEX::nvic_irq_enable(uint8_t irq) {
-  if (static_cast<uint32_t>(irq) >= 0) {
-    __asm volatile("":::"memory");
-    NVIC->ISER[(static_cast<uint32_t>(irq) >> 5UL)] = (uint32_t)(1UL << (static_cast<uint32_t>(irq) & 0x1FUL));
-    __asm volatile("":::"memory");
-  }
+    if (static_cast<uint32_t>(irq) >= 0) {
+        __asm volatile("":::"memory");
+        NVIC->ISER[(static_cast<uint32_t>(irq) >> 5UL)] = (uint32_t)(1UL << (static_cast<uint32_t>(irq) & 0x1FUL));
+        __asm volatile("":::"memory");
+    }
 }
 
 /**

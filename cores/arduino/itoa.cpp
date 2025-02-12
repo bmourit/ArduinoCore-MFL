@@ -20,7 +20,7 @@
 
 extern "C" {
 
-    constexpr const int MAX_BUFFER_SIZE = 33;
+    constexpr int MAX_BUFFER_SIZE = 33;
 
     /**
      * @brief Converts a signed long integer to a string in a specified radix.
@@ -89,7 +89,7 @@ extern "C" {
      *
      * This function converts an unsigned long integer to a string in the specified
      * radix. The resulting string is stored in the provided character array.
-     * The conversion supports radices from 2 to 36, and the function does not 
+     * The conversion supports radices from 2 to 36, and the function does not
      * perform any checks for overflow. A pointer to the beginning of the resulting
      * string is returned.
      *
@@ -125,7 +125,7 @@ extern "C" {
      *
      * This function converts an unsigned integer to a string in the specified
      * radix. The resulting string is stored in the provided character array.
-     * The conversion supports radices from 2 to 36, and the function does not 
+     * The conversion supports radices from 2 to 36, and the function does not
      * perform any checks for overflow. A pointer to the beginning of the resulting
      * string is returned.
      *

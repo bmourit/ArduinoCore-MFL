@@ -52,10 +52,14 @@ public:
     void set_standby_enable();
     void set_sleep_enable(PMU_Commands cmd);
     void set_deep_sleep_enable(Power_Driver driver, PMU_Commands command, bool enable);
+    void set_sleep_mode_command(uint8_t value);
+    void set_deep_sleep_mode_command(uint8_t value);
+    void set_standby_mode(void);
     // Wakeup
     void set_wakeup_pin_enable(bool enable);
     // Backup
     void set_backup_write_enable(bool enable);
+
     // Flags
     bool get_flag(Status_Flags flag);
     void clear_flag(Clear_Flags flag);
@@ -80,12 +84,3 @@ private:
 } // namespace pmu
 
 extern pmu::PMU& PMU_I;
-
-
-extern "C" {
-
-    void set_sleep_mode_command(uint8_t value);
-    void set_deep_sleep_mode_command(uint8_t value);
-    void set_standby_mode(void);
-
-} // extern "C"

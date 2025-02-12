@@ -10,16 +10,16 @@
 #define ADC_PERIPH_COUNT    3
 
 #ifndef ADC_RESOLUTION
-	#define ADC_RESOLUTION      12
+    #define ADC_RESOLUTION      12
 #endif
 #ifndef PWM_RESOLUTION
-	#define PWM_RESOLUTION      8
+    #define PWM_RESOLUTION      8
 #endif
 #ifndef PWM_MAX_RESOLUTION
-	#define PWM_MAX_RESOLUTION  16
+    #define PWM_MAX_RESOLUTION  16
 #endif
 #ifndef ADC_MAX_RESOLUTION
-	#define ADC_MAX_RESOLUTION  12
+    #define ADC_MAX_RESOLUTION  12
 #endif
 
 // ADC

@@ -47,33 +47,33 @@ void RCU::reset() {
     write_bit_range(*this, RCU_Regs::CFG0, static_cast<uint32_t>(CFG0_Bits::SCS), Clear);
     // Reset CTL register
     write_bits_sequence(*this, RCU_Regs::CTL,
-               static_cast<uint32_t>(CTL_Bits::HXTALEN), false,
-               static_cast<uint32_t>(CTL_Bits::CKMEN), false,
-               static_cast<uint32_t>(CTL_Bits::PLLEN), false,
-               static_cast<uint32_t>(CTL_Bits::HXTALBPS), false);
+                        static_cast<uint32_t>(CTL_Bits::HXTALEN), false,
+                        static_cast<uint32_t>(CTL_Bits::CKMEN), false,
+                        static_cast<uint32_t>(CTL_Bits::PLLEN), false,
+                        static_cast<uint32_t>(CTL_Bits::HXTALBPS), false);
     // Reset CFG0 register
     write_bit_ranges(*this, RCU_Regs::CFG0,
-               static_cast<uint32_t>(CFG0_Bits::SCS), Clear,
-               static_cast<uint32_t>(CFG0_Bits::AHBPSC), Clear,
-               static_cast<uint32_t>(CFG0_Bits::APB1PSC), Clear,
-               static_cast<uint32_t>(CFG0_Bits::APB2PSC), Clear,
-               static_cast<uint32_t>(CFG0_Bits::ADCPSC), Clear,
-               static_cast<uint32_t>(CFG0_Bits::PLLMF), Clear,
-               static_cast<uint32_t>(CFG0_Bits::USBDPSC), Clear,
-               static_cast<uint32_t>(CFG0_Bits::CKOUT0SEL), Clear);
+                     static_cast<uint32_t>(CFG0_Bits::SCS), Clear,
+                     static_cast<uint32_t>(CFG0_Bits::AHBPSC), Clear,
+                     static_cast<uint32_t>(CFG0_Bits::APB1PSC), Clear,
+                     static_cast<uint32_t>(CFG0_Bits::APB2PSC), Clear,
+                     static_cast<uint32_t>(CFG0_Bits::ADCPSC), Clear,
+                     static_cast<uint32_t>(CFG0_Bits::PLLMF), Clear,
+                     static_cast<uint32_t>(CFG0_Bits::USBDPSC), Clear,
+                     static_cast<uint32_t>(CFG0_Bits::CKOUT0SEL), Clear);
     write_bits_sequence(*this, RCU_Regs::CFG0,
-               static_cast<uint32_t>(CFG0_Bits::PLLSEL), false,
-               static_cast<uint32_t>(CFG0_Bits::PREDV0), false,
-               static_cast<uint32_t>(CFG0_Bits::PLLMF_4), false,
-               static_cast<uint32_t>(CFG0_Bits::ADCPSC_2), false,
-               static_cast<uint32_t>(CFG0_Bits::PLLMF_5), false,
-               static_cast<uint32_t>(CFG0_Bits::USBDPSC_2), false);
+                        static_cast<uint32_t>(CFG0_Bits::PLLSEL), false,
+                        static_cast<uint32_t>(CFG0_Bits::PREDV0), false,
+                        static_cast<uint32_t>(CFG0_Bits::PLLMF_4), false,
+                        static_cast<uint32_t>(CFG0_Bits::ADCPSC_2), false,
+                        static_cast<uint32_t>(CFG0_Bits::PLLMF_5), false,
+                        static_cast<uint32_t>(CFG0_Bits::USBDPSC_2), false);
     write_register(*this, RCU_Regs::INTR,
-                static_cast<uint32_t>(INTR_Bits::CLEAR_ALL) |
-                (1U << static_cast<uint32_t>(INTR_Bits::CKMIC)));
+                   static_cast<uint32_t>(INTR_Bits::CLEAR_ALL) |
+                   (1U << static_cast<uint32_t>(INTR_Bits::CKMIC)));
     write_bits_sequence(*this, RCU_Regs::CFG1,
-               static_cast<uint32_t>(CFG1_Bits::ADCPSC_3), false,
-               static_cast<uint32_t>(CFG1_Bits::PLLPRESEL), false);
+                        static_cast<uint32_t>(CFG1_Bits::ADCPSC_3), false,
+                        static_cast<uint32_t>(CFG1_Bits::PLLPRESEL), false);
 }
 
 /**
@@ -258,7 +258,7 @@ APB_Prescaler RCU::get_apb2_prescaler() {
  * @brief Sets the CKOUT0 source.
  *
  * This function configures the CKOUT0 source by setting the appropriate bits
- * in the CFG0 register. The CKOUT0 source determines the clock output signal 
+ * in the CFG0 register. The CKOUT0 source determines the clock output signal
  * from the microcontroller, which can be used to drive external devices.
  *
  * @param[in] source The CKOUT0 source to be set, represented by the CKOUT0_Source enum.
@@ -284,8 +284,8 @@ void RCU::set_pll_config(PLL_Source source, PLLMF_Select multiplier) {
     uint32_t bits = static_cast<uint32_t>(multiplier);
     write_bit_range(*this, RCU_Regs::CFG0, static_cast<uint32_t>(CFG0_Bits::PLLMF), bits & 0xFU);
     write_bits_sequence(*this, RCU_Regs::CFG0,
-               static_cast<uint32_t>(CFG0_Bits::PLLMF_4), (bits & 0x10U) >> 4U == 1U,
-               static_cast<uint32_t>(CFG0_Bits::PLLMF_5), (bits & 0x20U) >> 5U == 1U);
+                        static_cast<uint32_t>(CFG0_Bits::PLLMF_4), (bits & 0x10U) >> 4U == 1U,
+                        static_cast<uint32_t>(CFG0_Bits::PLLMF_5), (bits & 0x20U) >> 5U == 1U);
 }
 
 /**
@@ -507,11 +507,11 @@ bool RCU::is_osci_stable(OSCI_Select osci) {
                              OSC_STARTUP_TIMEOUT;  // Default for IRC48M, IRC40K, PLL_CK
 
     const Status_Flags flag = (osci == OSCI_Select::HXTAL) ? Status_Flags::FLAG_HXTALSTB :
-                        (osci == OSCI_Select::LXTAL) ? Status_Flags::FLAG_LXTALSTB :
-                        (osci == OSCI_Select::IRC8M) ? Status_Flags::FLAG_IRC8MSTB :
-                        (osci == OSCI_Select::IRC48M) ? Status_Flags::FLAG_IRC48MSTB :
-                        (osci == OSCI_Select::IRC40K) ? Status_Flags::FLAG_IRC40KSTB :
-                        Status_Flags::FLAG_PLLSTB; // Default for PLL_CK
+                              (osci == OSCI_Select::LXTAL) ? Status_Flags::FLAG_LXTALSTB :
+                              (osci == OSCI_Select::IRC8M) ? Status_Flags::FLAG_IRC8MSTB :
+                              (osci == OSCI_Select::IRC48M) ? Status_Flags::FLAG_IRC48MSTB :
+                              (osci == OSCI_Select::IRC40K) ? Status_Flags::FLAG_IRC40KSTB :
+                              Status_Flags::FLAG_PLLSTB; // Default for PLL_CK
 
     while ((osci_stable == false) && (count != timeout)) {
         osci_stable = get_flag(flag);
@@ -535,11 +535,11 @@ bool RCU::is_osci_stable(OSCI_Select osci) {
  */
 uint32_t RCU::get_clock_source_frequency(System_Clock_Source source) {
     switch (source) {
-    case System_Clock_Source::SOURCE_IRC8M: return IRC8M_VALUE;
-    case System_Clock_Source::SOURCE_HXTAL: return HXTAL_VALUE;
-    case System_Clock_Source::SOURCE_PLL: return calculate_pll_frequency();
-    case System_Clock_Source::SOURCE_INVALID:
-    default: return IRC8M_VALUE;
+        case System_Clock_Source::SOURCE_IRC8M: return IRC8M_VALUE;
+        case System_Clock_Source::SOURCE_HXTAL: return HXTAL_VALUE;
+        case System_Clock_Source::SOURCE_PLL: return calculate_pll_frequency();
+        case System_Clock_Source::SOURCE_INVALID:
+        default: return IRC8M_VALUE;
     }
 }
 
@@ -566,7 +566,7 @@ uint32_t RCU::calculate_pll_frequency() {
 
     if (pll_source == PLL_Source::PLLSRC_HXTAL_IRC48M) {
         PLL_Presel pll_presel = get_pll_presel();
-        if (pll_presel == PLL_Presel::PLLPRESRC_INVALID) { 
+        if (pll_presel == PLL_Presel::PLLPRESRC_INVALID) {
             return 0U;
         }
         osci_source = (pll_presel == PLL_Presel::PLLPRESRC_HXTAL) ? HXTAL_VALUE : IRC48M_VALUE;
@@ -605,10 +605,10 @@ uint32_t RCU::get_pll_multiplier() {
 
 /**
  * @brief Returns the frequency of the specified clock source.
- * 
+ *
  * @param clock The clock source to return the frequency for.
  * @return The frequency of the specified clock source in Hz.
- * 
+ *
  * @note The returned frequency is based on the current system clock source and its prescaler settings.
  * @note If the specified clock source is invalid (i.e. the clock source is not enabled), the function returns 0.
  */
@@ -632,11 +632,11 @@ uint32_t RCU::get_clock_frequency(Clock_Frequency clock) {
 
     // Return requested clock frequency
     switch (clock) {
-    case Clock_Frequency::CK_SYS: return cksys_freq;
-    case Clock_Frequency::CK_AHB: return ahb_freq;
-    case Clock_Frequency::CK_APB1: return apb1_freq;
-    case Clock_Frequency::CK_APB2: return apb2_freq;
-    default: return 0U;  // Handle invalid clock type
+        case Clock_Frequency::CK_SYS: return cksys_freq;
+        case Clock_Frequency::CK_AHB: return ahb_freq;
+        case Clock_Frequency::CK_APB1: return apb1_freq;
+        case Clock_Frequency::CK_APB2: return apb2_freq;
+        default: return 0U;  // Handle invalid clock type
     }
 }
 
@@ -799,10 +799,10 @@ void RCU::update_system_clock() {
     System_Clock_Source current_source = get_system_source();
 
     switch (current_source) {
-    case System_Clock_Source::SOURCE_IRC8M: SystemCoreClock = IRC8M_VALUE; break;
-    case System_Clock_Source::SOURCE_HXTAL: SystemCoreClock = HXTAL_VALUE; break;
-    case System_Clock_Source::SOURCE_PLL: SystemCoreClock = calculate_pll_frequency(); break;
-    case System_Clock_Source::SOURCE_INVALID: default: SystemCoreClock = IRC8M_VALUE; break;
+        case System_Clock_Source::SOURCE_IRC8M: SystemCoreClock = IRC8M_VALUE; break;
+        case System_Clock_Source::SOURCE_HXTAL: SystemCoreClock = HXTAL_VALUE; break;
+        case System_Clock_Source::SOURCE_PLL: SystemCoreClock = calculate_pll_frequency(); break;
+        case System_Clock_Source::SOURCE_INVALID: default: SystemCoreClock = IRC8M_VALUE; break;
     }
 
     uint32_t ahb_bit = read_bit_range(*this, RCU_Regs::CFG0, static_cast<uint32_t>(CFG0_Bits::AHBPSC));

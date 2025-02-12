@@ -116,7 +116,7 @@ void CTC::set_hardware_auto_trim_enable(bool enable) {
  */
 void CTC::set_reference_source_polarity(Reference_Polarity polarity) {
     write_bit(*this, CTC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::REFPOL),
-           (polarity == Reference_Polarity::FALLING) ? true : false);
+              (polarity == Reference_Polarity::FALLING) ? true : false);
 }
 
 /**

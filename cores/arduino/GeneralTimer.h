@@ -72,8 +72,8 @@ public:
                 uint32_t dutycycle, TimerCallback UPCallback = nullptr,
                 TimerCallback CCCallback = nullptr);
     inline void setPWM(uint8_t channel, pin_size_t pin, uint32_t frequency,
-                uint32_t dutycycle, TimerCallback UPCallback = nullptr,
-                TimerCallback CCCallback = nullptr) {
+                       uint32_t dutycycle, TimerCallback UPCallback = nullptr,
+                       TimerCallback CCCallback = nullptr) {
         setPWM(convertToChannel(channel), pin, frequency, dutycycle, UPCallback, CCCallback);
     }
     // Interrupts

@@ -30,8 +30,8 @@ FWatchdogTimer& FWatchdogTimer::get_instance() {
 }
 
 FWatchdogTimer::FWatchdogTimer() :
-        fwdgt_(fwdgt::FWDGT::get_instance()),
-        enabled_(false) {}
+    fwdgt_(fwdgt::FWDGT::get_instance()),
+    enabled_(false) {}
 
 /**
  * @brief Initializes the FWDGT hardware block.

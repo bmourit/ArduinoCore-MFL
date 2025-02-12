@@ -192,34 +192,34 @@ enum class Clear_Flags : uint8_t {
 };
 
 inline const uint32_t clear_command_flags = (
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_CCRCERRC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_CMDTMOUTC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_CMDRECVC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_CMDSENDC))
-);
+        (1U << static_cast<uint32_t>(Clear_Flags::FLAG_CCRCERRC)) |
+        (1U << static_cast<uint32_t>(Clear_Flags::FLAG_CMDTMOUTC)) |
+        (1U << static_cast<uint32_t>(Clear_Flags::FLAG_CMDRECVC)) |
+        (1U << static_cast<uint32_t>(Clear_Flags::FLAG_CMDSENDC))
+    );
 
 inline const uint32_t clear_data_flags = (
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_DTCRCERRC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_DTTMOUTC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_TXUREC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_RXOREC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_DTENDC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_DTBLKENDC))
-);
+        (1U << static_cast<uint32_t>(Clear_Flags::FLAG_DTCRCERRC)) |
+        (1U << static_cast<uint32_t>(Clear_Flags::FLAG_DTTMOUTC)) |
+        (1U << static_cast<uint32_t>(Clear_Flags::FLAG_TXUREC)) |
+        (1U << static_cast<uint32_t>(Clear_Flags::FLAG_RXOREC)) |
+        (1U << static_cast<uint32_t>(Clear_Flags::FLAG_DTENDC)) |
+        (1U << static_cast<uint32_t>(Clear_Flags::FLAG_DTBLKENDC))
+    );
 
 inline const uint32_t clear_common_flags = (
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_CCRCERRC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_DTCRCERRC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_CMDTMOUTC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_DTTMOUTC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_TXUREC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_RXOREC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_CMDRECVC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_CMDSENDC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_DTENDC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_DTBLKENDC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_SDIOINTC))
-);
+        (1U << static_cast<uint32_t>(Clear_Flags::FLAG_CCRCERRC)) |
+        (1U << static_cast<uint32_t>(Clear_Flags::FLAG_DTCRCERRC)) |
+        (1U << static_cast<uint32_t>(Clear_Flags::FLAG_CMDTMOUTC)) |
+        (1U << static_cast<uint32_t>(Clear_Flags::FLAG_DTTMOUTC)) |
+        (1U << static_cast<uint32_t>(Clear_Flags::FLAG_TXUREC)) |
+        (1U << static_cast<uint32_t>(Clear_Flags::FLAG_RXOREC)) |
+        (1U << static_cast<uint32_t>(Clear_Flags::FLAG_CMDRECVC)) |
+        (1U << static_cast<uint32_t>(Clear_Flags::FLAG_CMDSENDC)) |
+        (1U << static_cast<uint32_t>(Clear_Flags::FLAG_DTENDC)) |
+        (1U << static_cast<uint32_t>(Clear_Flags::FLAG_DTBLKENDC)) |
+        (1U << static_cast<uint32_t>(Clear_Flags::FLAG_SDIOINTC))
+    );
 
 enum class Interrupt_Flags : uint8_t {
     FLAG_INTR_CCRCERR,
@@ -564,24 +564,24 @@ struct Error_Map {
 };
 
 static inline constexpr std::array<Error_Map, 17> errorTableR1 {{
-    {static_cast<uint32_t>(R1_Status::OUT_OF_RANGE), SDIO_Error_Type::COMMAND_OUT_OF_RANGE},
-    {static_cast<uint32_t>(R1_Status::ADDRESS_ERROR), SDIO_Error_Type::INVALID_ADDRESS},
-    {static_cast<uint32_t>(R1_Status::BLOCK_LEN_ERROR), SDIO_Error_Type::INVALID_BLOCK_LENGTH},
-    {static_cast<uint32_t>(R1_Status::ERASE_SEQ_ERROR), SDIO_Error_Type::ERASE_SEQUENCE_ERROR},
-    {static_cast<uint32_t>(R1_Status::ERASE_PARAM), SDIO_Error_Type::INVALID_ERASE_BLOCKS},
-    {static_cast<uint32_t>(R1_Status::WP_VIOLATION), SDIO_Error_Type::WRITE_PROTECT_VIOLATION},
-    {static_cast<uint32_t>(R1_Status::LOCK_UNLOCK_FAILED), SDIO_Error_Type::LOCK_UNLOCK_FAILED},
-    {static_cast<uint32_t>(R1_Status::COM_CRC_ERROR), SDIO_Error_Type::COMMAND_CRC_ERROR},
-    {static_cast<uint32_t>(R1_Status::ILLEGAL_COMMAND), SDIO_Error_Type::ILLEGAL_COMMAND},
-    {static_cast<uint32_t>(R1_Status::CARD_ECC_FAILED), SDIO_Error_Type::ECC_FAILED},
-    {static_cast<uint32_t>(R1_Status::CC_ERROR), SDIO_Error_Type::CARD_CONTROLLER_ERROR},
-    {static_cast<uint32_t>(R1_Status::ERROR), SDIO_Error_Type::ERROR},
-    {static_cast<uint32_t>(R1_Status::CID_CSD_OVERWRITE), SDIO_Error_Type::CSD_OVERWRITE},
-    {static_cast<uint32_t>(R1_Status::WP_ERASE_SKIP), SDIO_Error_Type::ERASE_SKIP},
-    {static_cast<uint32_t>(R1_Status::CARD_ECC_DISABLED), SDIO_Error_Type::ECC_DISABLED},
-    {static_cast<uint32_t>(R1_Status::ERASE_RESET), SDIO_Error_Type::ERASE_SEQUENCE_RESET},
-    {static_cast<uint32_t>(R1_Status::AKE_SEQ_ERROR), SDIO_Error_Type::AUTHENTICATION_ERROR},
-}};
+        {static_cast<uint32_t>(R1_Status::OUT_OF_RANGE), SDIO_Error_Type::COMMAND_OUT_OF_RANGE},
+        {static_cast<uint32_t>(R1_Status::ADDRESS_ERROR), SDIO_Error_Type::INVALID_ADDRESS},
+        {static_cast<uint32_t>(R1_Status::BLOCK_LEN_ERROR), SDIO_Error_Type::INVALID_BLOCK_LENGTH},
+        {static_cast<uint32_t>(R1_Status::ERASE_SEQ_ERROR), SDIO_Error_Type::ERASE_SEQUENCE_ERROR},
+        {static_cast<uint32_t>(R1_Status::ERASE_PARAM), SDIO_Error_Type::INVALID_ERASE_BLOCKS},
+        {static_cast<uint32_t>(R1_Status::WP_VIOLATION), SDIO_Error_Type::WRITE_PROTECT_VIOLATION},
+        {static_cast<uint32_t>(R1_Status::LOCK_UNLOCK_FAILED), SDIO_Error_Type::LOCK_UNLOCK_FAILED},
+        {static_cast<uint32_t>(R1_Status::COM_CRC_ERROR), SDIO_Error_Type::COMMAND_CRC_ERROR},
+        {static_cast<uint32_t>(R1_Status::ILLEGAL_COMMAND), SDIO_Error_Type::ILLEGAL_COMMAND},
+        {static_cast<uint32_t>(R1_Status::CARD_ECC_FAILED), SDIO_Error_Type::ECC_FAILED},
+        {static_cast<uint32_t>(R1_Status::CC_ERROR), SDIO_Error_Type::CARD_CONTROLLER_ERROR},
+        {static_cast<uint32_t>(R1_Status::ERROR), SDIO_Error_Type::ERROR},
+        {static_cast<uint32_t>(R1_Status::CID_CSD_OVERWRITE), SDIO_Error_Type::CSD_OVERWRITE},
+        {static_cast<uint32_t>(R1_Status::WP_ERASE_SKIP), SDIO_Error_Type::ERASE_SKIP},
+        {static_cast<uint32_t>(R1_Status::CARD_ECC_DISABLED), SDIO_Error_Type::ECC_DISABLED},
+        {static_cast<uint32_t>(R1_Status::ERASE_RESET), SDIO_Error_Type::ERASE_SEQUENCE_RESET},
+        {static_cast<uint32_t>(R1_Status::AKE_SEQ_ERROR), SDIO_Error_Type::AUTHENTICATION_ERROR},
+    }};
 
 enum class R6_Status : uint32_t {
     ERROR = (1U << 13U),
@@ -590,10 +590,10 @@ enum class R6_Status : uint32_t {
 };
 
 static inline constexpr std::array<Error_Map, 3> errorTableR6 {{
-    {static_cast<uint32_t>(R6_Status::ERROR), SDIO_Error_Type::ERROR},
-    {static_cast<uint32_t>(R6_Status::ILLEGAL_COMMAND), SDIO_Error_Type::ILLEGAL_COMMAND},
-    {static_cast<uint32_t>(R6_Status::COM_CRC_ERROR), SDIO_Error_Type::COMMAND_CRC_ERROR},
-}};
+        {static_cast<uint32_t>(R6_Status::ERROR), SDIO_Error_Type::ERROR},
+        {static_cast<uint32_t>(R6_Status::ILLEGAL_COMMAND), SDIO_Error_Type::ILLEGAL_COMMAND},
+        {static_cast<uint32_t>(R6_Status::COM_CRC_ERROR), SDIO_Error_Type::COMMAND_CRC_ERROR},
+    }};
 
 
 ///////////////////////////// STRUCTURES /////////////////////////////

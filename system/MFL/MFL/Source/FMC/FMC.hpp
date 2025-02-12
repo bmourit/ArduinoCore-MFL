@@ -66,7 +66,7 @@ public:
     // Interrupts
     void set_interrupt_enable(Interrupt_Types type, bool enable);
 
-   // Base address
+    // Base address
     static inline constexpr uintptr_t FMC_baseAddress = 0x4002200U;
 
     // Register address
@@ -83,15 +83,15 @@ private:
 
     template<typename T>
     inline FMC_Error_Type program_word_to_bank(uint32_t address, uint32_t data,
-                uint32_t timeout, FMC_Regs control_reg, T program_bit);
+            uint32_t timeout, FMC_Regs control_reg, T program_bit);
 
     template<typename T>
     inline FMC_Error_Type program_halfword_to_bank(uint32_t address, uint16_t data,
-                uint32_t timeout, FMC_Regs control_reg, T program_bit);
+            uint32_t timeout, FMC_Regs control_reg, T program_bit);
 
     template<typename T>
     inline FMC_Error_Type erase_word_bank(uint32_t address, uint32_t timeout,
-                FMC_Regs control_reg, T erase_bit, T start_bit, FMC_Regs address_reg);
+                                          FMC_Regs control_reg, T erase_bit, T start_bit, FMC_Regs address_reg);
 
     inline uint16_t get_fmc_size() {
         return *reinterpret_cast<const uint16_t*>(Flash_Size_Addess);

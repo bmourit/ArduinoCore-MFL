@@ -82,24 +82,24 @@ typedef enum IRQn {
 } IRQn_Type;
 
 #if defined(__CC_ARM)
-  #pragma push
-  #pragma anon_unions
+    #pragma push
+    #pragma anon_unions
 #elif defined(__ICCARM__)
-  #pragma language=extended
+    #pragma language=extended
 #elif defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
-  #pragma clang diagnostic push
-  #pragma clang diagnostic ignored "-Wc11-extensions"
-  #pragma clang diagnostic ignored "-Wreserved-id-macro"
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wc11-extensions"
+    #pragma clang diagnostic ignored "-Wreserved-id-macro"
 #elif defined (__GNUC__)
-  // Anonymous unions are enabled by default
+    // Anonymous unions are enabled by default
 #elif defined(__TMS470__)
-  // Anonymous unions are enabled by default
+    // Anonymous unions are enabled by default
 #elif defined(__TASKING__)
-  #pragma warning 586
+    #pragma warning 586
 #elif defined(__CSMC__)
-  // Anonymous unions are enabled by default
+    // Anonymous unions are enabled by default
 #else
-  #warning Not supported compiler type
+    #warning Not supported compiler type
 #endif
 
 //////////////////////////////////////// NOTICE ////////////////////////////////////////
@@ -118,22 +118,22 @@ typedef enum IRQn {
 
 #include <core_cm4.h>
 
-#if   defined (__CC_ARM)
-  #pragma pop
-#elif defined (__ICCARM__)
-  /* leave anonymous unions enabled */
+#if defined(__CC_ARM)
+    #pragma pop
+#elif defined(__ICCARM__)
+    // Leave anonymous unions enabled
 #elif (defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050))
-  #pragma clang diagnostic pop
-#elif defined (__GNUC__)
-  /* anonymous unions are enabled by default */
-#elif defined (__TMS470__)
-  /* anonymous unions are enabled by default */
-#elif defined (__TASKING__)
-  #pragma warning restore
-#elif defined (__CSMC__)
-  /* anonymous unions are enabled by default */
+    #pragma clang diagnostic pop
+#elif defined(__GNUC__)
+    // Anonymous unions are enabled by default
+#elif defined(__TMS470__)
+    // Anonymous unions are enabled by default
+#elif defined(__TASKING__)
+    #pragma warning restore
+#elif defined(__CSMC__)
+    // Anonymous unions are enabled by default
 #else
-  #warning Not supported compiler type
+    #warning Not supported compiler type
 #endif
 
 #ifdef __cplusplus

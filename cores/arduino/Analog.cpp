@@ -40,7 +40,7 @@ uint32_t getAdcValue(pin_size_t pin, uint32_t resolution) {
     adc::ADC_Sample_Time sampleTime = getAdcSampleTime(pin);
 
     volatile uint32_t convertedData =
-               adcInstance.start_regular_single_conversion(channel, sampleTime, getAdcResolution(resolution), true);
+        adcInstance.start_regular_single_conversion(channel, sampleTime, getAdcResolution(resolution), true);
 
     return convertedData;
 }
@@ -85,7 +85,7 @@ void setDacValue(pin_size_t pin, uint16_t value, bool is_initialized) {
 
 /**
  * Stops the DAC operation on the specified pin.
- * 
+ *
  * @param pin The pin number on which to stop DAC operation
  * @return None
  */
@@ -104,12 +104,12 @@ void dacStop(pin_size_t pin) {
 
 /**
  * Initializes or updates PWM output on a specified pin.
- * 
+ *
  * @param pin Pin number to output PWM signal
  * @param frequency PWM frequency in Hz
  * @param value PWM compare value in specified format
  * @param format Format of the compare value (CCFormat enum class)
- * 
+ *
  * @note If pin is not PWM capable or invalid, function returns without effect
  */
 void pwmStart(pin_size_t pin, uint32_t frequency, uint32_t value, CCFormat format) {
@@ -177,10 +177,10 @@ int analogRead(pin_size_t pin) {
 
 /**
  * Writes an analog value to a pin using DAC, PWM, or digital output.
- * 
+ *
  * @param pin Pin number to write to
  * @param value Value to write (range depends on write resolution)
- * 
+ *
  * For DAC pins: Configures DAC and writes analog value
  * For PWM pins: Configures timer and starts PWM output
  * For other pins: Sets pin to digital output with HIGH/LOW based on value
@@ -220,9 +220,9 @@ void analogReadResolution(int resolution) {
     if ((resolution > 0) && (resolution <= 12)) {
         readResolution_ = resolution;
         internalReadResolution_ = (resolution > ADC_MAX_RESOLUTION) ?
-                   ADC_MAX_RESOLUTION : (resolution <= 8) ?
-                   8 : (resolution <= 10) ?
-                   10 : 12;
+                                  ADC_MAX_RESOLUTION : (resolution <= 8) ?
+                                  8 : (resolution <= 10) ?
+                                  10 : 12;
     }
 }
 
@@ -283,7 +283,7 @@ inline constexpr adc::ADC_Channel getAdcInternalChannel(pin_size_t pin) {
 
 /**
  * Maps a pin number to its corresponding ADC channel.
- * 
+ *
  * @param pin Pin number to convert to ADC channel. Can be a regular pin,
  *            ADC_TEMP, or ADC_VREF
  * @return ADC_Channel enum class representing the mapped channel, or INVALID if
@@ -316,8 +316,8 @@ inline adc::ADC_Sample_Time getAdcSampleTime(pin_size_t pin) {
  */
 inline constexpr adc::ADC_Resolution getAdcResolution(uint32_t resolution) {
     switch (resolution) {
-        case 6:  return adc::ADC_Resolution::RESOLUTION_6BIT;
-        case 8:  return adc::ADC_Resolution::RESOLUTION_8BIT;
+        case 6: return adc::ADC_Resolution::RESOLUTION_6BIT;
+        case 8: return adc::ADC_Resolution::RESOLUTION_8BIT;
         case 10: return adc::ADC_Resolution::RESOLUTION_10BIT;
         case 12: return adc::ADC_Resolution::RESOLUTION_12BIT;
         default: return adc::ADC_Resolution::RESOLUTION_12BIT;
@@ -341,7 +341,7 @@ inline CCFormat getPwmResolution(uint32_t resolution) {
 
 /**
  * Maps a value from one resolution to another resolution.
- * 
+ *
  * @param value The input value to map
  * @param from Source resolution in bits
  * @param to Target resolution in bits

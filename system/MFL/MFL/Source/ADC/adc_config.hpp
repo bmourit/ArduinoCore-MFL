@@ -331,7 +331,7 @@ enum class ADC_Channel : uint8_t {
     INVALID
 };
 
-enum class Status_Flags  : uint8_t {
+enum class Status_Flags : uint8_t {
     FLAG_WDE = 0,
     FLAG_EOC = 1,
     FLAG_EOIC = 2,
@@ -339,13 +339,13 @@ enum class Status_Flags  : uint8_t {
     FLAG_STRC = 4
 };
 
-enum class Interrupt_Flags  : uint8_t {
+enum class Interrupt_Flags : uint8_t {
     INTR_FLAG_WDE = 0,
     INTR_FLAG_EOC = 1,
     INTR_FLAG_EOIC = 2
 };
 
-enum class Interrupt_Type  : uint8_t {
+enum class Interrupt_Type : uint8_t {
     INTR_WDE = 5,
     INTR_EOC = 6,
     INTR_EOIC = 7
@@ -373,10 +373,10 @@ struct ADC_Clock_Config {
 };
 
 static inline constexpr std::array<ADC_Clock_Config, 3> ADC_pclk_index {{
-    {rcu::RCU_PCLK::PCLK_ADC0, rcu::RCU_PCLK_Reset::PCLK_ADC0RST},
-    {rcu::RCU_PCLK::PCLK_ADC1, rcu::RCU_PCLK_Reset::PCLK_ADC1RST},
-    {rcu::RCU_PCLK::PCLK_ADC2, rcu::RCU_PCLK_Reset::PCLK_ADC2RST}
-}};
+        {rcu::RCU_PCLK::PCLK_ADC0, rcu::RCU_PCLK_Reset::PCLK_ADC0RST},
+        {rcu::RCU_PCLK::PCLK_ADC1, rcu::RCU_PCLK_Reset::PCLK_ADC1RST},
+        {rcu::RCU_PCLK::PCLK_ADC2, rcu::RCU_PCLK_Reset::PCLK_ADC2RST}
+    }};
 
 
 ///////////////////////////// UNUSED DOCUMENTATION ONLY /////////////////////////////

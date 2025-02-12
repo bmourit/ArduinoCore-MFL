@@ -104,7 +104,6 @@ private:
     uint32_t prescaler_;
 
     inline void set_sampling_time(ADC_Channel channel, ADC_Sample_Time sample_time);
-    inline uint32_t configure_channel(uint32_t reg, uint8_t rank, ADC_Channel channel);
 
     template <ADC_Base Base>
     friend ADC& get_instance_for_base();

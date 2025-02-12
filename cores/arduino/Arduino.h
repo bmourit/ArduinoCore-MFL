@@ -7,10 +7,10 @@
 #include "CoreHandler.h"
 
 #if defined(__cplusplus)
-#include "mfl_api.h"
-#include "variant.h"
+    #include "mfl_api.h"
+    #include "variant.h"
 
-using namespace arduino;
+    using namespace arduino;
 
 #endif // __cplusplus
 
@@ -18,10 +18,10 @@ using namespace arduino;
 #define noInterrupts()    __disable_irq()
 
 #ifdef __cplusplus
-// We currently support less than this
-inline constexpr pin_size_t NO_PIN = 70;
+    // We currently support less than this
+    inline constexpr pin_size_t NO_PIN = 70;
 #else
-#define NO_PIN	70
+    #define NO_PIN	70
 #endif
 
 #ifdef __cplusplus

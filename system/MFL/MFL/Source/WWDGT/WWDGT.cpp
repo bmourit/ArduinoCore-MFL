@@ -54,7 +54,7 @@ void WWDGT::reset() {
  *
  * This function enables the WWDGT peripheral by setting the WDGTEN bit in the
  * CTL register. Once enabled, the WWDGT starts counting down from the current
- * counter value and can generate an early warning interrupt. 
+ * counter value and can generate an early warning interrupt.
  */
 void WWDGT::enable() {
     write_bit(*this, WWDGT_Regs::CTL, static_cast<uint32_t>(CTL_Bits::WDGTEN), true);
@@ -68,7 +68,7 @@ void WWDGT::enable() {
  * function can be used at any time, regardless of whether the WWDGT is enabled
  * or disabled. If the WWDGT is enabled, the counter value is updated immediately
  * and the WWDGT continues counting down from the new value.
- * 
+ *
  * @param[in] value The new counter value to be set.
  */
 void WWDGT::update_counter(uint16_t value) {
@@ -92,10 +92,10 @@ void WWDGT::update_counter(uint16_t value) {
  */
 void WWDGT::setup(uint16_t value, uint16_t window, Prescaler_Values prescaler) {
     write_bit_range(*this, WWDGT_Regs::CTL,
-               static_cast<uint32_t>(CTL_Bits::CNT), static_cast<uint32_t>(value));
+                    static_cast<uint32_t>(CTL_Bits::CNT), static_cast<uint32_t>(value));
     write_bit_ranges(*this, WWDGT_Regs::CFG,
-               static_cast<uint32_t>(CFG_Bits::WIN), static_cast<uint32_t>(window),
-               static_cast<uint32_t>(CFG_Bits::PSC), static_cast<uint32_t>(prescaler));
+                     static_cast<uint32_t>(CFG_Bits::WIN), static_cast<uint32_t>(window),
+                     static_cast<uint32_t>(CFG_Bits::PSC), static_cast<uint32_t>(prescaler));
 }
 
 /**

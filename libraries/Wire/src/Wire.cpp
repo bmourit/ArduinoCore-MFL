@@ -754,20 +754,20 @@ i2c::I2C_Error_Type TwoWire::checkBusyState() {
  */
 void TwoWire::setSlaveInterruptEnable() {
     switch (base_) {
-    case i2c::I2C_Base::I2C0_BASE:
-        CORTEX_I.set_nvic_priority(I2C0_EV_IRQn, 2U, 3U);
-        NVIC_EnableIRQ(I2C0_EV_IRQn);
-        CORTEX_I.set_nvic_priority(I2C0_ER_IRQn, 2U, 2U);
-        NVIC_EnableIRQ(I2C0_ER_IRQn);
-        break;
-    case i2c::I2C_Base::I2C1_BASE:
-        CORTEX_I.set_nvic_priority(I2C1_EV_IRQn, 2U, 3U);
-        NVIC_EnableIRQ(I2C1_EV_IRQn);
-        CORTEX_I.set_nvic_priority(I2C1_ER_IRQn, 2U, 2U);
-        NVIC_EnableIRQ(I2C1_ER_IRQn);
-        break;
-    default:
-        break;
+        case i2c::I2C_Base::I2C0_BASE:
+            CORTEX_I.set_nvic_priority(I2C0_EV_IRQn, 2U, 3U);
+            NVIC_EnableIRQ(I2C0_EV_IRQn);
+            CORTEX_I.set_nvic_priority(I2C0_ER_IRQn, 2U, 2U);
+            NVIC_EnableIRQ(I2C0_ER_IRQn);
+            break;
+        case i2c::I2C_Base::I2C1_BASE:
+            CORTEX_I.set_nvic_priority(I2C1_EV_IRQn, 2U, 3U);
+            NVIC_EnableIRQ(I2C1_EV_IRQn);
+            CORTEX_I.set_nvic_priority(I2C1_ER_IRQn, 2U, 2U);
+            NVIC_EnableIRQ(I2C1_ER_IRQn);
+            break;
+        default:
+            break;
     }
 
     i2c_.set_interrupt_enable(i2c::Interrupt_Type::INTR_ERR, true);
@@ -955,22 +955,22 @@ void TwoWire::configurePins() {
 
 extern "C" {
 
-    #ifdef SUPPORT_I2C0
-        void I2C0_EV_IRQHandler(void) {
-            Wire.interruptHandler();
-        }
-        void I2C0_ER_IRQHandler(void) {
-            Wire.errorHandler();
-        }
-    #endif
+#ifdef SUPPORT_I2C0
+    void I2C0_EV_IRQHandler(void) {
+        Wire.interruptHandler();
+    }
+    void I2C0_ER_IRQHandler(void) {
+        Wire.errorHandler();
+    }
+#endif
 
-    #ifdef SUPPORT_I2C1
-        void I2C1_EV_IRQHandler(void) {
-            Wire1.interruptHandler();
-        }
-        void I2C1_ER_IRQHandler(void) {
-            Wire1.errorHandler();
-        }
-    #endif
+#ifdef SUPPORT_I2C1
+    void I2C1_EV_IRQHandler(void) {
+        Wire1.interruptHandler();
+    }
+    void I2C1_ER_IRQHandler(void) {
+        Wire1.errorHandler();
+    }
+#endif
 
 } // extern "C"

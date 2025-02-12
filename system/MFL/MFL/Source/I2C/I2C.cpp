@@ -31,17 +31,17 @@ I2C& get_instance_for_base() {
 
 Result<I2C, I2C_Error_Type> I2C::get_instance(I2C_Base Base) {
     switch (Base) {
-    case I2C_Base::I2C0_BASE:
-        return get_enum_instance<I2C_Base, I2C, I2C_Error_Type>(
-                   Base, I2C_Base::I2C0_BASE, get_instance_for_base<I2C_Base::I2C0_BASE>()
-               );
-    case I2C_Base::I2C1_BASE:
-        return get_enum_instance<I2C_Base, I2C, I2C_Error_Type>(
-                   Base, I2C_Base::I2C1_BASE, get_instance_for_base<I2C_Base::I2C1_BASE>()
-               );
-    case I2C_Base::INVALID:
-    default:
-        return RETURN_RESULT(I2C, I2C_Error_Type::INVALID_I2C);
+        case I2C_Base::I2C0_BASE:
+            return get_enum_instance<I2C_Base, I2C, I2C_Error_Type>(
+                       Base, I2C_Base::I2C0_BASE, get_instance_for_base<I2C_Base::I2C0_BASE>()
+                   );
+        case I2C_Base::I2C1_BASE:
+            return get_enum_instance<I2C_Base, I2C, I2C_Error_Type>(
+                       Base, I2C_Base::I2C1_BASE, get_instance_for_base<I2C_Base::I2C1_BASE>()
+                   );
+        case I2C_Base::INVALID:
+        default:
+            return RETURN_RESULT(I2C, I2C_Error_Type::INVALID_I2C);
     }
 }
 
@@ -62,7 +62,7 @@ I2C::I2C(I2C_Base Base) :
 
 /**
  * @brief Resets the I2C peripheral by toggling its peripheral clock reset.
- * 
+ *
  * This function enables the reset of the I2C peripheral by setting the
  * reset register, then disables the reset to complete the operation.
  */
@@ -77,11 +77,11 @@ void I2C::reset() {
 
 /**
  * @brief Sets the clock speed for the I2C peripheral and configures the prescaler duty cycle.
- * 
+ *
  * @param speed The desired clock speed in Hz. The maximum clock speed is currently 1MHz.
  * @param duty The desired duty cycle for the prescaler to use. The duty cycle is either 2 or 16/9.
  * @return An error code representing the result of the operation.
- * 
+ *
  * @note The maximum clock speed is currently 1MHz. Attempting to set a higher clock speed will
  *       result in an error. Additionally, the I2C peripheral will be disabled if the clock speed
  *       is set to 0.
@@ -89,34 +89,37 @@ void I2C::reset() {
 I2C_Error_Type I2C::set_clock_speed_duty(uint32_t speed, Duty_Cycle duty) {
     if (!speed) return I2C_Error_Type::INVALID_CLOCK_FREQUENCY;
 
-    uint32_t apb1_clock = RCU_I.get_clock_frequency(rcu::Clock_Frequency::CK_APB1);
-    uint32_t frequency = custom_min(apb1_clock / 1'000'000U, MaximumClockSpeed);
+    const uint32_t apb1_clock = RCU_I.get_clock_frequency(rcu::Clock_Frequency::CK_APB1);
+    const uint32_t frequency = custom_min(apb1_clock >> 20, MaximumClockSpeed);
 
     write_bit_range(*this, I2C_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::I2CCLK), frequency);
 
     uint32_t clkc = (duty == Duty_Cycle::DTCY_2) ?
-                    (apb1_clock / (speed * 3U)) : 
-                    (apb1_clock / (speed * 25U));
+                    apb1_clock / (speed * 3U) :
+                    apb1_clock / ((speed << 4) + (speed << 3) + speed); // speed * 25 = (speed << 4) + (speed << 3) + speed
 
+    // Standard mode
     if (speed <= 100'000U) {
-        // Standard mode
-        uint32_t rise_time = custom_clamp(apb1_clock / 1'000'000U + 1U, MinimumClockSpeed, MaximumClockSpeed);
+        const uint32_t rise_time = custom_clamp((apb1_clock >> 20) + 1U, MinimumClockSpeed, MaximumClockSpeed);
         write_register(*this, I2C_Regs::RT, rise_time);
-        clkc = custom_max(apb1_clock / (speed * 2), 4);
+        clkc = custom_max(apb1_clock / (speed << 1), 4);
         write_bit_range(*this, I2C_Regs::CKCFG, static_cast<uint32_t>(CKCFG_Bits::CLKC), clkc);
         return I2C_Error_Type::OK;
     }
 
     // Fast modes
-    bool is_fast_plus = speed > 400'000U;
-    write_register(*this, I2C_Regs::RT, (frequency * (is_fast_plus ? 120U : 300U)) / 1000U + 1U);
-    write_bit(*this, I2C_Regs::CKCFG, static_cast<uint32_t>(CKCFG_Bits::DTCY), duty == Duty_Cycle::DTCY_16_9 ? true : false);
+    const bool is_fast_plus = speed > 400'000U;
+
+    const uint32_t rt_multiplier = is_fast_plus ? 120U : 300U;
+    write_register(*this, I2C_Regs::RT, (frequency * rt_multiplier) / 1000U + 1U);
+
+    write_bits_sequence(*this, I2C_Regs::CKCFG,
+                        static_cast<uint32_t>(CKCFG_Bits::DTCY), duty == Duty_Cycle::DTCY_16_9 ? true : false,
+                        static_cast<uint32_t>(CKCFG_Bits::FAST), true);
 
     if (!is_fast_plus && !read_bit_range(*this, I2C_Regs::CKCFG, static_cast<uint32_t>(CKCFG_Bits::CLKC))) {
         clkc |= 1U;
     }
-
-    write_bit(*this, I2C_Regs::CKCFG, static_cast<uint32_t>(CKCFG_Bits::FAST), true);
     write_bit_range(*this, I2C_Regs::CKCFG, static_cast<uint32_t>(CKCFG_Bits::CLKC), clkc);
 
     if (is_fast_plus) {
@@ -130,10 +133,10 @@ I2C_Error_Type I2C::set_clock_speed_duty(uint32_t speed, Duty_Cycle duty) {
  * @brief Configures the I2C address format and operational mode.
  *
  * This function sets the address format (either 7-bit or 10-bit) and the mode
- * (I2C or SMBus) for the I2C peripheral. It updates the control and address 
+ * (I2C or SMBus) for the I2C peripheral. It updates the control and address
  * registers to reflect these configurations.
  *
- * @param address The device address to be set. This address is masked according 
+ * @param address The device address to be set. This address is masked according
  * to the selected address format.
  * @param format The address format to be used, which can be either 7-bit or 10-bit.
  * @param mode The bus mode to be set, which can be either I2C or SMBus.
@@ -143,7 +146,7 @@ void I2C::set_address_format(uint32_t address, Address_Format format, Bus_Mode m
     write_bit(*this, I2C_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::SMBEN), mode == Bus_Mode::SMBUS ? true : false);
     write_bit(*this, I2C_Regs::SADDR0, static_cast<uint32_t>(SADDR0_Bits::ADDFORMAT), format == Address_Format::FORMAT_10BITS ? true : false);
     write_bit_ranges(*this, I2C_Regs::SADDR0,
-               static_cast<uint32_t>((format == Address_Format::FORMAT_10BITS) ? SADDR0_Bits::ADDRESS_10BIT : SADDR0_Bits::ADDRESS_7BIT), address);
+                     static_cast<uint32_t>((format == Address_Format::FORMAT_10BITS) ? SADDR0_Bits::ADDRESS_10BIT : SADDR0_Bits::ADDRESS_7BIT), address);
 }
 
 /**
@@ -163,9 +166,9 @@ void I2C::set_smbus_type(Bus_Type type) {
 /**
  * @brief Enables or disables the acknowledgment feature for the I2C peripheral.
  *
- * This function configures the I2C peripheral to either send or not send an 
- * acknowledgment after receiving a byte of data. Enabling acknowledgment is 
- * essential for proper communication in I2C protocols, as it ensures that 
+ * This function configures the I2C peripheral to either send or not send an
+ * acknowledgment after receiving a byte of data. Enabling acknowledgment is
+ * essential for proper communication in I2C protocols, as it ensures that
  * the master acknowledges receipts from the slave devices.
  *
  * @param enable Set to true to enable acknowledgment, false to disable it.
@@ -194,23 +197,19 @@ void I2C::set_ack_position(ACK_Select select) {
 /**
  * @brief Sets the direction and address for the I2C peripheral.
  *
- * This function configures the transfer direction (transmit or receive) 
+ * This function configures the transfer direction (transmit or receive)
  * and the target address for the I2C peripheral. For transmit operations,
- * the least significant bit (LSB) of the address is cleared. For receive 
- * operations, the LSB is set. The modified address is then written to the 
+ * the least significant bit (LSB) of the address is cleared. For receive
+ * operations, the LSB is set. The modified address is then written to the
  * data register.
  *
- * @param direction The transfer direction, which can be either 
+ * @param direction The transfer direction, which can be either
  *                  Transfer_Direction::TRANSMIT or Transfer_Direction::RECEIVE.
- * @param address The 7-bit or 10-bit address of the I2C device. The LSB is 
+ * @param address The 7-bit or 10-bit address of the I2C device. The LSB is
  *                adjusted based on the transfer direction.
  */
 void I2C::set_direction_address(Transfer_Direction direction, uint32_t address) {
-    if (direction == Transfer_Direction::TRANSMIT) {
-        address &= ~1U; // Clear LSB for transmit
-    } else {
-        address |= 0x00000001U;  // Set LSB for receive
-    }
+    address = (address & ~1U) | (direction == Transfer_Direction::RECEIVE);
     write_register(*this, I2C_Regs::DATA, address);
 }
 
@@ -218,10 +217,10 @@ void I2C::set_direction_address(Transfer_Direction direction, uint32_t address) 
  * @brief Configures the dual addressing mode for the I2C peripheral.
  *
  * This function enables or disables the dual addressing mode, allowing the I2C
- * peripheral to respond to two different addresses. When enabled, the second 
+ * peripheral to respond to two different addresses. When enabled, the second
  * address is configured and stored in the appropriate register.
  *
- * @param address The second device address to be set. This address is masked 
+ * @param address The second device address to be set. This address is masked
  *                according to the Address2Mask.
  * @param enable Set to true to enable dual addressing mode, false to disable it.
  */
@@ -358,7 +357,7 @@ void I2C::set_dma_transfer_end(bool is_end) {
  */
 void I2C::set_stretch_low(Stretch_Low stretch) {
     write_bit(*this, I2C_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::SS),
-           (stretch == Stretch_Low::SCLSTRETCH_ENABLE) ? false : true);
+              (stretch == Stretch_Low::SCLSTRETCH_ENABLE) ? false : true);
 }
 
 /**

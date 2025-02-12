@@ -31,25 +31,25 @@ GPIO& get_instance_for_base() {
 
 Result<GPIO, GPIO_Error_Type> GPIO::get_instance(GPIO_Base Base) {
     switch (Base) {
-    case GPIO_Base::GPIOA_BASE:
-        return get_enum_instance<GPIO_Base, GPIO, GPIO_Error_Type>(
-                   Base, GPIO_Base::GPIOA_BASE, get_instance_for_base<GPIO_Base::GPIOA_BASE>()
-               );
-    case GPIO_Base::GPIOB_BASE:
-        return get_enum_instance<GPIO_Base, GPIO, GPIO_Error_Type>(
-                   Base, GPIO_Base::GPIOB_BASE, get_instance_for_base<GPIO_Base::GPIOB_BASE>()
-               );
-    case GPIO_Base::GPIOC_BASE:
-        return get_enum_instance<GPIO_Base, GPIO, GPIO_Error_Type>(
-                   Base, GPIO_Base::GPIOC_BASE, get_instance_for_base<GPIO_Base::GPIOC_BASE>()
-               );
-    case GPIO_Base::GPIOD_BASE:
-        return get_enum_instance<GPIO_Base, GPIO, GPIO_Error_Type>(
-                   Base, GPIO_Base::GPIOD_BASE, get_instance_for_base<GPIO_Base::GPIOD_BASE>()
-               );
-    case GPIO_Base::INVALID:
-    default:
-        return RETURN_RESULT(GPIO, GPIO_Error_Type::INVALID_PORT);
+        case GPIO_Base::GPIOA_BASE:
+            return get_enum_instance<GPIO_Base, GPIO, GPIO_Error_Type>(
+                       Base, GPIO_Base::GPIOA_BASE, get_instance_for_base<GPIO_Base::GPIOA_BASE>()
+                   );
+        case GPIO_Base::GPIOB_BASE:
+            return get_enum_instance<GPIO_Base, GPIO, GPIO_Error_Type>(
+                       Base, GPIO_Base::GPIOB_BASE, get_instance_for_base<GPIO_Base::GPIOB_BASE>()
+                   );
+        case GPIO_Base::GPIOC_BASE:
+            return get_enum_instance<GPIO_Base, GPIO, GPIO_Error_Type>(
+                       Base, GPIO_Base::GPIOC_BASE, get_instance_for_base<GPIO_Base::GPIOC_BASE>()
+                   );
+        case GPIO_Base::GPIOD_BASE:
+            return get_enum_instance<GPIO_Base, GPIO, GPIO_Error_Type>(
+                       Base, GPIO_Base::GPIOD_BASE, get_instance_for_base<GPIO_Base::GPIOD_BASE>()
+                   );
+        case GPIO_Base::INVALID:
+        default:
+            return RETURN_RESULT(GPIO, GPIO_Error_Type::INVALID_PORT);
     }
 }
 
@@ -100,7 +100,7 @@ void GPIO::set_pin_mode(Pin_Number pin, Pin_Mode mode, Output_Speed speed) {
     uint32_t cfg = 0U;
     if (mode <= Pin_Mode::INPUT_PULLDOWN) {
         // Handle input modes
-        cfg = (mode == Pin_Mode::INPUT_FLOATING) ? 0x4U : 
+        cfg = (mode == Pin_Mode::INPUT_FLOATING) ? 0x4U :
               (mode == Pin_Mode::ANALOG) ? 0x0U : 0x8U;
 
         if (mode == Pin_Mode::INPUT_PULLUP)
@@ -151,14 +151,14 @@ Pin_Mode GPIO::get_pin_mode(Pin_Number pin) {
     const uint32_t mode_bits = (read_register<uint32_t>(*this, reg) & (0xFU << shift)) >> shift;
 
     switch (mode_bits) {
-    case 0x0U: return Pin_Mode::ANALOG;
-    case 0x4U: return Pin_Mode::INPUT_FLOATING;
-    case 0x8U: return get_pin_output_state(pin) ? Pin_Mode::INPUT_PULLUP : Pin_Mode::INPUT_PULLDOWN;
-    case 0x1U: case 0x2U: case 0x3U: return Pin_Mode::OUTPUT_PUSHPULL;
-    case 0x5U: case 0x6U: case 0x7U: return Pin_Mode::OUTPUT_OPENDRAIN;
-    case 0x9U: case 0xAU: case 0xBU: return Pin_Mode::ALT_PUSHPULL;
-    case 0xDU: case 0xEU: case 0xFU: return Pin_Mode::ALT_OPENDRAIN;
-    default: return Pin_Mode::INVALID;
+        case 0x0U: return Pin_Mode::ANALOG;
+        case 0x4U: return Pin_Mode::INPUT_FLOATING;
+        case 0x8U: return get_pin_output_state(pin) ? Pin_Mode::INPUT_PULLUP : Pin_Mode::INPUT_PULLDOWN;
+        case 0x1U: case 0x2U: case 0x3U: return Pin_Mode::OUTPUT_PUSHPULL;
+        case 0x5U: case 0x6U: case 0x7U: return Pin_Mode::OUTPUT_OPENDRAIN;
+        case 0x9U: case 0xAU: case 0xBU: return Pin_Mode::ALT_PUSHPULL;
+        case 0xDU: case 0xEU: case 0xFU: return Pin_Mode::ALT_OPENDRAIN;
+        default: return Pin_Mode::INVALID;
     }
 }
 
@@ -248,7 +248,7 @@ bool GPIO::read_pin(Pin_Number pin) {
  *
  * @param pin  GPIO pin to toggle.
  *
- * @note This function relies on the GPIO peripheral's semantics, where the BOP 
+ * @note This function relies on the GPIO peripheral's semantics, where the BOP
  *       (bit set) and BC (bit clear) registers are used for atomic pin operations:
  *         - Writing 1 << pin to BOP sets the pin high.
  *         - Writing 1 << pin to BC clears the pin low.
@@ -256,7 +256,7 @@ bool GPIO::read_pin(Pin_Number pin) {
  *       the register selection determines whether the pin is set or cleared.
  *
  * @warning Since GPIO peripherals often include separate registers for set/clear,
- *          writing 0 (via `atomic_write_bit`) has no effect. Other peripherals 
+ *          writing 0 (via `atomic_write_bit`) has no effect. Other peripherals
  *          may behave differently when writing 0 to registers.
  */
 void GPIO::toggle_pin(Pin_Number pin) {

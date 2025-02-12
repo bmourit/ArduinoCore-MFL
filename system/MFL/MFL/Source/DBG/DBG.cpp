@@ -83,7 +83,7 @@ void ARMDBG::set_peripheral_debug_enable(Debug_Peripheral peripheral, bool enabl
  * @brief Enables or disables debugging during low power modes.
  *
  * This function sets the debug configuration for specific low power modes
- * by enabling or disabling it based on the `enable` parameter. It modifies 
+ * by enabling or disabling it based on the `enable` parameter. It modifies
  * the corresponding bit in the DBG control register.
  *
  * @param type The type of low power mode to configure for debugging.

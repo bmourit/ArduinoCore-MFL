@@ -39,8 +39,8 @@ namespace arduino {
 class SPIClassMFL : public HardwareSPI {
 public:
     static SPIClassMFL& get_instance(spi::SPI_Base Base,
-               pin_size_t mosiPin = NO_PIN, pin_size_t misoPin = NO_PIN,
-               pin_size_t sclkPin = NO_PIN, pin_size_t sselPin = NO_PIN);
+                                     pin_size_t mosiPin = NO_PIN, pin_size_t misoPin = NO_PIN,
+                                     pin_size_t sclkPin = NO_PIN, pin_size_t sselPin = NO_PIN);
 
     void begin() override;
     void end() override;
@@ -60,7 +60,7 @@ public:
 
 private:
     SPIClassMFL(spi::SPI_Base Base, pin_size_t mosiPin, pin_size_t misoPin,
-               pin_size_t sclkPin, pin_size_t sselPin);
+                pin_size_t sclkPin, pin_size_t sselPin);
 
     spi::SPI_Base base_;
     spi::SPI& spi_;
