@@ -172,7 +172,7 @@ int analogRead(pin_size_t pin) {
         return 0;
     }
     uint32_t value = getAdcValue(pin, internalReadResolution_);
-    return mapResolution(value, internalReadResolution_, readResolution_);
+    return static_cast<int>(mapResolution(value, internalReadResolution_, readResolution_));
 }
 
 /**
@@ -196,17 +196,17 @@ void analogWrite(pin_size_t pin, int value) {
             isInitialized = false;
             pinConfigManager.setPinConfigured(pin);
         }
-        value = mapResolution(static_cast<uint32_t>(value), writeResolution_, pwmResolution_);
+        value = static_cast<int>(mapResolution(static_cast<uint32_t>(value), writeResolution_, pwmResolution_));
         setDacValue(pin, static_cast<uint16_t>(value), isInitialized);
     } else if (isPinInPinOps(TIMER_PinOps, pin)) {
         if (!pinConfigManager.isPinConfigured(pin)) {
             pinConfigManager.setPinConfigured(pin);
         }
-        value = mapResolution(static_cast<uint32_t>(value), writeResolution_, internalWriteResolution_);
+        value = static_cast<int>(mapResolution(static_cast<uint32_t>(value), writeResolution_, internalWriteResolution_));
         pwmStart(pin, writeFrequency_, static_cast<uint32_t>(value), getPwmResolution(internalWriteResolution_));
     } else {
         pinMode(pin, OUTPUT);
-        value = mapResolution(static_cast<uint32_t>(value), writeResolution_, 8);
+        value = static_cast<int>(mapResolution(static_cast<uint32_t>(value), writeResolution_, 8));
         digitalWrite(pin, (value >= 128) ? HIGH : LOW);
     }
 }
