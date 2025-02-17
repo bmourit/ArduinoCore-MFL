@@ -39,7 +39,7 @@ inline constexpr uint32_t REG_BIT_DEF(uint32_t start, uint32_t end) {
 // Uncomment if you need the vector table in SRAM
 //#define VECTOR_TABLE_SRAM
 
-#define	DISABLE_CEE_ENHANCE
+//#define	DISABLE_CEE_ENHANCE
 
 // Set the oppropriate offset here.
 // This should match the offset expected by the bootloader.
