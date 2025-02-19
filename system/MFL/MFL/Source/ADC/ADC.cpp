@@ -820,7 +820,7 @@ inline void ADC::cleanup_regular_conversion() {
  * @return The converted data
  */
 uint32_t ADC::start_regular_single_conversion(ADC_Channel channel, ADC_Sample_Time sample, ADC_Resolution resolution, bool calibrate) {
-    // Disable to avoid any accidentally triggering conversion
+    // Disable to avoid accidentally triggering conversion
     write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::ADCON), false);
     while (read_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::ADCON))) {
         // Wait for the ADC to be disabled

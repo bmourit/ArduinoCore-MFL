@@ -338,13 +338,10 @@ uint32_t GeneralTimer::getRolloverValue(TimerFormat format) {
     uint16_t prescalerValue = timer_.get_prescaler() + 1U;
 
     switch (format) {
-        case TimerFormat::US:
-            return (((value + 1U) * prescalerValue * 1'000'000.0) / getTimerClockFrequency());
-        case TimerFormat::HERTZ:
-            return (getTimerClockFrequency() / ((value + 1U) * prescalerValue));
+        case TimerFormat::US: return (((value + 1U) * prescalerValue * 1'000'000.0) / getTimerClockFrequency());
+        case TimerFormat::HERTZ: return (getTimerClockFrequency() / ((value + 1U) * prescalerValue));
         case TimerFormat::TICK:
-        default:
-            return value + 1U;
+        default: return value + 1U;
     }
 
     return value + 1U;
@@ -397,13 +394,10 @@ uint32_t GeneralTimer::getCounter(TimerFormat format) {
     uint16_t prescalerValue = timer_.get_prescaler() + 1U;
 
     switch (format) {
-        case TimerFormat::US:
-            return ((counterValue * prescalerValue * 1'000'000.0) / getTimerClockFrequency());
-        case TimerFormat::HERTZ:
-            return (getTimerClockFrequency() / (counterValue * prescalerValue));
+        case TimerFormat::US: return ((counterValue * prescalerValue * 1'000'000.0) / getTimerClockFrequency());
+        case TimerFormat::HERTZ: return (getTimerClockFrequency() / (counterValue * prescalerValue));
         case TimerFormat::TICK:
-        default:
-            return counterValue;
+        default: return counterValue;
     }
 
     return counterValue;
@@ -859,17 +853,13 @@ uint32_t GeneralTimer::getTimerClockFrequency() {
     rcu::APB_Prescaler prescaler = rcu::APB_Prescaler::INVALID;
 
     switch (base_) {
-        case timer::TIMER_Base::TIMER0_BASE:
-        case timer::TIMER_Base::TIMER7_BASE:
+        case timer::TIMER_Base::TIMER0_BASE: case timer::TIMER_Base::TIMER7_BASE:
             timer_source = rcu::Clock_Frequency::CK_APB2;
             prescaler = RCU_I.get_apb2_prescaler();
             break;
-        case timer::TIMER_Base::TIMER1_BASE:
-        case timer::TIMER_Base::TIMER2_BASE:
-        case timer::TIMER_Base::TIMER3_BASE:
-        case timer::TIMER_Base::TIMER4_BASE:
-        case timer::TIMER_Base::TIMER5_BASE:
-        case timer::TIMER_Base::TIMER6_BASE:
+        case timer::TIMER_Base::TIMER1_BASE: case timer::TIMER_Base::TIMER2_BASE:
+        case timer::TIMER_Base::TIMER3_BASE: case timer::TIMER_Base::TIMER4_BASE:
+        case timer::TIMER_Base::TIMER5_BASE: case timer::TIMER_Base::TIMER6_BASE:
             timer_source = rcu::Clock_Frequency::CK_APB1;
             prescaler = RCU_I.get_apb1_prescaler();
             break;

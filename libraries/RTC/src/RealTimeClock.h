@@ -37,12 +37,18 @@ public:
     using RTCCallback = void (*)(void);
 
     void init();
-    void setTime(Time_Set* time);
-    void getTime(Time_Set* time);
+    void setTime(const Time_Set& time);
+    void getTime(Time_Set& time);
     void setSeconds(uint32_t seconds);
     uint32_t getSeconds();
-    void setAlarm(uint32_t offset, Alarm_Format format);
-    uint32_t createTimestamp(Time_Set* time);
+    // Alarms
+    void setTimerAlarm(uint32_t hours, uint32_t minutes, uint32_t seconds);
+    void setTimerAlarm(uint32_t offset, Alarm_Format format);
+    void setDailyAlarm(uint8_t hour, uint8_t minute, uint8_t second);
+    void setCalendarAlarm(uint8_t month, uint8_t day, uint8_t hour, uint8_t minute, uint8_t second);
+    // Timestamp
+    uint32_t createTimestamp(const Time_Set& time);
+    // Interrupts
     void attachInterrupt(RTCCallback callback, Interrupt_Type type);
     void detachInterrupt(Interrupt_Type type);
     void interruptHandler(Interrupt_Type type);
