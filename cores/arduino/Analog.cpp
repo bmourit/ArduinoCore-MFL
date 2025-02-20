@@ -9,7 +9,7 @@ static int internalReadResolution_ = (ADC_RESOLUTION > ADC_MAX_RESOLUTION) ? ADC
 static int internalWriteResolution_ = (PWM_RESOLUTION > PWM_MAX_RESOLUTION) ? PWM_MAX_RESOLUTION : PWM_RESOLUTION;
 static uint32_t writeFrequency_ = static_cast<uint32_t>(PWM_FREQUENCY);
 
-static constexpr adc::ADC_Sample_Time SampleTime = adc::ADC_Sample_Time::SAMPLETIME_239_5_CYCLES;
+static constexpr adc::ADC_Sample_Time SampleTime = adc::ADC_Sample_Time::SAMPLETIME_13_5_CYCLES;
 static constexpr adc::ADC_Sample_Time InternalSampleTime = adc::ADC_Sample_Time::SAMPLETIME_239_5_CYCLES;
 
 // ADC
