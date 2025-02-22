@@ -41,7 +41,7 @@ STARTUP::STARTUP() {}
  * This function will:
  *  1. Enable the High-Speed Crystal Oscillator (HXTAL)
  *  2. Wait until HXTAL is stable
- *  3. Set the LDO output voltage to LOW (1.2V). This can be changed
+ *  3. Set the LDO output voltage to HIGH (1.2V). This can be changed
  *     by uncommenting one of the other options below.
  *  4. Set the AHB clock to be the system clock (SYSCLK)
  *  5. Set the APB2 clock to be the system clock (SYSCLK) divided by 1
@@ -51,10 +51,10 @@ STARTUP::STARTUP() {}
  *  9. Wait for the PLL to be stable
  *  10. Enable high-drive mode for high clock frequency
  *  11. Select high-drive mode
- *  12. Set the ADC prescaler to divide the APB2 clock by 4
- *  13. Set the system clock to be the PLL clock
- *  14. Verify the system clock is set to the PLL clock
- *  15. Enable the CEE enhanced mode
+ *  12. Set the system clock to be the PLL clock
+ *  13. Verify the system clock is set to the PLL clock
+ *  14. Set the ADC prescaler to divide the APB2 clock by 8
+ *  15. Enable the CEE enhanced mode, when applicable
  *
  * @note This function should be called as early as possible in the startup
  * sequence to ensure proper configuration of the MCU.
@@ -100,13 +100,13 @@ void STARTUP::startup_init() {
     // Select high-drive mode
     pmu::PMU::get_instance().high_driver_switch(true);
 
-    // ADC prescaler
-    rcu::RCU::get_instance().set_adc_prescaler(rcu::ADC_Prescaler::CKAPB2_DIV4);    // 30 MHz
-
     // PLL as system clock
     rcu::RCU::get_instance().set_system_source(rcu::System_Clock_Source::SOURCE_PLL);
     // Verify PLL is set as system clock
     while (rcu::RCU::get_instance().get_system_source() != rcu::System_Clock_Source::SOURCE_PLL) {}
+
+    // ADC prescaler
+    rcu::RCU::get_instance().set_adc_prescaler(rcu::ADC_Prescaler::CKAPB2_DIV8);    // 15 MHz
 
 #ifndef DISABLE_CEE_ENHANCE
     // Set CEE enahnced mode
