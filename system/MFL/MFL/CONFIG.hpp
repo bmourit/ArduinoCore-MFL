@@ -51,7 +51,7 @@ inline constexpr uint32_t REG_BIT_DEF(uint32_t start, uint32_t end) {
 #ifndef VECT_TAB_OFFSET
     inline constexpr uintptr_t VECT_TABLE_OFFSET = 0x00007000U;
 #else
-    inline constexpr uintptr_t VECT_TABLE_OFFSET = VECT_TAB_OFFSET
+    inline constexpr uintptr_t VECT_TABLE_OFFSET = VECT_TAB_OFFSET;
 #endif
 
 // DO NOT CHANGE THESE
