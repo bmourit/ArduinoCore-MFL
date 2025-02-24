@@ -36,9 +36,6 @@ void pinMode(pin_size_t pin, PinMode mode) {
     }
 
     switch (mode) {
-        case INPUT:
-            setPinOp(pin, createPackedPinOps(gpio::Pin_Mode::INPUT_FLOATING, gpio::Output_Speed::SPEED_MAX, gpio::Pin_Remap_Select::NO_REMAP, 0, 0));
-            break;
         case INPUT_PULLUP:
             setPinOp(pin, createPackedPinOps(gpio::Pin_Mode::INPUT_PULLUP, gpio::Output_Speed::SPEED_MAX, gpio::Pin_Remap_Select::NO_REMAP, 0, 0));
             break;
@@ -51,12 +48,18 @@ void pinMode(pin_size_t pin, PinMode mode) {
         case OUTPUT_OPENDRAIN:
             setPinOp(pin, createPackedPinOps(gpio::Pin_Mode::OUTPUT_OPENDRAIN, gpio::Output_Speed::SPEED_MAX, gpio::Pin_Remap_Select::NO_REMAP, 0, 0));
             break;
+        // NOTE: INPUT_ANALOG is deprecated.
+        // Besides not being part of the Arduino API,
+        // it is already handled directly in Analog.cpp
 #pragma GCC diagnostic ignored "-Wswitch"
         case INPUT_ANALOG:
-        default:    // Default to INPUT_ANALOG
             if ((pin != ADC_TEMP) && (pin != ADC_VREF)) {
                 pinOpsPinout(ADC_PinOps, pin);
             }
+            break;
+        case INPUT:
+        default:    // Default to INPUT
+            setPinOp(pin, createPackedPinOps(gpio::Pin_Mode::INPUT_FLOATING, gpio::Output_Speed::SPEED_MAX, gpio::Pin_Remap_Select::NO_REMAP, 0, 0));
             break;
     }
 }

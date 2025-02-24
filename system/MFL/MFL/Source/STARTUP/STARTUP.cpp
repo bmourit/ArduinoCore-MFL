@@ -53,7 +53,7 @@ STARTUP::STARTUP() {}
  *  11. Select high-drive mode
  *  12. Set the system clock to be the PLL clock
  *  13. Verify the system clock is set to the PLL clock
- *  14. Set the ADC prescaler to divide the APB2 clock by 8
+ *  14. Set the ADC prescaler to AHB clock divided by 10 (user can change this later if desired)
  *  15. Enable the CEE enhanced mode, when applicable
  *
  * @note This function should be called as early as possible in the startup
@@ -106,7 +106,7 @@ void STARTUP::startup_init() {
     while (rcu::RCU::get_instance().get_system_source() != rcu::System_Clock_Source::SOURCE_PLL) {}
 
     // ADC prescaler
-    rcu::RCU::get_instance().set_adc_prescaler(rcu::ADC_Prescaler::CKAPB2_DIV8);    // 15 MHz
+    rcu::RCU::get_instance().set_adc_prescaler(rcu::ADC_Prescaler::CKAHB_DIV10);    // 12 MHz
 
 #ifndef DISABLE_CEE_ENHANCE
     // Set CEE enahnced mode

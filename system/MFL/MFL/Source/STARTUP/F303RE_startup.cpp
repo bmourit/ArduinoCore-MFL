@@ -78,7 +78,7 @@ extern "C" void system_startup() {
     regs->CFG0 = 0x00000000U;
     regs->CFG1 = 0x00000000U;
     // Vector table offset
-    SCB->VTOR = 0x08000000U | 0x7000U;
+    SCB->VTOR = VTOR_ADDRESS;
 }
 
 /**

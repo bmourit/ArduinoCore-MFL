@@ -6,8 +6,8 @@ _Min_Stack_Size = 0x400;     /* required amount of stack */
 
 /* memory map */
 MEMORY {
-  FLASH (rx) : ORIGIN = 0x08000000 + 0x7000, LENGTH = 512K - 0x7000
-  RAM (xrw) : ORIGIN = 0x20000000, LENGTH = 64K - 40
+  FLASH (rx) : ORIGIN = 0x08000000 + LD_FLASH_OFFSET, LENGTH = LD_MAX_SIZE - LD_FLASH_OFFSET
+  RAM (xrw) : ORIGIN = 0x20000000, LENGTH = LD_MAX_DATA_SIZE
 }
 
 SECTIONS {

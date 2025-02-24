@@ -871,6 +871,8 @@ uint32_t ADC::start_regular_single_conversion(ADC_Channel channel, ADC_Sample_Ti
     clear_flag(Status_Flags::FLAG_EOC);
     // Cleanup
     cleanup_regular_conversion();
+    // Disable to avoid excess noise
+    write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::ADCON), false);
 
     return converted_data;
 }
