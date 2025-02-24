@@ -338,7 +338,7 @@ uint32_t GeneralTimer::getRolloverValue(TimerFormat format) {
     uint16_t prescalerValue = timer_.get_prescaler() + 1U;
 
     switch (format) {
-        case TimerFormat::US: return (((value + 1U) * prescalerValue * 1'000'000.0) / getTimerClockFrequency());
+        case TimerFormat::US: return (((value + 1U) * prescalerValue * 1'000'000U) / getTimerClockFrequency());
         case TimerFormat::HERTZ: return (getTimerClockFrequency() / ((value + 1U) * prescalerValue));
         case TimerFormat::TICK:
         default: return value + 1U;
@@ -394,7 +394,7 @@ uint32_t GeneralTimer::getCounter(TimerFormat format) {
     uint16_t prescalerValue = timer_.get_prescaler() + 1U;
 
     switch (format) {
-        case TimerFormat::US: return ((counterValue * prescalerValue * 1'000'000.0) / getTimerClockFrequency());
+        case TimerFormat::US: return ((counterValue * prescalerValue * 1'000'000U) / getTimerClockFrequency());
         case TimerFormat::HERTZ: return (getTimerClockFrequency() / (counterValue * prescalerValue));
         case TimerFormat::TICK:
         default: return counterValue;
@@ -671,7 +671,7 @@ uint32_t GeneralTimer::getCaptureCompare(timer::Timer_Channel channel, CCFormat 
     // Handle remaining formats
     switch (format) {
         case CCFormat::US:
-            return (ccValue * prescaler * 1'000'000.0) / (getTimerClockFrequency());
+            return (ccValue * prescaler * 1'000'000U) / (getTimerClockFrequency());
         case CCFormat::HERTZ:
             return (getTimerClockFrequency() / (ccValue * prescaler));
         case CCFormat::PERCENT:
