@@ -24,46 +24,21 @@ timer::TIMER& GeneralTimer::get_timer_instance(timer::TIMER_Base Base) {
 
 GeneralTimer& GeneralTimer::get_instance(timer::TIMER_Base Base) {
     switch (Base) {
-        case timer::TIMER_Base::TIMER0_BASE: {
-            static GeneralTimer GTimer0(Base);
-            return GTimer0;
-        }
-        case timer::TIMER_Base::TIMER1_BASE: {
-            static GeneralTimer GTimer1(Base);
-            return GTimer1;
-        }
-        case timer::TIMER_Base::TIMER2_BASE: {
-            static GeneralTimer GTimer2(Base);
-            return GTimer2;
-        }
-        case timer::TIMER_Base::TIMER3_BASE: {
-            static GeneralTimer GTimer3(Base);
-            return GTimer3;
-        }
-        case timer::TIMER_Base::TIMER4_BASE: {
-            static GeneralTimer GTimer4(Base);
-            return GTimer4;
-        }
-        case timer::TIMER_Base::TIMER5_BASE: {
-            static GeneralTimer GTimer5(Base);
-            return GTimer5;
-        }
-        case timer::TIMER_Base::TIMER6_BASE: {
-            static GeneralTimer GTimer6(Base);
-            return GTimer6;
-        }
-        case timer::TIMER_Base::TIMER7_BASE: {
-            static GeneralTimer GTimer7(Base);
-            return GTimer7;
-        }
+        case timer::TIMER_Base::TIMER0_BASE: { static GeneralTimer GTimer0(Base); return GTimer0; }
+        case timer::TIMER_Base::TIMER1_BASE: { static GeneralTimer GTimer1(Base); return GTimer1; }
+        case timer::TIMER_Base::TIMER2_BASE: { static GeneralTimer GTimer2(Base); return GTimer2; }
+        case timer::TIMER_Base::TIMER3_BASE: { static GeneralTimer GTimer3(Base); return GTimer3; }
+        case timer::TIMER_Base::TIMER4_BASE: { static GeneralTimer GTimer4(Base); return GTimer4; }
+        case timer::TIMER_Base::TIMER5_BASE: { static GeneralTimer GTimer5(Base); return GTimer5; }
+        case timer::TIMER_Base::TIMER6_BASE: { static GeneralTimer GTimer6(Base); return GTimer6; }
+        case timer::TIMER_Base::TIMER7_BASE: { static GeneralTimer GTimer7(Base); return GTimer7; }
         case timer::TIMER_Base::INVALID:
         default:
 #ifdef CORE_DEBUG
             core_debug("Invalid TIMER instance!");
             __builtin_trap();
 #endif
-            static GeneralTimer dummy(Base);
-            return dummy;
+            static GeneralTimer dummy(Base); return dummy;
     }
 }
 
@@ -201,19 +176,14 @@ void GeneralTimer::startTimerChannel(timer::Timer_Channel channel) {
                 }
             }
             break;
-        case InputOutputMode::RISING:
-        case InputOutputMode::FALLING:
+        case InputOutputMode::RISING: case InputOutputMode::FALLING:
             timer_.set_channel_output_enable(channel, true);
             timer_.enable();
             break;
-        case InputOutputMode::TIMING:
-        case InputOutputMode::OUTPUT:
-        case InputOutputMode::CLEAR:
-        case InputOutputMode::TOGGLE:
-        case InputOutputMode::FORCE_LOW:
-        case InputOutputMode::FORCE_HIGH:
-        case InputOutputMode::PWM0:
-        case InputOutputMode::PWM1:
+        case InputOutputMode::TIMING: case InputOutputMode::OUTPUT:
+        case InputOutputMode::CLEAR: case InputOutputMode::TOGGLE:
+        case InputOutputMode::FORCE_LOW: case InputOutputMode::FORCE_HIGH:
+        case InputOutputMode::PWM0: case InputOutputMode::PWM1:
             if (companionChannel[static_cast<size_t>(channel)]) {
                 timer_.set_compliment_output_enable(channel, true);
             } else {
@@ -849,24 +819,11 @@ bool GeneralTimer::hasInterrupt(timer::Timer_Channel channel) {
  * @return The clock frequency of the timer in Hz.
  */
 uint32_t GeneralTimer::getTimerClockFrequency() {
-    rcu::Clock_Frequency timer_source = rcu::Clock_Frequency::CK_APB1;
-    rcu::APB_Prescaler prescaler = rcu::APB_Prescaler::INVALID;
+    if (base_ == timer::TIMER_Base::INVALID) return 0U;
 
-    switch (base_) {
-        case timer::TIMER_Base::TIMER0_BASE: case timer::TIMER_Base::TIMER7_BASE:
-            timer_source = rcu::Clock_Frequency::CK_APB2;
-            prescaler = RCU_I.get_apb2_prescaler();
-            break;
-        case timer::TIMER_Base::TIMER1_BASE: case timer::TIMER_Base::TIMER2_BASE:
-        case timer::TIMER_Base::TIMER3_BASE: case timer::TIMER_Base::TIMER4_BASE:
-        case timer::TIMER_Base::TIMER5_BASE: case timer::TIMER_Base::TIMER6_BASE:
-            timer_source = rcu::Clock_Frequency::CK_APB1;
-            prescaler = RCU_I.get_apb1_prescaler();
-            break;
-        case timer::TIMER_Base::INVALID:
-        default:
-            return 0U;
-    }
+    const bool apb2_bus = (base_ == timer::TIMER_Base::TIMER0_BASE || base_ == timer::TIMER_Base::TIMER7_BASE);
+    rcu::Clock_Frequency timer_source = apb2_bus ? rcu::Clock_Frequency::CK_APB2 : rcu::Clock_Frequency::CK_APB1;
+    rcu::APB_Prescaler prescaler = apb2_bus ? RCU_I.get_apb2_prescaler() : RCU_I.get_apb1_prescaler();
 
     if (prescaler == rcu::APB_Prescaler::INVALID) return 0U;
 

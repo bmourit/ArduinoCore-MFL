@@ -85,6 +85,15 @@ void delayMicroseconds(unsigned int usec) {
     } while (numTicks > elapsedTicks);
 }
 
+/**
+ * @brief Increments the system tick count.
+ *
+ * This function is used to increment the system tick count.
+ * It is called by the SysTick interrupt handler.
+ *
+ * @details
+ * The function increments the msTickCount_ variable by 1U.
+ */
 void tickIncrement() {
     msTickCount_ = msTickCount_ + 1U;
 }

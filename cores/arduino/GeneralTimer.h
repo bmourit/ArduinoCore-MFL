@@ -137,9 +137,7 @@ protected:
     inline timer::Status_Flags convertToFlag(timer::Timer_Channel channel);
     inline timer::Interrupt_Flags convertToInterruptFlag(timer::Timer_Channel channel);
     inline timer::Interrupt_Type convertToInterrupt(timer::Timer_Channel channel);
-    inline timer::Timer_Channel convertToChannel(uint8_t channel) {
-        return static_cast<timer::Timer_Channel>(channel);
-    }
+    inline timer::Timer_Channel convertToChannel(uint8_t channel) { return static_cast<timer::Timer_Channel>(channel); }
 
 private:
     static std::array<timer_to_irq, TIMER_COUNT> timer_up_irq;
@@ -164,7 +162,6 @@ private:
         // Return invalid
         return INVALID_IRQ;
     }
-
 
     template<timer::Timer_Channel channel>
     inline void processChannelInterrupt() {
