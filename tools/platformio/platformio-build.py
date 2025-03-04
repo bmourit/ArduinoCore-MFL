@@ -110,7 +110,7 @@ env.Append(
 	ASPPFLAGS=[
 	],
 	CFLAGS=[
-		"-std=gnu11",
+		"-std=gnu23",
 	],
 	CXXFLAGS=[
 		"-std=gnu++23",
