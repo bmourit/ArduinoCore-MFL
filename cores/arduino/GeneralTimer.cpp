@@ -59,8 +59,8 @@ GeneralTimer::GeneralTimer(timer::TIMER_Base Base) :
     capture_config_(timer::default_capture),
     compare_config_(timer::default_compare),
     callbacks_{0, nullptr, {nullptr}},
-           preemptPriority_(12U),
-           subPriority_(0U)
+    preemptPriority_(12U),
+    subPriority_(0U)
 {
     // Initialize channel modes array
     for (int i = 0; i < TIMER_CHANNELS; i++) {
@@ -216,14 +216,14 @@ void GeneralTimer::stopTimerChannel(timer::Timer_Channel channel) {
         InputOutputMode mode = channel_modes_[static_cast<size_t>(channel)];
         if (mode == InputOutputMode::COMPARE) {
             timer::Timer_Channel companion = getCompanionChannel(channel);
-            if (companion != timer::Timer_Channel::INVALID) {
-                timer::Interrupt_Flags companion_flag = convertToInterruptFlag(companion);
-                timer::Interrupt_Type companion_type = convertToInterrupt(companion);
-                if (companion_flag != timer::Interrupt_Flags::INVALID && companion_type != timer::Interrupt_Type::INVALID) {
-                    timer_.clear_interrupt_flag(companion_flag);
-                    timer_.set_interrupt_enable(companion_type, false);
-                }
-            }
+            if (companion == timer::Timer_Channel::INVALID) return;
+
+            timer::Interrupt_Flags companion_flag = convertToInterruptFlag(companion);
+            timer::Interrupt_Type companion_type = convertToInterrupt(companion);
+            if (companion_flag == timer::Interrupt_Flags::INVALID || companion_type == timer::Interrupt_Type::INVALID) return;
+
+            timer_.clear_interrupt_flag(companion_flag);
+            timer_.set_interrupt_enable(companion_type, false);
         }
     }
 }
@@ -266,30 +266,21 @@ uint16_t GeneralTimer::getPrescaler() {
  * @param[in] format The unit of the value parameter.
  */
 void GeneralTimer::setRolloverValue(uint32_t value, TimerFormat format) {
-    uint32_t tickValue = 0U;
-    uint16_t prescalerValue = 0U;
-    uint32_t cycle = 0U;
+    // TICK format
+    if (format == TimerFormat::TICK) {
+        timer_.set_auto_reload((value > 0U) ? value - 1U : 0U)
+    } else {
+        // US and HERTZ formats
+        const uint32_t timerClock = getTimerClockFrequency();
+        uint32_t cycle = (format == TimerFormat::US) ?
+                          value * (timerClock / 1'000'000U) :
+                          timerClock / value;
+        const uint32_t prescalerValue = (cycle / 0x10000U) + 1U;
+        const uint32_t tickValue = cycle / prescalerValue;
 
-    switch (format) {
-        case TimerFormat::US:
-            cycle = value * (getTimerClockFrequency() / 1'000'000U);
-            prescalerValue = (cycle / 0x10000U) + 1U;
-            timer_.set_prescaler_reload(prescalerValue - 1U, timer::PSC_Reload::RELOAD_UPDATE);
-            tickValue = cycle / prescalerValue;
-            break;
-        case TimerFormat::HERTZ:
-            cycle = getTimerClockFrequency() / value;
-            prescalerValue = (cycle / 0x10000U) + 1U;
-            timer_.set_prescaler_reload(prescalerValue - 1U, timer::PSC_Reload::RELOAD_UPDATE);
-            tickValue = cycle / prescalerValue;
-            break;
-        case TimerFormat::TICK:
-        default:
-            tickValue = value;
-            break;
+        timer_.set_prescaler_reload(static_cast<uint16_t>(prescalerValue - 1U), timer::PSC_Reload::RELOAD_UPDATE);
+        timer_.set_auto_reload((tickValue > 0U) ? tickValue - 1U : 0U);
     }
-
-    timer_.set_auto_reload((tickValue > 0U) ? tickValue - 1U : 0U);
 }
 
 /**
@@ -304,17 +295,14 @@ void GeneralTimer::setRolloverValue(uint32_t value, TimerFormat format) {
  * @return The rollover value in the specified format.
  */
 uint32_t GeneralTimer::getRolloverValue(TimerFormat format) {
-    uint16_t value = timer_.get_auto_reload();
-    uint16_t prescalerValue = timer_.get_prescaler() + 1U;
+    const uint32_t prescalerValue = static_cast<uint32_t>(timer_.get_prescaler()) + 1U;
+    const uint16_t value = timer_.get_auto_reload();
+    const uint32_t timerClock = getTimerClockFrequency();
 
-    switch (format) {
-        case TimerFormat::US: return (((value + 1U) * prescalerValue * 1'000'000U) / getTimerClockFrequency());
-        case TimerFormat::HERTZ: return (getTimerClockFrequency() / ((value + 1U) * prescalerValue));
-        case TimerFormat::TICK:
-        default: return value + 1U;
-    }
-
-    return value + 1U;
+    return (format == TimerFormat::US) ?
+           ((value + 1U) * prescalerValue * 1'000'000U) / timerClock :
+           (format == TimerFormat::HERTZ) ?
+           timerClock / ((value + 1U) * prescalerValue) : value + 1U;
 }
 
 /**
@@ -329,21 +317,13 @@ uint32_t GeneralTimer::getRolloverValue(TimerFormat format) {
  * @param[in] format The unit of the value parameter.
  */
 void GeneralTimer::setCounter(uint16_t count, TimerFormat format) {
-    uint16_t counterValue = 0U;
-    uint16_t prescalerValue = timer_.get_prescaler() + 1U;
+    const uint32_t prescalerValue = static_cast<uint32_t>(timer_.get_prescaler()) + 1U;
+    const uint32_t timerClock = getTimerClockFrequency();
 
-    switch (format) {
-        case TimerFormat::US:
-            counterValue = ((count * (getTimerClockFrequency() / 1'000'000U)) / prescalerValue);
-            break;
-        case TimerFormat::HERTZ:
-            counterValue = (getTimerClockFrequency() / (count * prescalerValue));
-            break;
-        case TimerFormat::TICK:
-        default:
-            counterValue = count;
-            break;
-    }
+    uint16_t counterValue = (format == TimerFormat::US) ?
+                            ((count * (timerClock / 1'000'000U)) / prescalerValue) :
+                            (format == TimerFormat::HERTZ) ?
+                            (timerClock / (count * prescalerValue)) : count;
 
     timer_.set_counter_value(counterValue);
 }
@@ -360,17 +340,14 @@ void GeneralTimer::setCounter(uint16_t count, TimerFormat format) {
  * @return The current counter value in the specified format.
  */
 uint32_t GeneralTimer::getCounter(TimerFormat format) {
-    uint32_t counterValue = timer_.get_counter();
-    uint16_t prescalerValue = timer_.get_prescaler() + 1U;
+    const uint32_t counterValue = timer_.get_counter();
+    const uint32_t prescalerValue = static_cast<uint32_t>(timer_.get_prescaler()) + 1U;
+    const uint32_t timerClock = getTimerClockFrequency();
 
-    switch (format) {
-        case TimerFormat::US: return ((counterValue * prescalerValue * 1'000'000U) / getTimerClockFrequency());
-        case TimerFormat::HERTZ: return (getTimerClockFrequency() / (counterValue * prescalerValue));
-        case TimerFormat::TICK:
-        default: return counterValue;
-    }
-
-    return counterValue;
+    return (format == TimerFormat::US) ?
+           ((counterValue * prescalerValue * 1'000'000U) / timerClock) :
+           (format == TimerFormat::HERTZ) ?
+           (timerClock / (counterValue * prescalerValue)) : counterValue;
 }
 
 /**
@@ -392,114 +369,97 @@ void GeneralTimer::setChannelMode(timer::Timer_Channel channel, InputOutputMode 
         return;
     }
 
-    uint8_t companionNumber = 0U;
-    channel_modes_[static_cast<size_t>(channel)] = mode;
+    const size_t channelIndex = static_cast<size_t>(channel);
+    channel_modes_[channelIndex] = mode;
 
-    timer::TIMER_Input_Capture captureConfig = {
-        .digital_filter = 0U,
-        .polarity = timer::Polarity_Select::HIGH_RISING,
-        .source_select = timer::Input_Capture_Select::IO_INPUT_CI0FE0,
-        .prescaler = timer::Input_Capture_Prescaler::DIV1
-    };
+    // Directly set capture values
+    capture_config_.digital_filter = 0U;
+    capture_config_.polarity = timer::Polarity_Select::HIGH_RISING;
+    capture_config_.source_select = timer::Input_Capture_Select::IO_INPUT_CI0FE0;
+    capture_config_.prescaler = timer::Input_Capture_Prescaler::DIV1;
 
-    timer::TIMER_Output_Compare compareConfig = {
-        .state = timer::Output_Compare_State::OC_DISABLE,
-        .companion_state = timer::Output_Compare_State::OC_DISABLE,
-        .polarity = timer::Polarity_Select::HIGH_RISING,
-        .companion_polarity = timer::Polarity_Select::HIGH_RISING,
-        .idle_state = timer::Idle_State::IDLE_LOW,
-        .companion_idle_state = timer::Idle_State::IDLE_LOW
-    };
+    // Directly set compare values
+    compare_config_.state = timer::Output_Compare_State::OC_DISABLE;
+    compare_config_.companion_state = timer::Output_Compare_State::OC_DISABLE;
+    compare_config_.polarity = timer::Polarity_Select::HIGH_RISING;
+    compare_config_.companion_polarity = timer::Polarity_Select::HIGH_RISING;
+    compare_config_.idle_state = timer::Idle_State::IDLE_LOW;
+    compare_config_.companion_idle_state = timer::Idle_State::IDLE_LOW;
 
     // Main switch case for handling different modes
     switch (mode) {
-        case InputOutputMode::TIMING:
-            timer_.set_output_mode(channel, timer::Output_Compare_Mode::OC_TIMING_MODE);
-            timer_.output_compare_init(channel, compareConfig);
-            break;
-        case InputOutputMode::OUTPUT:
-            timer_.set_output_mode(channel, timer::Output_Compare_Mode::OC_OUTPUT_MODE);
-            timer_.output_compare_init(channel, compareConfig);
-            break;
-        case InputOutputMode::CLEAR:
-            timer_.set_output_mode(channel, timer::Output_Compare_Mode::OC_CLEAR_MODE);
-            timer_.output_compare_init(channel, compareConfig);
-            break;
-        case InputOutputMode::TOGGLE:
-            timer_.set_output_mode(channel, timer::Output_Compare_Mode::OC_TOGGLE_MODE);
-            timer_.output_compare_init(channel, compareConfig);
-            break;
-        case InputOutputMode::FORCE_LOW:
-            timer_.set_output_mode(channel, timer::Output_Compare_Mode::OC_FORCE_LOW_MODE);
-            timer_.output_compare_init(channel, compareConfig);
-            break;
-        case InputOutputMode::FORCE_HIGH:
-            timer_.set_output_mode(channel, timer::Output_Compare_Mode::OC_FORCE_HIGH_MODE);
-            timer_.output_compare_init(channel, compareConfig);
-            break;
         case InputOutputMode::PWM0:
-            timer_.set_output_mode(channel, timer::Output_Compare_Mode::OC_PWM_MODE0);
-            timer_.output_compare_init(channel, compareConfig);
-            timer_.set_output_shadow(channel, timer::Output_Compare_Shadow::OC_SHADOW_ENABLE);
-            timer_.set_output_fast(channel, timer::Output_Compare_Fast::OC_FAST_DISABLE);
-            break;
         case InputOutputMode::PWM1:
-            timer_.set_output_mode(channel, timer::Output_Compare_Mode::OC_PWM_MODE1);
-            timer_.output_compare_init(channel, compareConfig);
+            timer_.set_output_mode(channel,
+                   (mode == InputOutputMode::PWM0) ? 
+                   timer::Output_Compare_Mode::OC_PWM_MODE0 :
+                   timer::Output_Compare_Mode::OC_PWM_MODE1);
+            timer_.output_compare_init(channel, compare_config_);
             timer_.set_output_shadow(channel, timer::Output_Compare_Shadow::OC_SHADOW_ENABLE);
             timer_.set_output_fast(channel, timer::Output_Compare_Fast::OC_FAST_DISABLE);
             break;
         case InputOutputMode::RISING:
-            captureConfig.polarity = timer::Polarity_Select::HIGH_RISING;
-            timer_.input_capture_init(channel, captureConfig);
-            break;
         case InputOutputMode::FALLING:
-            captureConfig.polarity = timer::Polarity_Select::LOW_FALLING;
-            timer_.input_capture_init(channel, captureConfig);
+            capture_config_.polarity = (mode == InputOutputMode::RISING) ? 
+                   timer::Polarity_Select::HIGH_RISING :
+                   timer::Polarity_Select::LOW_FALLING;
+            timer_.input_capture_init(channel, capture_config_);
+            break;
+        case InputOutputMode::TIMING:
+            timer_.set_output_mode(channel, timer::Output_Compare_Mode::OC_TIMING_MODE);
+            timer_.output_compare_init(channel, compare_config_);
+            break;
+        case InputOutputMode::OUTPUT:
+            timer_.set_output_mode(channel, timer::Output_Compare_Mode::OC_OUTPUT_MODE);
+            timer_.output_compare_init(channel, compare_config_);
+            break;
+        case InputOutputMode::CLEAR:
+            timer_.set_output_mode(channel, timer::Output_Compare_Mode::OC_CLEAR_MODE);
+            timer_.output_compare_init(channel, compare_config_);
+            break;
+        case InputOutputMode::TOGGLE:
+            timer_.set_output_mode(channel, timer::Output_Compare_Mode::OC_TOGGLE_MODE);
+            timer_.output_compare_init(channel, compare_config_);
+            break;
+        case InputOutputMode::FORCE_LOW:
+            timer_.set_output_mode(channel, timer::Output_Compare_Mode::OC_FORCE_LOW_MODE);
+            timer_.output_compare_init(channel, compare_config_);
+            break;
+        case InputOutputMode::FORCE_HIGH:
+            timer_.set_output_mode(channel, timer::Output_Compare_Mode::OC_FORCE_HIGH_MODE);
+            timer_.output_compare_init(channel, compare_config_);
             break;
         // TODO:
         //  Can we even support this?
         //  Leaving commented for now
         //case InputOutputMode::DUAL:
-        //  captureConfig.polarity = timer::Polarity_Select::DUAL_EDGE;
-        //  if (captureConfig) {
-        //      timer_.input_capture_init(channel, captureConfig);
+        //  capture_config_.polarity = timer::Polarity_Select::DUAL_EDGE;
+        //  if (capture_config_) {
+        //      timer_.input_capture_init(channel, capture_config_);
         //  }
         //  break;
         case InputOutputMode::COMPARE:
-            captureConfig.polarity = timer::Polarity_Select::HIGH_RISING;
-            captureConfig.source_select = timer::Input_Capture_Select::IO_INPUT_CI0FE0;
-            timer_.input_capture_init(channel, captureConfig);
-
+            timer_.input_capture_init(channel, capture_config_);
             // Configure companion channel
-            companionNumber = static_cast<uint8_t>(getCompanionChannel(channel));
-            channel_modes_[static_cast<size_t>(companionNumber)] = mode;
-
-            captureConfig.polarity = timer::Polarity_Select::LOW_FALLING;
-            captureConfig.source_select = timer::Input_Capture_Select::IO_INPUT_CI1FE0;
-            timer_.input_capture_init(getCompanionChannel(channel), captureConfig);
+            const timer::Timer_Channel companionCh = getCompanionChannel(channel);
+            channel_modes_[static_cast<size_t>(companionCh)] = mode;
+            capture_config_.polarity = timer::Polarity_Select::LOW_FALLING;
+            capture_config_.source_select = timer::Input_Capture_Select::IO_INPUT_CI1FE0;
+            timer_.input_capture_init(companionCh, capture_config_);
             break;
         case InputOutputMode::INVALID:
         default:
             break;
     }
 
-    // Store configuration
-    capture_config_ = captureConfig;
-    compare_config_ = compareConfig;
-
-    if (pin != NO_PIN) {
-        if (getChannelFromPin(pin) == channel) {
-            pinOpsPinout(TIMER_PinOps, pin);
-            if ((mode == InputOutputMode::RISING) ||
-                    (mode == InputOutputMode::FALLING) ||
-                    (mode == InputOutputMode::COMPARE)) {
-                pinMode(pin, INPUT);
-            }
-        } else {
-            return; // Pin and channel mismatch
+    if (pin != NO_PIN && getChannelFromPin(pin) == channel) {
+        pinOpsPinout(TIMER_PinOps, pin);
+        if ((mode == InputOutputMode::RISING) ||
+                (mode == InputOutputMode::FALLING) ||
+                (mode == InputOutputMode::COMPARE)) {
+            pinMode(pin, INPUT);
         }
-        companionChannel[static_cast<uint8_t>(channel)] = (getCompanionChannelFromPin(pin) != timer::Timer_Channel::CH0);
+        companionChannel[channelIndex] = (getCompanionChannelFromPin(pin) != timer::Timer_Channel::CH0);
     }
 }
 
@@ -560,7 +520,7 @@ void GeneralTimer::setCaptureCompare(timer::Timer_Channel channel, uint32_t valu
         return;
     }
 
-    uint32_t prescalerValue = static_cast<uint32_t>(timer_.get_prescaler() + 1U);
+    const uint32_t prescalerValue = static_cast<uint32_t>(timer_.get_prescaler()) + 1U;
     uint32_t ccValue = 0U;
 
     switch (format) {
@@ -636,27 +596,17 @@ uint32_t GeneralTimer::getCaptureCompare(timer::Timer_Channel channel, CCFormat 
         return (ccValue * ((1U << formatValue) - 1U)) / autoReload;
     }
 
-    uint32_t prescaler = timer_.get_prescaler() + 1U;
-
     // Handle remaining formats
-    switch (format) {
-        case CCFormat::US:
-            return (ccValue * prescaler * 1'000'000U) / (getTimerClockFrequency());
-        case CCFormat::HERTZ:
-            return (getTimerClockFrequency() / (ccValue * prescaler));
-        case CCFormat::PERCENT:
-            return (ccValue * 100U) / timer_.get_auto_reload();
-        case CCFormat::TICK:    // Already handled above
-        case CCFormat::INVALID: // Already handled above
-        case CCFormat::B1: case CCFormat::B2: case CCFormat::B3: case CCFormat::B4:
-        case CCFormat::B5: case CCFormat::B6: case CCFormat::B7: case CCFormat::B8:
-        case CCFormat::B9: case CCFormat::B10: case CCFormat::B11: case CCFormat::B12:
-        case CCFormat::B13: case CCFormat::B14: case CCFormat::B15: case CCFormat::B16:
-            // Already handled in bit resolution section
-            return ccValue; // Fallback, should never reach here
-    }
+    const uint32_t prescaler = static_cast<uint32_t>(timer_.get_prescaler()) + 1U;
+    const uint32_t timerClock = getTimerClockFrequency();
 
-    return ccValue; // Fallback, should never reach here
+    return (format == CCFormat::US) ?
+           (ccValue * prescaler * 1'000'000U) / timerClock :
+           (format == CCFormat::HERTZ) ?
+           (timerClock / (ccValue * prescaler)) :
+           (format == CCFormat::PERCENT) ?
+           (ccValue * 100U) / timer_.get_auto_reload() :
+           ccValue; // Fallback, should never reach here
 }
 
 /**
@@ -701,7 +651,6 @@ void GeneralTimer::setInterruptPriority(uint8_t preemptPriority, uint8_t subPrio
     if (upIrq == INVALID_IRQ || ccIrq == INVALID_IRQ) return;
 
     NVIC_SetPriority(upIrq, preemptPriority);
-
     if (ccIrq != upIrq) {
         NVIC_SetPriority(ccIrq, preemptPriority);
     }
@@ -746,13 +695,15 @@ void GeneralTimer::attachInterrupt(TimerCallback callback) {
  * @note If channel is invalid or out of range, function returns without action.
  */
 void GeneralTimer::attachInterrupt(TimerCallback callback, timer::Timer_Channel channel) {
-    if ((static_cast<size_t>(channel) < 0) || (static_cast<size_t>(channel) > TIMER_CHANNELS)) return;
-    if (callbacks_.channel_callbacks[static_cast<size_t>(channel)]) {
-        callbacks_.channel_callbacks[static_cast<size_t>(channel)] = callback;
-        callbacks_.active_callbacks |= (callback ? (1U << (static_cast<size_t>(channel) + 1U)) : 0x00U);
+    const size_t channelIndex = static_cast<size_t>(channel);
+    if (channelIndex < 0 || channelIndex > TIMER_CHANNELS) return;
+
+    if (callbacks_.channel_callbacks[channelIndex]) {
+        callbacks_.channel_callbacks[channelIndex] = callback;
+        callbacks_.active_callbacks |= (callback ? (1U << channelIndex + 1U) : 0x00U);
     } else {
-        callbacks_.channel_callbacks[static_cast<size_t>(channel)] = callback;
-        callbacks_.active_callbacks |= (callback ? (1U << (static_cast<size_t>(channel) + 1U)) : 0x00U);
+        callbacks_.channel_callbacks[channelIndex] = callback;
+        callbacks_.active_callbacks |= (callback ? (1U << channelIndex + 1U) : 0x00U);
         if (callback) {
             timer_.clear_interrupt_flag(convertToInterruptFlag(channel));
             timer_.set_interrupt_enable(convertToInterrupt(channel), true);
@@ -782,11 +733,14 @@ void GeneralTimer::detachInterrupt() {
  * @param channel The timer channel to detach the interrupt from (CH0-CH3).
  */
 void GeneralTimer::detachInterrupt(timer::Timer_Channel channel) {
-    if (static_cast<size_t>(channel) >= static_cast<size_t>(TIMER_CHANNELS)) return;
+    const size_t channelIndex = static_cast<size_t>(channel);
+    if (channelIndex >= static_cast<size_t>(TIMER_CHANNELS)) return;
+
     IRQn_Type ccIrq = timerToChIrq(static_cast<size_t>(base_));
     if (ccIrq == INVALID_IRQ) return;
+
     timer_.set_interrupt_enable(convertToInterrupt(channel), false);
-    callbacks_.channel_callbacks[static_cast<size_t>(channel)] = nullptr;
+    callbacks_.channel_callbacks[channelIndex] = nullptr;
 }
 
 /**
@@ -803,10 +757,11 @@ bool GeneralTimer::hasInterrupt() {
  * @return true if an interrupt callback exists, false if no callback
  */
 bool GeneralTimer::hasInterrupt(timer::Timer_Channel channel) {
-    if ((static_cast<size_t>(channel) < 0) || (static_cast<size_t>(channel) > static_cast<size_t>(TIMER_CHANNELS))) {
+    const size_t channelIndex = static_cast<size_t>(channel);
+    if (channelIndex < 0 || channelIndex > static_cast<size_t>(TIMER_CHANNELS)) {
         return false;
     }
-    return callbacks_.channel_callbacks[static_cast<size_t>(channel)] != nullptr;
+    return callbacks_.channel_callbacks[channelIndex] != nullptr;
 }
 
 /**

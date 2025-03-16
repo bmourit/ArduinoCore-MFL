@@ -13,14 +13,14 @@
  * INPUT_ANALOG. If the pin is not configured, the function does not take any
  * action.
  *
- * If the pin is currently configured as a PWM pin, the function stops the PWM
+ * If the pin is currently configured as a PWM or DAC pin, the function stops the
  * output on that pin before configuring it as an input or output.
  *
  * @param pin The pin number to configure.
- * @param mode The pin mode to set. Valid values are PinMode::INPUT,
- *             PinMode::INPUT_PULLUP, PinMode::INPUT_PULLDOWN,
- *             PinMode::OUTPUT, PinMode::OUTPUT_OPENDRAIN, or
- *             PinMode::INPUT_ANALOG.
+ * @param mode The pin mode to set. Valid values are INPUT,
+ *             INPUT_PULLUP, INPUT_PULLDOWN,
+ *             OUTPUT, or OUTPUT_OPENDRAIN.
+ *             INPUT_ANALOG is deprecated and will be removed in a future release.
  */
 void pinMode(pin_size_t pin, PinMode mode) {
     if (pin == NO_PIN) {
@@ -31,11 +31,16 @@ void pinMode(pin_size_t pin, PinMode mode) {
     if (pinConfigManager.isPinConfigured(pin)) {
         if (isPinInPinOps(TIMER_PinOps, pin)) {
             pwmStop(pin);
+        } else if (isPinInPinOps(DAC_PinOps, pin)) {
+            dacStop(pin);
         }
         pinConfigManager.resetPinConfigured(pin);
     }
 
     switch (mode) {
+        case INPUT:
+            setPinOp(pin, createPackedPinOps(gpio::Pin_Mode::INPUT_FLOATING, gpio::Output_Speed::SPEED_MAX, gpio::Pin_Remap_Select::NO_REMAP, 0, 0));
+            break;
         case INPUT_PULLUP:
             setPinOp(pin, createPackedPinOps(gpio::Pin_Mode::INPUT_PULLUP, gpio::Output_Speed::SPEED_MAX, gpio::Pin_Remap_Select::NO_REMAP, 0, 0));
             break;
@@ -57,9 +62,7 @@ void pinMode(pin_size_t pin, PinMode mode) {
                 pinOpsPinout(ADC_PinOps, pin);
             }
             break;
-        case INPUT:
-        default:    // Default to INPUT
-            setPinOp(pin, createPackedPinOps(gpio::Pin_Mode::INPUT_FLOATING, gpio::Output_Speed::SPEED_MAX, gpio::Pin_Remap_Select::NO_REMAP, 0, 0));
+        default:    // Do nothing
             break;
     }
 }

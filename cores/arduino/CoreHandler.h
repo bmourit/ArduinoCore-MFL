@@ -9,7 +9,7 @@
 // Arduino core version number
 #define VERSION_MAJOR   1	// Major version
 #define VERSION_MINOR   0	// Minor version
-#define VERSION_PATCH   1	// Patch version
+#define VERSION_PATCH   2	// Patch version
 #define CORE_VERSION    (VERSION_MAJOR << 16) | (VERSION_MINOR << 8) | (VERSION_PATCH)
 
 // libc porting layers for GCC
