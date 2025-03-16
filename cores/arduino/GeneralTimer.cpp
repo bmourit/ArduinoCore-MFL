@@ -268,7 +268,7 @@ uint16_t GeneralTimer::getPrescaler() {
 void GeneralTimer::setRolloverValue(uint32_t value, TimerFormat format) {
     // TICK format
     if (format == TimerFormat::TICK) {
-        timer_.set_auto_reload((value > 0U) ? value - 1U : 0U)
+        timer_.set_auto_reload((value > 0U) ? value - 1U : 0U);
     } else {
         // US and HERTZ formats
         const uint32_t timerClock = getTimerClockFrequency();
@@ -386,6 +386,11 @@ void GeneralTimer::setChannelMode(timer::Timer_Channel channel, InputOutputMode 
     compare_config_.idle_state = timer::Idle_State::IDLE_LOW;
     compare_config_.companion_idle_state = timer::Idle_State::IDLE_LOW;
 
+    // Handle INVALID and default cases first
+    if (mode == InputOutputMode::INVALID) {
+        return;
+    }
+
     // Main switch case for handling different modes
     switch (mode) {
         case InputOutputMode::PWM0:
@@ -438,7 +443,7 @@ void GeneralTimer::setChannelMode(timer::Timer_Channel channel, InputOutputMode 
         //      timer_.input_capture_init(channel, capture_config_);
         //  }
         //  break;
-        case InputOutputMode::COMPARE:
+        case InputOutputMode::COMPARE: {
             timer_.input_capture_init(channel, capture_config_);
             // Configure companion channel
             const timer::Timer_Channel companionCh = getCompanionChannel(channel);
@@ -447,8 +452,8 @@ void GeneralTimer::setChannelMode(timer::Timer_Channel channel, InputOutputMode 
             capture_config_.source_select = timer::Input_Capture_Select::IO_INPUT_CI1FE0;
             timer_.input_capture_init(companionCh, capture_config_);
             break;
+        }
         case InputOutputMode::INVALID:
-        default:
             break;
     }
 
@@ -700,10 +705,10 @@ void GeneralTimer::attachInterrupt(TimerCallback callback, timer::Timer_Channel 
 
     if (callbacks_.channel_callbacks[channelIndex]) {
         callbacks_.channel_callbacks[channelIndex] = callback;
-        callbacks_.active_callbacks |= (callback ? (1U << channelIndex + 1U) : 0x00U);
+        callbacks_.active_callbacks |= (callback ? (1U << (channelIndex + 1U)) : 0x00U);
     } else {
         callbacks_.channel_callbacks[channelIndex] = callback;
-        callbacks_.active_callbacks |= (callback ? (1U << channelIndex + 1U) : 0x00U);
+        callbacks_.active_callbacks |= (callback ? (1U << (channelIndex + 1U)) : 0x00U);
         if (callback) {
             timer_.clear_interrupt_flag(convertToInterruptFlag(channel));
             timer_.set_interrupt_enable(convertToInterrupt(channel), true);
