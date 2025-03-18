@@ -1,17 +1,11 @@
 #pragma once
 
 #include "PinOps.hpp"
-#include "MCU.hpp"
 
 inline constexpr gpio::Output_Speed MIN_SPEED = gpio::Output_Speed::SPEED_2MHZ;
 inline constexpr gpio::Output_Speed MEDIUM_SPEED = gpio::Output_Speed::SPEED_10MHZ;
 inline constexpr gpio::Output_Speed HIGH_SPEED = gpio::Output_Speed::SPEED_50MHZ;
-
-if constexpr (std::is_same_v<mcu::ChipSeries, mcu::F103R>) {
-    inline constexpr gpio::Output_Speed MAX_SPEED = gpio::Output_Speed::SPEED_50MHZ;
-} else {
-    inline constexpr gpio::Output_Speed MAX_SPEED = gpio::Output_Speed::SPEED_MAX;
-}
+inline constexpr gpio::Output_Speed MAX_SPEED = gpio::Output_Speed::SPEED_MAX;
 
 
 ///////////////////////////// USART /////////////////////////////
