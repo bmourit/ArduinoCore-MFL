@@ -142,7 +142,7 @@ typedef enum IRQn {
     #warning Not supported compiler type
 #endif
 
-if constexpr (std::is_same_v<mcu::ChipSeries, mcu::F103R>) {
+#if defined(GD32F103RE) || defined(GD32F103RC)
     // Cortex-M3 processor and peripherals configuration
     #define __CM3_REV                 0x0001U    // Core revision r0p1
     #define __Vendor_SysTickConfig    0U         // set to 1 if different SysTick config is used
@@ -153,7 +153,8 @@ if constexpr (std::is_same_v<mcu::ChipSeries, mcu::F103R>) {
     #define __FPU_DP                  0U         // Set to 1 if FPU is double precision FPU (default is single precision FPU)
 
     #include <core_cm3.h>
-} else {
+#endif
+#if defined(GD32F303RE) || defined(GD32F303RC)
     //////////////////////////////////////// NOTICE ////////////////////////////////////////
     //  Some early batches of this chip shipped without an FPU/MPU.
     //  If you experience issues, you may need to disable these features.
@@ -169,7 +170,7 @@ if constexpr (std::is_same_v<mcu::ChipSeries, mcu::F103R>) {
     #define __FPU_DP                  0U         // Set to 1 if FPU is double precision FPU (default is single precision FPU)
 
     #include <core_cm4.h>
-}
+#endif
 
 #if defined(__CC_ARM)
     #pragma pop
