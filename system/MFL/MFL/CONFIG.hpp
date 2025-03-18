@@ -20,8 +20,15 @@
 #pragma once
 
 #include <stdlib.h>
+#include <type_traits>
 
-#include "F303RE.hpp"
+#include "MCU.hpp"
+
+if constexpr (std::is_same_v<mcu::ChipSeries, mcu::F103R>) {
+    #include "F103R.hpp"
+} else {
+    #include "F303R.hpp"
+}
 
 /**
  * @brief Encodes register bit definitions.

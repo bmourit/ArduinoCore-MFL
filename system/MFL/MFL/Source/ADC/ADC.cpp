@@ -178,6 +178,8 @@ void ADC::set_temperature_voltage_reference_enable(bool enable) {
  * ADC_Resolution::RESOLUTION_12BIT
  *
  * @param resolution The desired ADC resolution.
+ * 
+ * NOTE: This function is only valid for F303R! (F103R is fixed at 12 bits)
  */
 void ADC::set_resolution(ADC_Resolution resolution) {
     write_bit_range(*this, ADC_Regs::OVSAMPCTL,
@@ -617,6 +619,8 @@ void ADC::set_watchdog_threshold(uint16_t low, uint16_t high) {
  *              values.
  * @param ratio The oversampling ratio value. Must be one of the Oversampling_Ratio
  *              values.
+ * 
+ * NOTE: This function only valid for F303R!
  */
 void ADC::set_oversampling_configuration(Oversampling_Conversion mode, Oversampling_Shift shift, Oversampling_Ratio ratio) {
     write_bit(*this, ADC_Regs::OVSAMPCTL,
@@ -815,7 +819,7 @@ inline void ADC::cleanup_regular_conversion() {
  *
  * @param channel The ADC channel to convert
  * @param sample The sample time to use for the channel
- * @param resolution The resolution of the ADC conversion
+ * @param resolution The resolution of the ADC conversion NOTE: F103R is fixed at 12bit
  * @param calibrate If true, wait for the calibration to finish before starting the conversion
  * @return The converted data
  */
@@ -832,17 +836,20 @@ uint32_t ADC::start_regular_single_conversion(ADC_Channel channel, ADC_Sample_Ti
     write_bit_range(*this, ADC_Regs::RSQ2, static_cast<uint32_t>(RSQX_Bits::RSQ_0_6_12), static_cast<uint32_t>(channel));
     // Set the sample time
     set_sampling_time(channel, sample);
-    // Set resolution
-    write_bit_range(*this, ADC_Regs::OVSAMPCTL, static_cast<uint32_t>(OVSAMPCTL_Bits::DRES), static_cast<uint32_t>(resolution));
 
-    // Basic 16x hardware oversampling
-    write_bit_ranges(*this, ADC_Regs::OVSAMPCTL,
-                     static_cast<uint32_t>(OVSAMPCTL_Bits::OVSR), static_cast<uint32_t>(Oversampling_Ratio::OVERSAMPLING_RATIO_MUL16),
-                     static_cast<uint32_t>(OVSAMPCTL_Bits::OVSS), static_cast<uint32_t>(Oversampling_Shift::OVERSAMPLING_SHIFT_4BIT));
-    // Enable oversampling
-    write_bits_sequence(*this, ADC_Regs::OVSAMPCTL,
-                        static_cast<uint32_t>(OVSAMPCTL_Bits::TOVS), false,
-                        static_cast<uint32_t>(OVSAMPCTL_Bits::OVSEN), true);
+    if constexpr (std::is_same_v<mcu::ChipSeries, mcu::F303R>) {
+        // Set resolution
+        write_bit_range(*this, ADC_Regs::OVSAMPCTL, static_cast<uint32_t>(OVSAMPCTL_Bits::DRES), static_cast<uint32_t>(resolution));
+
+        // Basic 16x hardware oversampling
+        write_bit_ranges(*this, ADC_Regs::OVSAMPCTL,
+                         static_cast<uint32_t>(OVSAMPCTL_Bits::OVSR), static_cast<uint32_t>(Oversampling_Ratio::OVERSAMPLING_RATIO_MUL16),
+                         static_cast<uint32_t>(OVSAMPCTL_Bits::OVSS), static_cast<uint32_t>(Oversampling_Shift::OVERSAMPLING_SHIFT_4BIT));
+        // Enable oversampling
+        write_bits_sequence(*this, ADC_Regs::OVSAMPCTL,
+                            static_cast<uint32_t>(OVSAMPCTL_Bits::TOVS), false,
+                            static_cast<uint32_t>(OVSAMPCTL_Bits::OVSEN), true);
+    }
 
     // Set alignment
     write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::DAL), false);

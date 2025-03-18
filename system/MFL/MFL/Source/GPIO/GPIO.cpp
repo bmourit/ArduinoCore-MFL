@@ -114,12 +114,18 @@ void GPIO::set_pin_mode(Pin_Number pin, Pin_Mode mode, Output_Speed speed) {
 
         cfg = (is_open_drain ? 0x4U : 0x0U) | (is_alt ? 0x8U : 0x0U);
 
-        if (speed == Output_Speed::SPEED_MAX) {
-            cfg |= 0x3U;
-            write_bit(*this, GPIO_Regs::SPD, static_cast<uint32_t>(pin), true);
-            AFIO_I.set_compensation(true);
-            while (!AFIO_I.get_compensation()) {
-                // Wait for ready
+        if constexpr (std::is_same_v<mcu::ChipSeries, mcu::F303R>) {
+            if (speed == Output_Speed::SPEED_MAX) {
+                cfg |= 0x3U;
+                write_bit(*this, GPIO_Regs::SPD, static_cast<uint32_t>(pin), true);
+                AFIO_I.set_compensation(true);
+                while (!AFIO_I.get_compensation()) {
+                    // Wait for ready
+                }
+            } else {
+                cfg |= (speed == Output_Speed::INVALID) ?
+                   static_cast<uint32_t>(Output_Speed::SPEED_50MHZ) :
+                   static_cast<uint32_t>(speed);
             }
         } else {
             cfg |= (speed == Output_Speed::INVALID) ?

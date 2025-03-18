@@ -3,7 +3,16 @@
 
 ///////////////////////////////// STARTUP /////////////////////////////////
 
-#include "F303RE.hpp"
+#include <type_traits>
+
+#include "MCU.hpp"
+
+if constexpr (std::is_same_v<mcu::ChipSeries, mcu::F103R>) {
+    #include "F103R.hpp"
+} else {
+    #include "F303R.hpp"
+}
+
 #include "CONFIG.hpp"
 #include "Interrupt_Handlers.hpp"
 #include "STARTUP.hpp"
@@ -71,7 +80,11 @@
 
 
 #ifndef F_CPU
-    #define F_CPU   120'000'000U
+    if constexpr (std::is_same_v<mcu::ChipSeries, mcu::F103R>) {
+        #define F_CPU   108'000'000U
+    } else {
+        #define F_CPU   120'000'000U
+    }
 #endif
 
 template<typename T>
