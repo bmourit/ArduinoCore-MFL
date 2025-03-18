@@ -18,7 +18,7 @@
 //
 
 #include "PMU.hpp"
-#include "F303RE.hpp"
+#include "mcu_common.hpp"
 #include "RCU.hpp"
 #include <array>
 
