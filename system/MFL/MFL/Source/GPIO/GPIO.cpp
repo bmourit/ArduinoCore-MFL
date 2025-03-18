@@ -17,6 +17,8 @@
 // If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include <type_traits>
+
 #include "GPIO.hpp"
 #include "RCU.hpp"
 #include "AFIO.hpp"

@@ -2,17 +2,9 @@
 
 
 ///////////////////////////////// STARTUP /////////////////////////////////
-
 #include <type_traits>
 
-#include "MCU.hpp"
-
-if constexpr (std::is_same_v<mcu::ChipSeries, mcu::F103R>) {
-    #include "F103R.hpp"
-} else {
-    #include "F303R.hpp"
-}
-
+#include "mcu_common.hpp"
 #include "CONFIG.hpp"
 #include "Interrupt_Handlers.hpp"
 #include "STARTUP.hpp"

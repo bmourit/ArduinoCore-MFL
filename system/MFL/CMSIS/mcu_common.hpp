@@ -2,6 +2,46 @@
 
 #pragma once
 
+#include <stdlib.h>
+#include <type_traits>
+
+namespace mcu {
+
+    // Series
+    struct F103R {};
+    struct F303R {};
+
+    // Variants
+    struct F103RE {};
+    struct F103RC {};
+    struct F303RE {};
+    struct F303RC {};
+
+    using ChipSeries =
+    #if defined(GD32F103RE) || defined(GD32F103RC)
+        F103R;
+    #elif defined(GD32F303RE) || defined(GD32F303RC)
+        F303R;
+    #else
+        #error Unsupported mcu series!
+    #endif
+
+    using ChipVariant =
+    #if defined(GD32F103RE)
+        F103RE;
+    #elif defined(GD32F103RC)
+        F103RC;
+    #elif defined(GD32F303RE)
+        F303RE;
+    #elif defined(GD32F303RC)
+        F303RC;
+    #else
+        #error Unsupported mcu variant!
+    #endif
+
+} // namespace mcu
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -18,7 +58,7 @@ typedef enum IRQn {
     DebugMonitor_IRQn            = -4,
     PendSV_IRQn                  = -2,
     SysTick_IRQn                 = -1,
-    // F303RE
+    // F103R/F303R
     WWDGT_IRQn                   = 0,
     LVD_IRQn                     = 1,
     TAMPER_IRQn                  = 2,
@@ -102,21 +142,34 @@ typedef enum IRQn {
     #warning Not supported compiler type
 #endif
 
-//////////////////////////////////////// NOTICE ////////////////////////////////////////
-//  Some early batches of this chip shipped without an FPU/MPU.
-//  If you experience issues, you may need to disable these features.
-////////////////////////////////////////////////////////////////////////////////////////
+if constexpr (std::is_same_v<mcu::ChipSeries, mcu::F103R>) {
+    // Cortex-M3 processor and peripherals configuration
+    #define __CM3_REV                 0x0001U    // Core revision r0p1
+    #define __Vendor_SysTickConfig    0U         // set to 1 if different SysTick config is used
+    #define __NVIC_PRIO_BITS          4U         // GD32F103 uses 4 bits for priority levels
+    #define __VTOR_PRESENT            1U         // Set to 1 if VTOR is present
+    #define __MPU_PRESENT             0U         // GD32F103 does not have MPU
+    #define __FPU_PRESENT             0U         // Set to 1 if FPU is present
+    #define __FPU_DP                  0U         // Set to 1 if FPU is double precision FPU (default is single precision FPU)
 
-// Cortex-M4 processor and peripherals configuration
-#define __CM4_REV                 0x0001U    // Core revision r0p1
-#define __Vendor_SysTickConfig    0U         // set to 1 if different SysTick config is used
-#define __NVIC_PRIO_BITS          4U         // GD32F303RE uses 4 bits for priority levels
-#define __VTOR_PRESENT            1U         // Set to 1 if VTOR is present
-#define __MPU_PRESENT             1U         // GD32F303RE provide MPU
-#define __FPU_PRESENT             1U         // Set to 1 if FPU is present
-#define __FPU_DP                  0U         // Set to 1 if FPU is double precision FPU (default is single precision FPU)
+    #include <core_cm3.h>
+} else {
+    //////////////////////////////////////// NOTICE ////////////////////////////////////////
+    //  Some early batches of this chip shipped without an FPU/MPU.
+    //  If you experience issues, you may need to disable these features.
+    ////////////////////////////////////////////////////////////////////////////////////////
 
-#include <core_cm4.h>
+    // Cortex-M4 processor and peripherals configuration
+    #define __CM4_REV                 0x0001U    // Core revision r0p1
+    #define __Vendor_SysTickConfig    0U         // set to 1 if different SysTick config is used
+    #define __NVIC_PRIO_BITS          4U         // GD32F303RE uses 4 bits for priority levels
+    #define __VTOR_PRESENT            1U         // Set to 1 if VTOR is present
+    #define __MPU_PRESENT             1U         // GD32F303RE provide MPU
+    #define __FPU_PRESENT             1U         // Set to 1 if FPU is present
+    #define __FPU_DP                  0U         // Set to 1 if FPU is double precision FPU (default is single precision FPU)
+
+    #include <core_cm4.h>
+}
 
 #if defined(__CC_ARM)
     #pragma pop

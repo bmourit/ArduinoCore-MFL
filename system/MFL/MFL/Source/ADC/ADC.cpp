@@ -17,6 +17,8 @@
 // If not, see <https://www.gnu.org/licenses/>.
 //
 
+#include <type_traits>
+
 #include "ADC.hpp"
 #include "RCU.hpp"
 
