@@ -60,7 +60,7 @@ void ExtiManager::enablePinExtiInterrupt(pin_size_t pin, EXTICallback callback, 
     // the pin using the digital pinMode interface.
     //
     // NOTE:
-    //  Only input only here as only input pins can have an exti
+    //  Only input is valid here as only input pins can have an exti
     if (currentMode != gpio::Pin_Mode::INPUT_FLOATING &&
             currentMode != gpio::Pin_Mode::INPUT_PULLUP &&
             currentMode != gpio::Pin_Mode::INPUT_PULLDOWN) {

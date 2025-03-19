@@ -17,7 +17,7 @@
 // If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include "F303RE.hpp"
+#include "mcu_common.hpp"
 #include "CORTEX.hpp"
 
 namespace cortex {

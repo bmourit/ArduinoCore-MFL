@@ -39,19 +39,19 @@ void pinMode(pin_size_t pin, PinMode mode) {
 
     switch (mode) {
         case INPUT:
-            setPinOp(pin, createPackedPinOps(gpio::Pin_Mode::INPUT_FLOATING, gpio::Output_Speed::SPEED_MAX, gpio::Pin_Remap_Select::NO_REMAP, 0, 0));
+            setPinOp(pin, createPackedPinOps(gpio::Pin_Mode::INPUT_FLOATING, MAX_SPEED, gpio::Pin_Remap_Select::NO_REMAP, 0, 0));
             break;
         case INPUT_PULLUP:
-            setPinOp(pin, createPackedPinOps(gpio::Pin_Mode::INPUT_PULLUP, gpio::Output_Speed::SPEED_MAX, gpio::Pin_Remap_Select::NO_REMAP, 0, 0));
+            setPinOp(pin, createPackedPinOps(gpio::Pin_Mode::INPUT_PULLUP, MAX_SPEED, gpio::Pin_Remap_Select::NO_REMAP, 0, 0));
             break;
         case INPUT_PULLDOWN:
-            setPinOp(pin, createPackedPinOps(gpio::Pin_Mode::INPUT_PULLDOWN, gpio::Output_Speed::SPEED_MAX, gpio::Pin_Remap_Select::NO_REMAP, 0, 0));
+            setPinOp(pin, createPackedPinOps(gpio::Pin_Mode::INPUT_PULLDOWN, MAX_SPEED, gpio::Pin_Remap_Select::NO_REMAP, 0, 0));
             break;
         case OUTPUT:
-            setPinOp(pin, createPackedPinOps(gpio::Pin_Mode::OUTPUT_PUSHPULL, gpio::Output_Speed::SPEED_MAX, gpio::Pin_Remap_Select::NO_REMAP, 0, 0));
+            setPinOp(pin, createPackedPinOps(gpio::Pin_Mode::OUTPUT_PUSHPULL, MAX_SPEED, gpio::Pin_Remap_Select::NO_REMAP, 0, 0));
             break;
         case OUTPUT_OPENDRAIN:
-            setPinOp(pin, createPackedPinOps(gpio::Pin_Mode::OUTPUT_OPENDRAIN, gpio::Output_Speed::SPEED_MAX, gpio::Pin_Remap_Select::NO_REMAP, 0, 0));
+            setPinOp(pin, createPackedPinOps(gpio::Pin_Mode::OUTPUT_OPENDRAIN, MAX_SPEED, gpio::Pin_Remap_Select::NO_REMAP, 0, 0));
             break;
         // NOTE: INPUT_ANALOG is deprecated.
         // Besides not being part of the Arduino API,

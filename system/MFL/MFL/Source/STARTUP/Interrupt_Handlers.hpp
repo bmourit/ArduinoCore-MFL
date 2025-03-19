@@ -1,5 +1,5 @@
 //
-// MFL gd32f30x Interrupt handlers
+// MFL gd32f103r/gd32f303r Interrupt handlers
 //
 // Copyright (C) 2025 B. Mouritsen <bnmguy@gmail.com>. All rights reserved.
 //

@@ -18,6 +18,7 @@
 //
 
 #include <stdint.h>
+#include <type_traits>
 
 #include "STARTUP.hpp"
 #include "FMC.hpp"
@@ -36,7 +37,7 @@ STARTUP& STARTUP::get_instance() {
 STARTUP::STARTUP() {}
 
 /**
- * @brief Initializes the startup sequence for the GD32F30x MCU family.
+ * @brief Initializes the startup sequence for the GD32F10x/GD32F30x MCU family.
  *
  * This function will:
  *  1. Enable the High-Speed Crystal Oscillator (HXTAL)
@@ -46,14 +47,14 @@ STARTUP::STARTUP() {}
  *  4. Set the AHB clock to be the system clock (SYSCLK)
  *  5. Set the APB2 clock to be the system clock (SYSCLK) divided by 1
  *  6. Set the APB1 clock to be the system clock (SYSCLK) divided by 2
- *  7. Configure the PLL clock to be 120 MHz
+ *  7. Configure the PLL clock to be 108 MHz or 120 MHz
  *  8. Enable the PLL
  *  9. Wait for the PLL to be stable
  *  10. Enable high-drive mode for high clock frequency
  *  11. Select high-drive mode
  *  12. Set the system clock to be the PLL clock
  *  13. Verify the system clock is set to the PLL clock
- *  14. Set the ADC prescaler to AHB clock divided by 10 (user can change this later if desired)
+ *  14. Set the ADC prescaler to AHB clock divided by 8 or 10 (user can change this later if desired)
  *  15. Enable the CEE enhanced mode, when applicable
  *
  * @note This function should be called as early as possible in the startup
@@ -65,40 +66,51 @@ void STARTUP::startup_init() {
     // Wait until HXTAL is stable
     while (!rcu::RCU::get_instance().is_osci_stable(rcu::OSCI_Select::HXTAL)) {}
 
-    // TODO: Make this a configurable setting
-    //  Note:
-    //  According to the manual, this can only be set while main PLL
-    //  is off. This setting takes effect on the 1.2V power domain
-    //  when the main PLL is on. The manual states the when the main
-    //  PLL is off, this is automatically set to LDO_VOLATGE_LOW
-    //  This helps lower power requirements at the expense of driving
-    //  capabilities.
-    //  Since we need PLL off for this, we should make this a
-    //  configurable setting for different user requirments.
-    //  For now, if you need something different comment out the
-    //  default (LOW) and uncomment one of the other choices below.
-    //pmu::PMU::get_instance().set_ldo_output(pmu::Output_Voltage::LDO_VOLTAGE_LOW);
-    //pmu::PMU::get_instance().set_ldo_output(pmu::Output_Voltage::LDO_VOLTAGE_MID);
-    pmu::PMU::get_instance().set_ldo_output(pmu::Output_Voltage::LDO_VOLTAGE_HIGH);
+    if constexpr (std::is_same_v<mcu::ChipSeries, mcu::F303R>) {
+        // TODO: Make this a configurable setting
+        //  Note:
+        //  According to the manual, this can only be set while main PLL
+        //  is off. This setting takes effect on the 1.2V power domain
+        //  when the main PLL is on. The manual states the when the main
+        //  PLL is off, this is automatically set to LDO_VOLATGE_LOW
+        //  This helps lower power requirements at the expense of driving
+        //  capabilities.
+        //  Since we need PLL off for this, we should make this a
+        //  configurable setting for different user requirments.
+        //  For now, if you need something different comment out the
+        //  default (LOW) and uncomment one of the other choices below.
+        //pmu::PMU::get_instance().set_ldo_output(pmu::Output_Voltage::LDO_VOLTAGE_LOW);
+        //pmu::PMU::get_instance().set_ldo_output(pmu::Output_Voltage::LDO_VOLTAGE_MID);
+        pmu::PMU::get_instance().set_ldo_output(pmu::Output_Voltage::LDO_VOLTAGE_HIGH);
+    }
 
     // AHB = SYSCLK
     rcu::RCU::get_instance().set_ahb_prescaler(rcu::AHB_Prescaler::CKSYS_DIV1);
     rcu::RCU::get_instance().set_apb2_prescaler(rcu::APB_Prescaler::CKAHB_DIV1);
     rcu::RCU::get_instance().set_apb1_prescaler(rcu::APB_Prescaler::CKAHB_DIV2);
 
-    // CK_PLL = (CK_HXTAL / 2) * 30 = 120 MHz
+    // CK_HXTAL / 2
     rcu::RCU::get_instance().set_predv0_config(true);
-    rcu::RCU::get_instance().set_pll_config(rcu::PLL_Source::PLLSRC_HXTAL_IRC48M, rcu::PLLMF_Select::PLL_MUL30);
+
+    if constexpr (std::is_same_v<mcu::ChipSeries, mcu::F103R>) {
+        // CK_PLL = (CK_HXTAL / 2) * 27 = 108 MHz
+        rcu::RCU::get_instance().set_pll_config(rcu::PLL_Source::PLLSRC_HXTAL_IRC48M, rcu::PLLMF_Select::PLL_MUL27);
+    } else {
+        // CK_PLL = (CK_HXTAL / 2) * 30 = 120 MHz
+        rcu::RCU::get_instance().set_pll_config(rcu::PLL_Source::PLLSRC_HXTAL_IRC48M, rcu::PLLMF_Select::PLL_MUL30);
+    }
 
     // Enable PLL
     rcu::RCU::get_instance().set_osci_enable(rcu::OSCI_Select::PLL_CK, true);
     // Wait for PLL to stablize
     while (!rcu::RCU::get_instance().is_osci_stable(rcu::OSCI_Select::PLL_CK)) {}
 
-    // Enable high-drive for high clock frequency
-    pmu::PMU::get_instance().set_high_driver_enable(true);
-    // Select high-drive mode
-    pmu::PMU::get_instance().high_driver_switch(true);
+    if constexpr (std::is_same_v<mcu::ChipSeries, mcu::F303R>) {
+        // Enable high-drive for high clock frequency
+        pmu::PMU::get_instance().set_high_driver_enable(true);
+        // Select high-drive mode
+        pmu::PMU::get_instance().high_driver_switch(true);
+    }
 
     // PLL as system clock
     rcu::RCU::get_instance().set_system_source(rcu::System_Clock_Source::SOURCE_PLL);
@@ -106,7 +118,11 @@ void STARTUP::startup_init() {
     while (rcu::RCU::get_instance().get_system_source() != rcu::System_Clock_Source::SOURCE_PLL) {}
 
     // ADC prescaler
-    rcu::RCU::get_instance().set_adc_prescaler(rcu::ADC_Prescaler::CKAHB_DIV10);    // 12 MHz
+    if constexpr (std::is_same_v<mcu::ChipSeries, mcu::F103R>) {
+        rcu::RCU::get_instance().set_adc_prescaler(rcu::ADC_Prescaler::CKAPB2_DIV8);    // 13.5 MHz
+    } else {
+        rcu::RCU::get_instance().set_adc_prescaler(rcu::ADC_Prescaler::CKAHB_DIV10);    // 12 MHz
+    }
 
 #ifndef DISABLE_CEE_ENHANCE
     // Set CEE enahnced mode

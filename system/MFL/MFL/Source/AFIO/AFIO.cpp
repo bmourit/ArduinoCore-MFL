@@ -126,6 +126,8 @@ void AFIO::set_output_event_enable(bool enable) {
  * disabled.
  *
  * @param enable Set to true to enable GPIO compensation, false to disable it.
+ * 
+ * NOTE: This function is only valid for F303R!
  */
 void AFIO::set_compensation(bool enable) {
     write_bit(*this, AFIO_Regs::CPSCTL, static_cast<uint32_t>(CPSCTL_Bits::CPS_EN), enable);
@@ -139,6 +141,8 @@ void AFIO::set_compensation(bool enable) {
  * is ready to be used.
  *
  * @return true if GPIO compensation is ready, false otherwise.
+ * 
+ * NOTE: This function is only valid for F303R!
  */
 bool AFIO::get_compensation() {
     return read_bit(*this, AFIO_Regs::CPSCTL, static_cast<uint32_t>(CPSCTL_Bits::CPS_RDY));

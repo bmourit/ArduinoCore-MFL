@@ -21,7 +21,7 @@
 
 #include <stdlib.h>
 
-#include "F303RE.hpp"
+#include "mcu_common.hpp"
 
 /**
  * @brief Encodes register bit definitions.

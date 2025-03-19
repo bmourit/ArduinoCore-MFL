@@ -97,8 +97,8 @@ machine_flags = [
 # TODO:
 #	Do a check somehow?
 #
-# For now, if you use this chip and are certain it has an FPU,
-# you may uncomment the following line of code (Note: Enabling this when no FPU exists is undefined)
+# For now, if you use this chip and are certain it does not have an FPU,
+# you may comment out the following lines of code
 #
 if board_config.get("build.cpu") == "cortex-m4":
     machine_flags.extend(["-mfpu=fpv4-sp-d16", "-mfloat-abi=hard"])
@@ -209,9 +209,9 @@ env.ProcessFlags(board_config.get("build.framework_extra_flags.arduino", ""))
 #
 
 if not board_config.get("build.ldscript", ""):
-	if not isfile(join(env.subst(variant_dir), "F303RE.ld")):
+	if not isfile(join(env.subst(variant_dir), "MFL_422.ld")):
 		print("Warning! Cannot find linker script for the current target!\n")
-	env.Replace(LDSCRIPT_PATH=join(variant_dir, "F303RE.ld"))
+	env.Replace(LDSCRIPT_PATH=join(variant_dir, "MFL_422.ld"))
 
 #
 # Process configuration flags

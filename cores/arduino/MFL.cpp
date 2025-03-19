@@ -2,8 +2,8 @@
 ///////////////////////////// STARTUP /////////////////////////////
 
 #include "CONFIG.hpp"
-#include "F303RE_startup.cpp"
-#include "F303RE_vector_table.cpp"
+#include "common_startup.cpp"
+#include "common_vector_table.cpp"
 #include "STARTUP.cpp"
 
 
