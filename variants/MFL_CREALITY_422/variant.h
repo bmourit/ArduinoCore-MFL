@@ -20,6 +20,8 @@
 
 #include <stdint.h>
 
+#include "GPIO.hpp"
+
 // GPIOA
 inline constexpr uint8_t PA0 = 0;
 inline constexpr uint8_t PA1 = 1;
@@ -78,7 +80,6 @@ inline constexpr uint8_t PC15 = 47;
 inline constexpr uint8_t PD0 = 48;
 inline constexpr uint8_t PD1 = 49;
 inline constexpr uint8_t PD2 = 50;
-inline constexpr uint8_t PD3 = 51;
 
 // Pin numbers
 #define DIGITAL_PIN_COUNT   51
@@ -153,6 +154,16 @@ inline constexpr uint8_t SCL = PIN_WIRE_SCL;
 #ifndef PWM_MAX_DUTY_CYCLE
     #define PWM_MAX_DUTY_CYCLE  4095
 #endif
+
+inline bool isPinNumberValid(pin_size_t pin) { return ((pin >= 0U) && (pin <= DIGITAL_PIN_COUNT)); }
+inline pin_size_t digitalPinToInterrupt(pin_size_t pin) { return pin; }
+inline pin_size_t analogInputToDigitalPin(pin_size_t pin) { return pin; }
+inline gpio::GPIO_Base digitalPinToPort(pin_size_t pin) { return getPortFromPin(pin); }
+
+uint32_t portOutputRegister(gpio::GPIO_Base port) { return reinterpret_cast<uint32_t>(portToInstance(port).reg_address(gpio::GPIO_Regs::OCTL)); }
+uint32_t portInputRegister(gpio::GPIO_Base port) { return reinterpret_cast<uint32_t>(portToInstance(port).reg_address(gpio::GPIO_Regs::ISTAT)); }
+uint32_t portSetRegister(gpio::GPIO_Base port) { return reinterpret_cast<uint32_t>(portToInstance(port).reg_address(gpio::GPIO_Regs::BOP)); }
+uint32_t portClearRegister(gpio::GPIO_Base port) { return reinterpret_cast<uint32_t>(portToInstance(port).reg_address(gpio::GPIO_Regs::BC)); }
 
 // C++ only
 #ifdef __cplusplus
