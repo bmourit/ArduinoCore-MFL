@@ -40,10 +40,10 @@ void freeDebugPins(pin_size_t pin);
 inline constexpr PinMode INPUT_ANALOG = static_cast<PinMode>(0x5);
 inline constexpr IRQn_Type INVALID_IRQ = static_cast<IRQn_Type>(99);
 
-inline bool isPinNumberValid(pin_size_t pin);
-inline pin_size_t digitalPinToInterrupt(pin_size_t pin);
-inline pin_size_t analogInputToDigitalPin(pin_size_t pin);
-inline gpio::GPIO_Base digitalPinToPort(pin_size_t pin);
+bool isPinNumberValid(pin_size_t pin);
+pin_size_t digitalPinToInterrupt(pin_size_t pin);
+pin_size_t analogInputToDigitalPin(pin_size_t pin);
+gpio::GPIO_Base digitalPinToPort(pin_size_t pin);
 
 uint32_t portOutputRegister(gpio::GPIO_Base port);
 uint32_t portInputRegister(gpio::GPIO_Base port);

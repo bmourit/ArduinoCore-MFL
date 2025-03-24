@@ -79,22 +79,6 @@ void setPinOp(gpio::GPIO_Base port, gpio::Pin_Number pin, uint32_t packedPinOps)
     instance.set_pin_mode(pin, mode, speed);
 }
 
-inline bool isPinNumberValid(pin_size_t pin) {
-    return ((pin >= 0U) && (pin <= DIGITAL_PIN_COUNT));
-}
-
-inline pin_size_t digitalPinToInterrupt(pin_size_t pin) {
-    return pin;
-}
-
-inline pin_size_t analogInputToDigitalPin(pin_size_t pin) {
-    return pin;
-}
-
-inline gpio::GPIO_Base digitalPinToPort(pin_size_t pin) {
-    return getPortFromPin(pin);
-}
-
 uint32_t portOutputRegister(gpio::GPIO_Base port) {
     return reinterpret_cast<uint32_t>(portToInstance(port).reg_address(gpio::GPIO_Regs::OCTL));
 }

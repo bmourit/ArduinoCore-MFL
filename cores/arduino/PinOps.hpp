@@ -445,3 +445,19 @@ inline void setPinOpsFast(gpio::GPIO_Base port, gpio::Pin_Number pin, gpio::Pin_
     auto& instance = gpio::GPIO::get_instance(port).value();
     instance.set_pin_mode(pin, mode);
 }
+
+inline bool isPinNumberValid(pin_size_t pin) {
+    return ((pin >= 0U) && (pin <= DIGITAL_PIN_COUNT));
+}
+
+inline pin_size_t digitalPinToInterrupt(pin_size_t pin) {
+    return pin;
+}
+
+inline pin_size_t analogInputToDigitalPin(pin_size_t pin) {
+    return pin;
+}
+
+inline gpio::GPIO_Base digitalPinToPort(pin_size_t pin) {
+    return getPortFromPin(pin);
+}
