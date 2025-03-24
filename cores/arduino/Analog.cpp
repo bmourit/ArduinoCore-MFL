@@ -2,6 +2,13 @@
 #include "Analog.h"
 #include "PinConfigManager.hpp"
 
+static int pwmResolution_ = PWM_RESOLUTION;
+static int readResolution_ = ADC_RESOLUTION;
+static int writeResolution_ = PWM_RESOLUTION;
+static int internalReadResolution_ = (ADC_RESOLUTION > ADC_MAX_RESOLUTION) ? ADC_MAX_RESOLUTION : ADC_RESOLUTION;
+static int internalWriteResolution_ = (PWM_RESOLUTION > PWM_MAX_RESOLUTION) ? PWM_MAX_RESOLUTION : PWM_RESOLUTION;
+static uint32_t writeFrequency_ = static_cast<uint32_t>(PWM_FREQUENCY);
+
 // ADC
 
 /**

@@ -22,13 +22,6 @@
     #define ADC_MAX_RESOLUTION  12
 #endif
 
-static inline int pwmResolution_ = PWM_RESOLUTION;
-static inline int readResolution_ = ADC_RESOLUTION;
-static inline int writeResolution_ = PWM_RESOLUTION;
-static inline int internalReadResolution_ = (ADC_RESOLUTION > ADC_MAX_RESOLUTION) ? ADC_MAX_RESOLUTION : ADC_RESOLUTION;
-static inline int internalWriteResolution_ = (PWM_RESOLUTION > PWM_MAX_RESOLUTION) ? PWM_MAX_RESOLUTION : PWM_RESOLUTION;
-static inline uint32_t writeFrequency_ = static_cast<uint32_t>(PWM_FREQUENCY);
-
 static inline constexpr adc::ADC_Sample_Time SampleTime = adc::ADC_Sample_Time::SAMPLETIME_13_5_CYCLES;
 static inline constexpr adc::ADC_Sample_Time InternalSampleTime = adc::ADC_Sample_Time::SAMPLETIME_239_5_CYCLES;
 
