@@ -21,63 +21,63 @@
 #include <stdint.h>
 
 // GPIOA
-inline constexpr uint8_t PA0 = 0;
-inline constexpr uint8_t PA1 = 1;
-inline constexpr uint8_t PA2 = 2;
-inline constexpr uint8_t PA3 = 3;
-inline constexpr uint8_t PA4 = 4;
-inline constexpr uint8_t PA5 = 5;
-inline constexpr uint8_t PA6 = 6;
-inline constexpr uint8_t PA7 = 7;
-inline constexpr uint8_t PA8 = 8;
-inline constexpr uint8_t PA9 = 9;
-inline constexpr uint8_t PA10 = 10;
-inline constexpr uint8_t PA11 = 11;
-inline constexpr uint8_t PA12 = 12;
-inline constexpr uint8_t PA13 = 13;
-inline constexpr uint8_t PA14 = 14;
-inline constexpr uint8_t PA15 = 15;
+#define PA0     0
+#define PA1     1
+#define PA2     2
+#define PA3     3
+#define PA4     4
+#define PA5     5
+#define PA6     6
+#define PA7     7
+#define PA8     8
+#define PA9     9
+#define PA10    10
+#define PA11    11
+#define PA12    12
+#define PA13    13
+#define PA14    14
+#define PA15    15
 
 // GPIOB
-inline constexpr uint8_t PB0 = 16;
-inline constexpr uint8_t PB1 = 17;
-inline constexpr uint8_t PB2 = 18;
-inline constexpr uint8_t PB3 = 19;
-inline constexpr uint8_t PB4 = 20;
-inline constexpr uint8_t PB5 = 21;
-inline constexpr uint8_t PB6 = 22;
-inline constexpr uint8_t PB7 = 23;
-inline constexpr uint8_t PB8 = 24;
-inline constexpr uint8_t PB9 = 25;
-inline constexpr uint8_t PB10 = 26;
-inline constexpr uint8_t PB11 = 27;
-inline constexpr uint8_t PB12 = 28;
-inline constexpr uint8_t PB13 = 29;
-inline constexpr uint8_t PB14 = 30;
-inline constexpr uint8_t PB15 = 31;
+#define PB0     16
+#define PB1     17
+#define PB2     18
+#define PB3     19
+#define PB4     20
+#define PB5     21
+#define PB6     22
+#define PB7     23
+#define PB8     24
+#define PB9     25
+#define PB10    26
+#define PB11    27
+#define PB12    28
+#define PB13    29
+#define PB14    30
+#define PB15    31
 
 // GPIOC
-inline constexpr uint8_t PC0 = 32;
-inline constexpr uint8_t PC1 = 33;
-inline constexpr uint8_t PC2 = 34;
-inline constexpr uint8_t PC3 = 35;
-inline constexpr uint8_t PC4 = 36;
-inline constexpr uint8_t PC5 = 37;
-inline constexpr uint8_t PC6 = 38;
-inline constexpr uint8_t PC7 = 39;
-inline constexpr uint8_t PC8 = 40;
-inline constexpr uint8_t PC9 = 41;
-inline constexpr uint8_t PC10 = 42;
-inline constexpr uint8_t PC11 = 43;
-inline constexpr uint8_t PC12 = 44;
-inline constexpr uint8_t PC13 = 45;
-inline constexpr uint8_t PC14 = 46;
-inline constexpr uint8_t PC15 = 47;
+#define PC0     32
+#define PC1     33
+#define PC2     34
+#define PC3     35
+#define PC4     36
+#define PC5     37
+#define PC6     38
+#define PC7     39
+#define PC8	    40
+#define PC9	    41
+#define PC10	42
+#define PC11	43
+#define PC12	44
+#define PC13	45
+#define PC14	46
+#define PC15	47
 
 // GPIOD
-inline constexpr uint8_t PD0 = 48;
-inline constexpr uint8_t PD1 = 49;
-inline constexpr uint8_t PD2 = 50;
+#define PD0	    48
+#define PD1     49
+#define PD2	    50
 
 // Pin numbers
 #define DIGITAL_PIN_COUNT   51
