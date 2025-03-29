@@ -1,7 +1,13 @@
 
 #pragma once
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 #include "api/ArduinoAPI.h"
+
+#pragma GCC diagnostic pop
+
 #include "api/itoa.h"
 #include "api/deprecated-avr-comp/avr/dtostrf.h"
 #include "CoreHandler.h"
