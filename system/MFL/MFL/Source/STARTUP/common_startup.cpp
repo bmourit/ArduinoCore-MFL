@@ -54,6 +54,43 @@ struct RCUMin {
 
 static RCUMin* const regs = reinterpret_cast<RCUMin*>(0x40021000U);
 
+constexpr uint32_t AHBPSC = 0x000000F0U;
+constexpr uint32_t AHB_SHIFT = 4U;
+constexpr uint32_t CKSYS_DIV2 = (8U << AHB_SHIFT);
+constexpr uint32_t CKSYS_DIV4 = (9U << AHB_SHIFT);
+constexpr uint32_t CKSYS_DIV8 = (10U << AHB_SHIFT);
+constexpr uint32_t CKSYS_DIV16 = (11U << AHB_SHIFT);
+constexpr uint32_t IRC8MEN = 0x00000001U;
+constexpr uint32_t SCSS = 0x0000000CU;
+constexpr uint32_t SCSS_SHIFT = 2U;
+constexpr uint32_t SOURCE_PLL = 2U;
+
+static inline void stablize_voltage(uint32_t cycles) {
+    asm volatile (
+        "1: subs %0, %0, #1 \n"
+        "   bne 1b"
+        : "+r"(cycles)
+        :
+        : "cc"
+    );
+}
+
+static inline void safe_switch_vcore_voltage(uint32_t cycles) {
+    if (cycles == 0) return;
+
+    auto apply_division = [cycles](uint32_t div) {
+        regs->CFG0 &= ~AHBPSC;
+        regs->CFG0 |= div;
+        stabilize_voltage(cycles);
+    };
+
+    stabilize_voltage(cycles);
+    apply_division(CKSYS_DIV2);
+    apply_division(CKSYS_DIV4);
+    apply_division(CKSYS_DIV8);
+    apply_division(CKSYS_DIV16);
+}
+
 /**
  * @brief Perform minimal system startup operations.
  *
@@ -70,8 +107,12 @@ extern "C" void system_startup() {
     // Set CP10 and CP11 full access
     SCB->CPACR |= ((3U << 10 * 2) | (3U << 11 * 2));
 #endif
-    regs->CTL |= 0x00000001U;
+    regs->CTL |= IRC8MEN;
+    if (((regs->CFG0 & SCSS) >> SCSS_SHIFT) == SOURCE_PLL) {
+        safe_switch_vcore_voltage(5120);
+    }
     regs->CFG0 &= 0xFFFFFFFCU;
+    stabilize_voltage(8000);
     regs->CTL &= 0xFEF6FFFFU;
     regs->INTR = 0x009F0000U;
     regs->CTL &= 0xFFFBFFFFU;
