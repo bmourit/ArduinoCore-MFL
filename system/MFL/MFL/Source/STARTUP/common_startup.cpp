@@ -65,7 +65,7 @@ constexpr uint32_t SCSS = 0x0000000CU;
 constexpr uint32_t SCSS_SHIFT = 2U;
 constexpr uint32_t SOURCE_PLL = 2U;
 
-static inline void stablize_voltage(uint32_t cycles) {
+static inline void stabilize_voltage(uint32_t cycles) {
     asm volatile (
         "1: subs %0, %0, #1 \n"
         "   bne 1b"
