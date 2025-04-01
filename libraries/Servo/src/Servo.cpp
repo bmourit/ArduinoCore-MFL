@@ -23,18 +23,8 @@
  */
 
 #include <Arduino.h>
-#include <Servo.h>
-#include "GeneralTimer.h"
-
-constexpr int MIN_PULSE_WIDTH = 544;
-constexpr int MAX_PULSE_WIDTH = 2400;
-constexpr int DEFAULT_PULSE_WIDTH = 1500;
-
-constexpr uint8_t SERVO_VERSION = 2U;
-constexpr uint8_t SERVOS_PER_TIMER = 12U;
-constexpr uint16_t INVALID_SERVO = 255U;
-constexpr uint32_t REFRESH_INTERVAL = 20000U;
-constexpr uint16_t MAX_SERVOS = (static_cast<uint16_t>(Timers16Bit::timerCount) * SERVOS_PER_TIMER);
+#include <GeneralTimer.h>
+#include "Servo.h"
 
 static ServoConfig servos[MAX_SERVOS];
 static volatile int8_t timerChannel[static_cast<uint8_t>(Timers16Bit::timerCount)] = {-1};  // counter for the servo being pulsed for each timer (or -1 if refresh interval)
