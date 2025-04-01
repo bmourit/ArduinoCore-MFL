@@ -72,8 +72,8 @@ GeneralTimer::GeneralTimer(timer::TIMER_Base Base) :
         companionChannel[i] = false;
     }
 
-    IRQn_Type upIrq = timerToUpIrq(static_cast<size_t>(Base));
-    IRQn_Type ccIrq = timerToChIrq(static_cast<size_t>(Base));
+    IRQn_Type upIrq = timerToUpIrq();
+    IRQn_Type ccIrq = timerToChIrq();
 
     if (upIrq != INVALID_IRQ && ccIrq != INVALID_IRQ) {
         NVIC_SetPriority(upIrq, preemptPriority_);
@@ -650,8 +650,8 @@ void GeneralTimer::setPWM(timer::Timer_Channel channel, pin_size_t pin, uint32_t
  * @param subPriority The subpriority of the interrupt.
  */
 void GeneralTimer::setInterruptPriority(uint8_t preemptPriority, uint8_t subPriority) {
-    IRQn_Type upIrq = timerToUpIrq(static_cast<size_t>(base_));
-    IRQn_Type ccIrq = timerToChIrq(static_cast<size_t>(base_));
+    IRQn_Type upIrq = timerToUpIrq();
+    IRQn_Type ccIrq = timerToChIrq();
 
     if (upIrq == INVALID_IRQ || ccIrq == INVALID_IRQ) return;
 
@@ -722,7 +722,7 @@ void GeneralTimer::attachInterrupt(TimerCallback callback, timer::Timer_Channel 
  * This function disables the update interrupt and clears the associated callback.
  */
 void GeneralTimer::detachInterrupt() {
-    IRQn_Type upIrq = timerToUpIrq(static_cast<size_t>(base_));
+    IRQn_Type upIrq = timerToUpIrq();
     if (upIrq == INVALID_IRQ) return;
     timer_.set_interrupt_enable(timer::Interrupt_Type::INTR_UPIE, false);
     callbacks_.up_callback = nullptr;
@@ -741,7 +741,7 @@ void GeneralTimer::detachInterrupt(timer::Timer_Channel channel) {
     const size_t channelIndex = static_cast<size_t>(channel);
     if (channelIndex >= static_cast<size_t>(TIMER_CHANNELS)) return;
 
-    IRQn_Type ccIrq = timerToChIrq(static_cast<size_t>(base_));
+    IRQn_Type ccIrq = timerToChIrq();
     if (ccIrq == INVALID_IRQ) return;
 
     timer_.set_interrupt_enable(convertToInterrupt(channel), false);
@@ -790,137 +790,6 @@ uint32_t GeneralTimer::getTimerClockFrequency() {
     return (prescaler == rcu::APB_Prescaler::CKAHB_DIV1) ?
            RCU_I.get_clock_frequency(timer_source) :
            RCU_I.get_clock_frequency(timer_source) * 2U;
-}
-
-/**
- * @brief Converts a timer channel to its corresponding status flag
- *
- * This function converts a timer channel to its corresponding status flag.
- * The status flag is used to check the status of the timer channel.
- *
- * @param channel Timer channel to convert
- * @return Corresponding status flag for the given channel
- */
-inline timer::Status_Flags GeneralTimer::convertToFlag(timer::Timer_Channel channel) {
-    switch (channel) {
-        case timer::Timer_Channel::CH0: return timer::Status_Flags::FLAG_CH0;
-        case timer::Timer_Channel::CH1: return timer::Status_Flags::FLAG_CH1;
-        case timer::Timer_Channel::CH2: return timer::Status_Flags::FLAG_CH2;
-        case timer::Timer_Channel::CH3: return timer::Status_Flags::FLAG_CH3;
-        case timer::Timer_Channel::INVALID:
-        default: return timer::Status_Flags::INVALID;
-    }
-}
-
-/**
- * @brief Converts a timer channel to its corresponding interrupt flag
- *
- * This function converts a timer channel to its corresponding interrupt flag.
- * The interrupt flag is used to check the status of the timer channel interrupt
- * and to clear the interrupt flag.
- *
- * @param channel Timer channel to convert
- * @return Corresponding interrupt flag for the given channel
- */
-inline timer::Interrupt_Flags GeneralTimer::convertToInterruptFlag(timer::Timer_Channel channel) {
-    switch (channel) {
-        case timer::Timer_Channel::CH0: return timer::Interrupt_Flags::INTR_FLAG_CH0;
-        case timer::Timer_Channel::CH1: return timer::Interrupt_Flags::INTR_FLAG_CH1;
-        case timer::Timer_Channel::CH2: return timer::Interrupt_Flags::INTR_FLAG_CH2;
-        case timer::Timer_Channel::CH3: return timer::Interrupt_Flags::INTR_FLAG_CH3;
-        case timer::Timer_Channel::INVALID:
-        default: return timer::Interrupt_Flags::INVALID;
-    }
-}
-
-/**
- * @brief Converts a timer channel to its corresponding interrupt type
- *
- * This function converts a timer channel to its corresponding interrupt type.
- * The interrupt type is used to enable or disable the timer channel interrupt
- * and to clear the interrupt flag.
- *
- * @param channel Timer channel to convert
- * @return Corresponding interrupt type for the given channel
- */
-inline timer::Interrupt_Type GeneralTimer::convertToInterrupt(timer::Timer_Channel channel) {
-    switch (channel) {
-        case timer::Timer_Channel::CH0: return timer::Interrupt_Type::INTR_CH0IE;
-        case timer::Timer_Channel::CH1: return timer::Interrupt_Type::INTR_CH1IE;
-        case timer::Timer_Channel::CH2: return timer::Interrupt_Type::INTR_CH2IE;
-        case timer::Timer_Channel::CH3: return timer::Interrupt_Type::INTR_CH3IE;
-        case timer::Timer_Channel::INVALID:
-        default: return timer::Interrupt_Type::INVALID;
-    }
-}
-
-/**
- * @brief Returns the companion timer channel associated with a given timer channel
- *
- * The companion channel is the channel that is paired with the given channel
- * for complementary outputs. If the given channel is invalid, the function
- * returns `timer::Timer_Channel::INVALID`.
- *
- * @param channel The timer channel to get the companion for
- * @return The companion timer channel for the given channel
- */
-inline timer::Timer_Channel GeneralTimer::getCompanionChannel(timer::Timer_Channel channel) {
-    switch (channel) {
-        case timer::Timer_Channel::CH0: return timer::Timer_Channel::CH1;
-        case timer::Timer_Channel::CH1: return timer::Timer_Channel::CH0;
-        case timer::Timer_Channel::CH2: return timer::Timer_Channel::CH3;
-        case timer::Timer_Channel::CH3: return timer::Timer_Channel::CH2;
-        case timer::Timer_Channel::INVALID:
-        default: return timer::Timer_Channel::INVALID;
-    }
-}
-
-/**
- * @brief Converts a pin number to its corresponding timer channel
- *
- * This function takes a pin number and returns the corresponding timer channel
- * associated with that pin. If the pin is invalid, the function returns
- * `timer::Timer_Channel::INVALID`.
- *
- * @param pin The pin number to convert
- * @return The corresponding timer channel for the given pin
- */
-inline timer::Timer_Channel GeneralTimer::getChannelFromPin(pin_size_t pin) {
-    auto instanceBase = getPinOpsPeripheralBase<TIMERPinOps, timer::TIMER_Base>(TIMER_PinOps, pin);
-    if (instanceBase == timer::TIMER_Base::INVALID) {
-        return timer::Timer_Channel::INVALID;
-    }
-
-    uint32_t packedPinOps = getPackedPinOps(TIMER_PinOps, instanceBase, pin);
-    if (packedPinOps == invalidValue) {
-        return timer::Timer_Channel::INVALID;
-    }
-    uint8_t channel_num = getPackedPinChannel(packedPinOps);
-    return static_cast<timer::Timer_Channel>(channel_num);
-}
-
-/**
- * @brief Converts a pin number to its corresponding timer channel companion
- *
- * This function takes a pin number and returns the corresponding timer channel
- * companion associated with that pin. If the pin is invalid, the function
- * returns `timer::Timer_Channel::INVALID`.
- *
- * @param pin The pin number to convert
- * @return The corresponding timer channel companion for the given pin
- */
-inline timer::Timer_Channel GeneralTimer::getCompanionChannelFromPin(pin_size_t pin) {
-    auto instanceBase = getPinOpsPeripheralBase<TIMERPinOps, timer::TIMER_Base>(TIMER_PinOps, pin);
-    if (instanceBase == timer::TIMER_Base::INVALID) {
-        return timer::Timer_Channel::INVALID;
-    }
-
-    uint32_t packedPinOps = getPackedPinOps(TIMER_PinOps, instanceBase, pin);
-    if (packedPinOps == invalidValue) {
-        return timer::Timer_Channel::INVALID;
-    }
-    uint8_t channel_num = getPackedPinChOn(packedPinOps);
-    return static_cast<timer::Timer_Channel>(channel_num);
 }
 
 /**

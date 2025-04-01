@@ -113,6 +113,9 @@ public:
 
     uint32_t getTimerClockFrequency();
 
+    inline IRQn_Type getTimerUpIRQ() { return timerToUpIrq(); }
+    inline IRQn_Type getTimerCCIRQ() { return timerToChIrq(); }
+
 protected:
     explicit GeneralTimer(timer::TIMER_Base Base);
 
@@ -129,21 +132,86 @@ protected:
 
     static timer::TIMER& get_timer_instance(timer::TIMER_Base Base);
 
-    inline IRQn_Type getTimerUpIRQ();
-    inline IRQn_Type getTimerCCIRQ();
-    inline timer::Timer_Channel getChannelFromPin(pin_size_t pin);
-    inline timer::Timer_Channel getCompanionChannelFromPin(pin_size_t pin);
-    inline timer::Timer_Channel getCompanionChannel(timer::Timer_Channel channel);
-    inline timer::Status_Flags convertToFlag(timer::Timer_Channel channel);
-    inline timer::Interrupt_Flags convertToInterruptFlag(timer::Timer_Channel channel);
-    inline timer::Interrupt_Type convertToInterrupt(timer::Timer_Channel channel);
+    inline timer::Timer_Channel getChannelFromPin(pin_size_t pin) {
+        auto instanceBase = getPinOpsPeripheralBase<TIMERPinOps, timer::TIMER_Base>(TIMER_PinOps, pin);
+        if (instanceBase == timer::TIMER_Base::INVALID) {
+            return timer::Timer_Channel::INVALID;
+        }
+
+        uint32_t packedPinOps = getPackedPinOps(TIMER_PinOps, instanceBase, pin);
+        if (packedPinOps == invalidValue) {
+            return timer::Timer_Channel::INVALID;
+        }
+        uint8_t channel_num = getPackedPinChannel(packedPinOps);
+        return static_cast<timer::Timer_Channel>(channel_num);
+    }
+
+    inline timer::Timer_Channel getCompanionChannelFromPin(pin_size_t pin) {
+        auto instanceBase = getPinOpsPeripheralBase<TIMERPinOps, timer::TIMER_Base>(TIMER_PinOps, pin);
+        if (instanceBase == timer::TIMER_Base::INVALID) {
+            return timer::Timer_Channel::INVALID;
+        }
+
+        uint32_t packedPinOps = getPackedPinOps(TIMER_PinOps, instanceBase, pin);
+        if (packedPinOps == invalidValue) {
+            return timer::Timer_Channel::INVALID;
+        }
+        uint8_t channel_num = getPackedPinChOn(packedPinOps);
+        return static_cast<timer::Timer_Channel>(channel_num);
+    }
+
+    inline timer::Timer_Channel getCompanionChannel(timer::Timer_Channel channel) {
+        switch (channel) {
+            case timer::Timer_Channel::CH0: return timer::Timer_Channel::CH1;
+            case timer::Timer_Channel::CH1: return timer::Timer_Channel::CH0;
+            case timer::Timer_Channel::CH2: return timer::Timer_Channel::CH3;
+            case timer::Timer_Channel::CH3: return timer::Timer_Channel::CH2;
+            case timer::Timer_Channel::INVALID:
+            default: return timer::Timer_Channel::INVALID;
+        }
+    }
+
+    inline timer::Status_Flags convertToFlag(timer::Timer_Channel channel) {
+        switch (channel) {
+            case timer::Timer_Channel::CH0: return timer::Status_Flags::FLAG_CH0;
+            case timer::Timer_Channel::CH1: return timer::Status_Flags::FLAG_CH1;
+            case timer::Timer_Channel::CH2: return timer::Status_Flags::FLAG_CH2;
+            case timer::Timer_Channel::CH3: return timer::Status_Flags::FLAG_CH3;
+            case timer::Timer_Channel::INVALID:
+            default: return timer::Status_Flags::INVALID;
+        }
+    }
+
+    inline timer::Interrupt_Flags convertToInterruptFlag(timer::Timer_Channel channel) {
+        switch (channel) {
+            case timer::Timer_Channel::CH0: return timer::Interrupt_Flags::INTR_FLAG_CH0;
+            case timer::Timer_Channel::CH1: return timer::Interrupt_Flags::INTR_FLAG_CH1;
+            case timer::Timer_Channel::CH2: return timer::Interrupt_Flags::INTR_FLAG_CH2;
+            case timer::Timer_Channel::CH3: return timer::Interrupt_Flags::INTR_FLAG_CH3;
+            case timer::Timer_Channel::INVALID:
+            default: return timer::Interrupt_Flags::INVALID;
+        }
+    }
+
+    inline timer::Interrupt_Type convertToInterrupt(timer::Timer_Channel channel) {
+        switch (channel) {
+            case timer::Timer_Channel::CH0: return timer::Interrupt_Type::INTR_CH0IE;
+            case timer::Timer_Channel::CH1: return timer::Interrupt_Type::INTR_CH1IE;
+            case timer::Timer_Channel::CH2: return timer::Interrupt_Type::INTR_CH2IE;
+            case timer::Timer_Channel::CH3: return timer::Interrupt_Type::INTR_CH3IE;
+            case timer::Timer_Channel::INVALID:
+            default: return timer::Interrupt_Type::INVALID;
+        }
+    }
+
     inline timer::Timer_Channel convertToChannel(uint8_t channel) { return static_cast<timer::Timer_Channel>(channel); }
 
 private:
     static std::array<timer_to_irq, TIMER_COUNT> timer_up_irq;
     static std::array<timer_to_irq, TIMER_COUNT> timer_ch_irq;
 
-    inline IRQn_Type timerToUpIrq(uint8_t timerIndex) {
+    inline IRQn_Type timerToUpIrq() {
+        uint8_t timerIndex = static_cast<uint8_t>(base_);
         for (const auto& index : timer_up_irq) {
             if (index.timer_index == timerIndex) {
                 return index.irq_type;
@@ -153,7 +221,8 @@ private:
         return INVALID_IRQ;
     }
 
-    inline IRQn_Type timerToChIrq(uint8_t timerIndex) {
+    inline IRQn_Type timerToChIrq() {
+        uint8_t timerIndex = static_cast<uint8_t>(base_);
         for (const auto& index : timer_ch_irq) {
             if (index.timer_index == timerIndex) {
                 return index.irq_type;
