@@ -1,4 +1,4 @@
-# Arduino Core for MFL and GD32F103x/GD32F303x MCU
+# Arduino Core MFL for GD32F103x/GD32F303x MCUs
 
 This repository contains the source code and configuration files of the Arduino MFL Core
 for Gigadevice's GD32F103x Cortex-M3 and GD32F303x Cortex-M4 processors.
