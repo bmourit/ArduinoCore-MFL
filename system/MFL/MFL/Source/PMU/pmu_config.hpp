@@ -99,7 +99,7 @@ enum class Status_Flags : uint32_t {
     WAKEUP_FLAG = 0,
     STANDBY_FLAG = 1,
     LVD_FLAG = 2,
-    FDOVSR_FLAG = 14,
+    LDOVSR_FLAG = 14,
     HDR_FLAG = 16,
     HDSR_FLAG = 17,
     LDR_FLAG = REG_BIT_DEF(18, 19)

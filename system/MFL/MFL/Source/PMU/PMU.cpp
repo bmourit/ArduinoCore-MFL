@@ -89,6 +89,8 @@ void PMU::lvd_disable() {
  */
 void PMU::set_ldo_output(Output_Voltage level) {
     write_bit_range(*this, PMU_Regs::CTL, static_cast<uint32_t>(CTL_Bits::LDOVS), static_cast<uint32_t>(level));
+    while (get_flag(Status_Flags::LDOVSR_FLAG) == false) {
+    }
 }
 
 /**
@@ -102,7 +104,6 @@ void PMU::set_ldo_output(Output_Voltage level) {
 void PMU::high_driver_switch(bool enable) {
     write_bit(*this, PMU_Regs::CTL, static_cast<uint32_t>(CTL_Bits::HDS), enable);
     while (get_flag(Status_Flags::HDSR_FLAG) == false) {
-        // Just wait
     }
 }
 
