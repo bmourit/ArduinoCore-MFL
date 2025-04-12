@@ -829,7 +829,6 @@ uint32_t ADC::start_regular_single_conversion(ADC_Channel channel, ADC_Sample_Ti
     // Disable to avoid accidentally triggering conversion
     write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::ADCON), false);
     while (read_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::ADCON))) {
-        // Wait for the ADC to be disabled
     }
 
     // Setup the ADC
@@ -859,7 +858,6 @@ uint32_t ADC::start_regular_single_conversion(ADC_Channel channel, ADC_Sample_Ti
     // Enable ADC
     write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::ADCON), true);
     while (!read_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::ADCON))) {
-        // Wait for the ADC to be enabled
     }
     // If calibration is enabled, wait for the calibration to finish
     if (calibrate) {
@@ -873,7 +871,8 @@ uint32_t ADC::start_regular_single_conversion(ADC_Channel channel, ADC_Sample_Ti
     // Generate software trigger
     write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::SWRCST), true);
     // Wait for the flag to be set
-    while (!get_flag(Status_Flags::FLAG_EOC));
+    while (!get_flag(Status_Flags::FLAG_EOC)) {
+    }
     // Get converted data
     uint32_t converted_data = read_bit_range(*this, ADC_Regs::RDATA, static_cast<uint32_t>(RDATA_Bits::RDATA));
     // Clear the flag

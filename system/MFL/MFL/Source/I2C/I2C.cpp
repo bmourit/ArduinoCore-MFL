@@ -470,7 +470,8 @@ void I2C::set_smbus_arp_enable(bool enable) {
  * @return true if the flag is set, false otherwise.
  */
 bool I2C::get_flag(Status_Flags flag) {
-    return get_value(flag);
+    const auto& config = status_flag_index[static_cast<size_t>(flag)];
+    return read_bit(*this, config.register_offset, static_cast<uint32_t>(config.bit_info));
 }
 
 /**
@@ -489,8 +490,8 @@ void I2C::clear_flag(Clear_Flags flag) {
         read_register<uint32_t>(*this, I2C_Regs::STAT0);
         read_register<uint32_t>(*this, I2C_Regs::STAT1);
     } else {
-        const auto& info = clear_flag_index[static_cast<size_t>(flag)];
-        write_bit_range(*this, info.register_offset, info.bit_info, Clear);
+        const auto& config = clear_flag_index[static_cast<size_t>(flag)];
+        write_bit(*this, config.register_offset, static_cast<uint32_t>(config.bit_info), false);
     }
 }
 
@@ -505,7 +506,16 @@ void I2C::clear_flag(Clear_Flags flag) {
  * @return true if the flag is set, false otherwise.
  */
 bool I2C::get_interrupt_flag(Interrupt_Flags flag) {
-    return get_value(flag);
+    const auto& config = interrupt_flag_index[static_cast<size_t>(flag)];
+    bool flag_value = read_bit(*this, config.register0_offset, static_cast<uint32_t>(config.bit_info0));
+    bool is_enabled = read_bit(*this, config.register1_offset, static_cast<uint32_t>(config.bit_info1));
+    bool buf_enable = read_bit(*this, I2C_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::BUFIE));
+
+    if (flag == Interrupt_Flags::INTR_FLAG_RBNE || flag == Interrupt_Flags::INTR_FLAG_TBE) {
+        flag_value = (flag_value && buf_enable);
+    }
+
+    return (flag_value && is_enabled);
 }
 
 /**
@@ -520,15 +530,15 @@ bool I2C::get_interrupt_flag(Interrupt_Flags flag) {
  *             Clear_Flags enumeration.
  */
 void I2C::clear_interrupt_flag(Clear_Flags flag) {
-    if ((flag == Clear_Flags::FLAG_SBSEND) || (flag == Clear_Flags::FLAG_ADDSEND)) {
+    if (flag == Clear_Flags::FLAG_SBSEND || flag == Clear_Flags::FLAG_ADDSEND) {
         read_register<uint32_t>(*this, I2C_Regs::STAT0);
         if (flag == Clear_Flags::FLAG_ADDSEND) {
             // ADDSEND must also read STAT1 to clear
             read_register<uint32_t>(*this, I2C_Regs::STAT1);
         }
     } else {
-        const auto& info = clear_flag_index[static_cast<size_t>(flag)];
-        write_bit_range(*this, info.register_offset, info.bit_info, Clear);
+        const auto& config = clear_flag_index[static_cast<size_t>(flag)];
+        write_bit(*this, config.register_offset, static_cast<uint32_t>(config.bit_info), false);
     }
 }
 
@@ -543,8 +553,8 @@ void I2C::clear_interrupt_flag(Clear_Flags flag) {
  * @param enable Set to true to enable the interrupt, false to disable it.
  */
 void I2C::set_interrupt_enable(Interrupt_Type type, bool enable) {
-    const auto& info = interrupt_type_index[static_cast<size_t>(type)];
-    write_bit_range(*this, info.register_offset, info.bit_info, enable ? Set : Clear);
+    const auto& config = interrupt_type_index[static_cast<size_t>(type)];
+    write_bit(*this, config.register_offset, static_cast<uint32_t>(config.bit_info), enable);
 }
 
 

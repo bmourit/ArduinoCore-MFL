@@ -85,7 +85,7 @@ void FMC::unlock_bank1() {
  * the FMC_CTL0 and FMC_CTL1 registers. This prevents any further write operations to the
  * FMC memory regions.
  */
-void FMC::lock(void) {
+void FMC::lock() {
     write_bit(*this, FMC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::LK), true);
 
     if (get_fmc_size() > Bank0_Size) {
@@ -100,7 +100,7 @@ void FMC::lock(void) {
  * the FMC_CTL0 register. This prevents any further write operations to the
  * FMC bank0 memory region.
  */
-void FMC::lock_bank0(void) {
+void FMC::lock_bank0() {
     write_bit(*this, FMC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::LK), true);
 }
 
@@ -111,7 +111,7 @@ void FMC::lock_bank0(void) {
  * the FMC_CTL1 register. This prevents any further write operations to the
  * FMC bank1 memory region.
  */
-void FMC::lock_bank1(void) {
+void FMC::lock_bank1() {
     write_bit(*this, FMC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::LK), true);
 }
 
@@ -418,7 +418,7 @@ FMC_Error_Type FMC::ready_wait_bank0(uint32_t timeout) {
     do {
         state = get_bank0_state();
         timeout = timeout - 1;
-    } while ((state == FMC_Error_Type::BUSY) && (timeout != 0));
+    } while (state == FMC_Error_Type::BUSY && timeout != 0);
 
     if (state == FMC_Error_Type::BUSY) {
         state = FMC_Error_Type::TIMEOUT;
@@ -443,7 +443,7 @@ FMC_Error_Type FMC::ready_wait_bank1(uint32_t timeout) {
     do {
         state = get_bank1_state();
         timeout = timeout - 1;
-    } while ((state == FMC_Error_Type::BUSY) && (timeout != 0));
+    } while (state == FMC_Error_Type::BUSY && timeout != 0);
 
     if (state == FMC_Error_Type::BUSY) {
         state = FMC_Error_Type::TIMEOUT;
@@ -464,7 +464,8 @@ FMC_Error_Type FMC::ready_wait_bank1(uint32_t timeout) {
  * @return True if the specified flag is set, otherwise false.
  */
 bool FMC::get_flag(Status_Flags flag) {
-    return get_value(flag);
+    const auto& config = status_flag_index[static_cast<size_t>(flag)];
+    return read_bit(*this, config.register_offset, static_cast<uint32_t>(config.bit_info));
 }
 
 /**
@@ -478,7 +479,8 @@ bool FMC::get_flag(Status_Flags flag) {
  *             value.
  */
 void FMC::clear_flag(Status_Flags flag) {
-    set_value(flag, Set);
+    const auto& config = status_flag_index[static_cast<size_t>(flag)];
+    write_bit(*this, config.register_offset, static_cast<uint32_t>(config.bit_info), true);
 }
 
 /**
@@ -493,7 +495,10 @@ void FMC::clear_flag(Status_Flags flag) {
  * @return True if the specified flag is set, otherwise false.
  */
 bool FMC::get_interrupt_flag(Interrupt_Flags flag) {
-    return get_value(flag);
+    const auto& config = interrupt_flag_index[static_cast<size_t>(flag)];
+    const bool flag_value = read_bit(*this, config.flag_register_offset, static_cast<uint32_t>(config.flag_bit_info));
+    const bool is_enabled = read_bit(*this, config.interrupt_register_offset, static_cast<uint32_t>(config.interrupt_bit_info));
+    return (flag_value && is_enabled);
 }
 
 /**
@@ -507,7 +512,9 @@ bool FMC::get_interrupt_flag(Interrupt_Flags flag) {
  *             enumeration value.
  */
 void FMC::clear_interrupt_flag(Interrupt_Flags flag) {
-    set_value(flag, Set);
+    const auto& config = interrupt_flag_index[static_cast<size_t>(flag)];
+    write_bit(*this, config.flag_register_offset, static_cast<uint32_t>(config.flag_bit_info), true);
+    write_bit(*this, config.interrupt_register_offset, static_cast<uint32_t>(config.interrupt_bit_info), true);
 }
 
 /**
@@ -523,7 +530,8 @@ void FMC::clear_interrupt_flag(Interrupt_Flags flag) {
  * @param enable Set to true to enable the interrupt, false to disable it.
  */
 void FMC::set_interrupt_enable(Interrupt_Types type, bool enable) {
-    set_value(type, enable ? Set : Clear);
+    const auto& config = interrupt_type_index[static_cast<size_t>(type)];
+    write_bit(*this, config.register_offset, static_cast<uint32_t>(config.bit_info), enable);
 }
 
 /**

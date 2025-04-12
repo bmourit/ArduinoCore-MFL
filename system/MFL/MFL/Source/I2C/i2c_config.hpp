@@ -173,31 +173,31 @@ enum class Status_Flags : uint8_t {
 
 struct index_to_bits {
     I2C_Regs register_offset;
-    uint32_t bit_info;
+    uint8_t bit_info;
 };
 
 static inline constexpr std::array<index_to_bits, 21> status_flag_index {{
-        {I2C_Regs::STAT0, REG_BIT_DEF(0, 0)},
-        {I2C_Regs::STAT0, REG_BIT_DEF(1, 1)},
-        {I2C_Regs::STAT0, REG_BIT_DEF(2, 2)},
-        {I2C_Regs::STAT0, REG_BIT_DEF(3, 3)},
-        {I2C_Regs::STAT0, REG_BIT_DEF(4, 4)},
-        {I2C_Regs::STAT0, REG_BIT_DEF(6, 6)},
-        {I2C_Regs::STAT0, REG_BIT_DEF(7, 7)},
-        {I2C_Regs::STAT0, REG_BIT_DEF(8, 8)},
-        {I2C_Regs::STAT0, REG_BIT_DEF(9, 9)},
-        {I2C_Regs::STAT0, REG_BIT_DEF(10, 10)},
-        {I2C_Regs::STAT0, REG_BIT_DEF(11, 11)},
-        {I2C_Regs::STAT0, REG_BIT_DEF(12, 12)},
-        {I2C_Regs::STAT0, REG_BIT_DEF(14, 14)},
-        {I2C_Regs::STAT0, REG_BIT_DEF(15, 15)},
-        {I2C_Regs::STAT1, REG_BIT_DEF(0, 0)},
-        {I2C_Regs::STAT1, REG_BIT_DEF(1, 1)},
-        {I2C_Regs::STAT1, REG_BIT_DEF(2, 2)},
-        {I2C_Regs::STAT1, REG_BIT_DEF(4, 4)},
-        {I2C_Regs::STAT1, REG_BIT_DEF(5, 5)},
-        {I2C_Regs::STAT1, REG_BIT_DEF(6, 6)},
-        {I2C_Regs::STAT1, REG_BIT_DEF(7, 7)}
+        {I2C_Regs::STAT0, 0},
+        {I2C_Regs::STAT0, 1},
+        {I2C_Regs::STAT0, 2},
+        {I2C_Regs::STAT0, 3},
+        {I2C_Regs::STAT0, 4},
+        {I2C_Regs::STAT0, 6},
+        {I2C_Regs::STAT0, 7},
+        {I2C_Regs::STAT0, 8},
+        {I2C_Regs::STAT0, 9},
+        {I2C_Regs::STAT0, 10},
+        {I2C_Regs::STAT0, 11},
+        {I2C_Regs::STAT0, 12},
+        {I2C_Regs::STAT0, 14},
+        {I2C_Regs::STAT0, 15},
+        {I2C_Regs::STAT1, 0},
+        {I2C_Regs::STAT1, 1},
+        {I2C_Regs::STAT1, 2},
+        {I2C_Regs::STAT1, 4},
+        {I2C_Regs::STAT1, 5},
+        {I2C_Regs::STAT1, 6},
+        {I2C_Regs::STAT1, 7}
     }};
 
 enum class Clear_Flags : uint8_t {
@@ -213,15 +213,15 @@ enum class Clear_Flags : uint8_t {
 };
 
 static inline constexpr std::array<index_to_bits, 9> clear_flag_index {{
-        {I2C_Regs::STAT0, REG_BIT_DEF(0, 0)},
-        {I2C_Regs::STAT0, REG_BIT_DEF(1, 1)},
-        {I2C_Regs::STAT0, REG_BIT_DEF(8, 8)},
-        {I2C_Regs::STAT0, REG_BIT_DEF(9, 9)},
-        {I2C_Regs::STAT0, REG_BIT_DEF(10, 10)},
-        {I2C_Regs::STAT0, REG_BIT_DEF(11, 11)},
-        {I2C_Regs::STAT0, REG_BIT_DEF(12, 12)},
-        {I2C_Regs::STAT0, REG_BIT_DEF(14, 14)},
-        {I2C_Regs::STAT0, REG_BIT_DEF(15, 15)}
+        {I2C_Regs::STAT0, 0},
+        {I2C_Regs::STAT0, 1},
+        {I2C_Regs::STAT0, 8},
+        {I2C_Regs::STAT0, 9},
+        {I2C_Regs::STAT0, 10},
+        {I2C_Regs::STAT0, 11},
+        {I2C_Regs::STAT0, 12},
+        {I2C_Regs::STAT0, 14},
+        {I2C_Regs::STAT0, 15}
     }};
 
 enum class Interrupt_Flags : uint8_t {
@@ -243,26 +243,26 @@ enum class Interrupt_Flags : uint8_t {
 
 struct double_index_to_bits {
     I2C_Regs register0_offset;
-    uint32_t bit_info0;
+    uint8_t bit_info0;
     I2C_Regs register1_offset;
-    uint32_t bit_info1;
+    uint8_t bit_info1;
 };
 
 static inline constexpr std::array<double_index_to_bits, 14> interrupt_flag_index {{
-        {I2C_Regs::CTL1, REG_BIT_DEF(9, 9), I2C_Regs::STAT0, REG_BIT_DEF(0, 0)},
-        {I2C_Regs::CTL1, REG_BIT_DEF(9, 9), I2C_Regs::STAT0, REG_BIT_DEF(1, 1)},
-        {I2C_Regs::CTL1, REG_BIT_DEF(9, 9), I2C_Regs::STAT0, REG_BIT_DEF(2, 2)},
-        {I2C_Regs::CTL1, REG_BIT_DEF(9, 9), I2C_Regs::STAT0, REG_BIT_DEF(3, 3)},
-        {I2C_Regs::CTL1, REG_BIT_DEF(9, 9), I2C_Regs::STAT0, REG_BIT_DEF(4, 4)},
-        {I2C_Regs::CTL1, REG_BIT_DEF(9, 9), I2C_Regs::STAT0, REG_BIT_DEF(6, 6)},
-        {I2C_Regs::CTL1, REG_BIT_DEF(9, 9), I2C_Regs::STAT0, REG_BIT_DEF(7, 7)},
-        {I2C_Regs::CTL1, REG_BIT_DEF(8, 8), I2C_Regs::STAT0, REG_BIT_DEF(8, 8)},
-        {I2C_Regs::CTL1, REG_BIT_DEF(8, 8), I2C_Regs::STAT0, REG_BIT_DEF(9, 9)},
-        {I2C_Regs::CTL1, REG_BIT_DEF(8, 8), I2C_Regs::STAT0, REG_BIT_DEF(10, 10)},
-        {I2C_Regs::CTL1, REG_BIT_DEF(8, 8), I2C_Regs::STAT0, REG_BIT_DEF(11, 11)},
-        {I2C_Regs::CTL1, REG_BIT_DEF(8, 8), I2C_Regs::STAT0, REG_BIT_DEF(12, 12)},
-        {I2C_Regs::CTL1, REG_BIT_DEF(8, 8), I2C_Regs::STAT0, REG_BIT_DEF(14, 14)},
-        {I2C_Regs::CTL1, REG_BIT_DEF(8, 8), I2C_Regs::STAT0, REG_BIT_DEF(15, 15)}
+        {I2C_Regs::CTL1, 9, I2C_Regs::STAT0, 0},
+        {I2C_Regs::CTL1, 9, I2C_Regs::STAT0, 1},
+        {I2C_Regs::CTL1, 9, I2C_Regs::STAT0, 2},
+        {I2C_Regs::CTL1, 9, I2C_Regs::STAT0, 3},
+        {I2C_Regs::CTL1, 9, I2C_Regs::STAT0, 4},
+        {I2C_Regs::CTL1, 9, I2C_Regs::STAT0, 6},
+        {I2C_Regs::CTL1, 9, I2C_Regs::STAT0, 7},
+        {I2C_Regs::CTL1, 8, I2C_Regs::STAT0, 8},
+        {I2C_Regs::CTL1, 8, I2C_Regs::STAT0, 9},
+        {I2C_Regs::CTL1, 8, I2C_Regs::STAT0, 10},
+        {I2C_Regs::CTL1, 8, I2C_Regs::STAT0, 11},
+        {I2C_Regs::CTL1, 8, I2C_Regs::STAT0, 12},
+        {I2C_Regs::CTL1, 8, I2C_Regs::STAT0, 14},
+        {I2C_Regs::CTL1, 8, I2C_Regs::STAT0, 15}
     }};
 
 enum class Interrupt_Type : uint8_t {
@@ -272,9 +272,9 @@ enum class Interrupt_Type : uint8_t {
 };
 
 static inline constexpr std::array<index_to_bits, 3> interrupt_type_index {{
-        {I2C_Regs::CTL1, REG_BIT_DEF(8, 8)},
-        {I2C_Regs::CTL1, REG_BIT_DEF(9, 9)},
-        {I2C_Regs::CTL1, REG_BIT_DEF(10, 10)}
+        {I2C_Regs::CTL1, 8},
+        {I2C_Regs::CTL1, 9},
+        {I2C_Regs::CTL1, 10}
     }};
 
 enum class Bus_Mode : uint8_t {

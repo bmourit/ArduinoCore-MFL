@@ -83,8 +83,8 @@ void RCU::reset() {
  * @param[in] enable If true, the peripheral clock is enabled. If false, the peripheral clock is disabled.
  */
 void RCU::set_pclk_enable(RCU_PCLK pclk, bool enable) {
-    const auto& info = pclk_index[static_cast<size_t>(pclk)];
-    write_bit_range(*this, info.register_offset, info.bit_info, enable ? Set : Clear);
+    const auto& config = pclk_index[static_cast<size_t>(pclk)];
+    write_bit(*this, config.register_offset, static_cast<uint32_t>(config.bit_info), enable);
 }
 
 /**
@@ -94,8 +94,8 @@ void RCU::set_pclk_enable(RCU_PCLK pclk, bool enable) {
  * @return true if the peripheral clock is enabled, false otherwise.
  */
 bool RCU::get_pclk(RCU_PCLK pclk) {
-    const auto& info = pclk_index[static_cast<size_t>(pclk)];
-    return read_bit_range(*this, info.register_offset, info.bit_info) != Clear;
+    const auto& config = pclk_index[static_cast<size_t>(pclk)];
+    return read_bit(*this, config.register_offset, static_cast<uint32_t>(config.bit_info));
 }
 
 /**
@@ -105,8 +105,8 @@ bool RCU::get_pclk(RCU_PCLK pclk) {
  * @param[in] enable If true, the peripheral clock sleep mode is enabled. If false, it is disabled.
  */
 void RCU::set_pclk_sleep_enable(RCU_PCLK_Sleep pclk, bool enable) {
-    const auto& info = pclk_sleep_index[static_cast<size_t>(pclk)];
-    write_bit_range(*this, info.register_offset, info.bit_info, enable ? Set : Clear);
+    const auto& config = pclk_sleep_index[static_cast<size_t>(pclk)];
+    write_bit(*this, config.register_offset, static_cast<uint32_t>(config.bit_info), enable);
 }
 
 /**
@@ -116,8 +116,8 @@ void RCU::set_pclk_sleep_enable(RCU_PCLK_Sleep pclk, bool enable) {
  * @param[in] enable If true, the peripheral clock reset is enabled. If false, the peripheral clock reset is disabled.
  */
 void RCU::set_pclk_reset_enable(RCU_PCLK_Reset pclk, bool enable) {
-    const auto& info = pclk_reset_index[static_cast<size_t>(pclk)];
-    write_bit_range(*this, info.register_offset, info.bit_info, enable ? Set : Clear);
+    const auto& config = pclk_reset_index[static_cast<size_t>(pclk)];
+    write_bit(*this, config.register_offset, static_cast<uint32_t>(config.bit_info), enable);
 }
 
 /**
@@ -481,8 +481,8 @@ void RCU::set_lxtal_drive_capability(LXTAL_Drive drive) {
  *                   should be enabled (true) or disabled (false).
  */
 void RCU::set_osci_enable(OSCI_Select osci, bool enable) {
-    const auto& info = osci_select_index[static_cast<size_t>(osci)];
-    write_bit_range(*this, info.register_offset, info.bit_info, enable ? Set : Clear);
+    const auto& config = osci_select_index[static_cast<size_t>(osci)];
+    write_bit(*this, config.register_offset, static_cast<uint32_t>(config.bit_info), enable);
 }
 
 /**
@@ -513,7 +513,7 @@ bool RCU::is_osci_stable(OSCI_Select osci) {
                               (osci == OSCI_Select::IRC40K) ? Status_Flags::FLAG_IRC40KSTB :
                               Status_Flags::FLAG_PLLSTB; // Default for PLL_CK
 
-    while ((osci_stable == false) && (count != timeout)) {
+    while (osci_stable == false && count != timeout) {
         osci_stable = get_flag(flag);
         count = count + 1U;
     }
@@ -716,7 +716,8 @@ void RCU::set_deep_sleep_voltage(DeepSleep_Voltage voltage) {
  * @return true if the flag is set, false otherwise.
  */
 bool RCU::get_flag(Status_Flags flag) {
-    return get_value(flag);
+    const auto& config = status_flag_index[static_cast<size_t>(flag)];
+    return read_bit(*this, config.register_offset, static_cast<uint32_t>(config.bit_info));
 }
 
 /**
@@ -742,7 +743,8 @@ void RCU::clear_all_reset_flags() {
  * @return true if the specified interrupt flag is set, false otherwise.
  */
 bool RCU::get_interrupt_flag(Interrupt_Flags flag) {
-    return get_value(flag);
+    const auto& config = interrupt_flag_index[static_cast<size_t>(flag)];
+    return read_bit(*this, config.register_offset, static_cast<uint32_t>(config.bit_info));
 }
 
 /**
@@ -755,8 +757,8 @@ bool RCU::get_interrupt_flag(Interrupt_Flags flag) {
  * @param[in] flag The interrupt flag to clear, specified as a Clear_Flags enumeration value.
  */
 void RCU::clear_interrupt_flag(Clear_Flags flag) {
-    const auto& info = clear_flag_index[static_cast<size_t>(flag)];
-    write_bit_range(*this, info.register_offset, info.bit_info, Set);
+    const auto& config = clear_flag_index[static_cast<size_t>(flag)];
+    write_bit(*this, config.register_offset, static_cast<uint32_t>(config.bit_info), true);
 }
 
 /**
@@ -775,8 +777,8 @@ void RCU::clear_interrupt_flag(Clear_Flags flag) {
  *                   be enabled (true) or disabled (false).
  */
 void RCU::set_interrupt_enable(Interrupt_Type type, bool enable) {
-    const auto &info = interrupt_type_index[static_cast<size_t>(type)];
-    write_bit_range(*this, info.register_offset, info.bit_info, enable ? Set : Clear);
+    const auto &config = interrupt_type_index[static_cast<size_t>(type)];
+    write_bit(*this, config.register_offset, static_cast<uint32_t>(config.bit_info), enable);
 }
 
 /**

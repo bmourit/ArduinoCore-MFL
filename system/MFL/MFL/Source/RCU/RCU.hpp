@@ -113,27 +113,6 @@ private:
     RCU& operator=(const RCU&) = delete;
 
     uint32_t SystemCoreClock;
-
-    // Get value helpers
-    inline bool get_value(Status_Flags flag) {
-        const auto& info = status_flag_index[static_cast<size_t>(flag)];
-        uint32_t reg_value = read_register<uint32_t>(*this, info.register_offset);
-        const uint32_t width = info.bit_info & 0xFFU;
-        const uint32_t bitno = info.bit_info >> 16U;
-        reg_value >>= bitno;
-        reg_value &= ((1U << width) - 1U);
-        return reg_value;
-    }
-
-    inline bool get_value(Interrupt_Flags flag) {
-        const auto& info = interrupt_type_index[static_cast<size_t>(flag)];
-        uint32_t reg_value = read_register<uint32_t>(*this, info.register_offset);
-        const uint32_t width = info.bit_info & 0xFFU;
-        const uint32_t bitno = info.bit_info >> 16U;
-        reg_value >>= bitno;
-        reg_value &= ((1U << width) - 1U);
-        return reg_value;
-    }
 };
 
 

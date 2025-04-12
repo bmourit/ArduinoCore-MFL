@@ -699,7 +699,7 @@ bool SDIO::wait_cmd_flags() {
         }
         flags = read_register<uint32_t>(*this, SDIO_Regs::STAT);
     }
-    while (((flags & command_complete_flags) == 0U) || ((flags & command_running_flag) != 0U));
+    while ((flags & command_complete_flags) == 0U || (flags & command_running_flag) != 0U);
 
     return true; // Command completed successfully
 }

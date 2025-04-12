@@ -245,18 +245,18 @@ enum class SPI_Error_Type : uint8_t {
 struct Interrupt_Flags_Config {
     SPI_Regs stat_reg;
     SPI_Regs ctl_reg;
-    uint32_t stat_bit;
-    uint32_t ctl_bit;
+    uint8_t stat_bit;
+    uint8_t ctl_bit;
 };
 
 static inline constexpr std::array<Interrupt_Flags_Config, 7> interrupt_flags_config {{
-        {SPI_Regs::STAT, SPI_Regs::CTL1, REG_BIT_DEF(1, 1), REG_BIT_DEF(7, 7)},
-        {SPI_Regs::STAT, SPI_Regs::CTL1, REG_BIT_DEF(0, 0), REG_BIT_DEF(6, 6)},
-        {SPI_Regs::STAT, SPI_Regs::CTL1, REG_BIT_DEF(6, 6), REG_BIT_DEF(5, 5)},
-        {SPI_Regs::STAT, SPI_Regs::CTL1, REG_BIT_DEF(5, 5), REG_BIT_DEF(5, 5)},
-        {SPI_Regs::STAT, SPI_Regs::CTL1, REG_BIT_DEF(4, 4), REG_BIT_DEF(5, 5)},
-        {SPI_Regs::STAT, SPI_Regs::CTL1, REG_BIT_DEF(3, 3), REG_BIT_DEF(5, 5)},
-        {SPI_Regs::STAT, SPI_Regs::CTL1, REG_BIT_DEF(8, 8), REG_BIT_DEF(5, 5)}
+        {SPI_Regs::STAT, SPI_Regs::CTL1, 1, 7},
+        {SPI_Regs::STAT, SPI_Regs::CTL1, 0, 6},
+        {SPI_Regs::STAT, SPI_Regs::CTL1, 6, 5},
+        {SPI_Regs::STAT, SPI_Regs::CTL1, 5, 5},
+        {SPI_Regs::STAT, SPI_Regs::CTL1, 4, 5},
+        {SPI_Regs::STAT, SPI_Regs::CTL1, 3, 5},
+        {SPI_Regs::STAT, SPI_Regs::CTL1, 8, 5}
     }};
 
 struct SPI_Clock_Config {

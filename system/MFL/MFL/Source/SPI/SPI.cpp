@@ -444,8 +444,8 @@ bool SPI::get_flag(Status_Flags flag) {
  */
 bool SPI::get_interrupt_flag(Interrupt_Flags flag) {
     const auto& config = interrupt_flags_config[static_cast<size_t>(flag)];
-    bool stat_bit = read_bit_range(*this, config.stat_reg, config.stat_bit) != Clear;
-    bool ctl_bit = read_bit_range(*this, config.ctl_reg, config.ctl_bit) != Clear;
+    const bool stat_bit = read_bit(*this, config.stat_reg, static_cast<uint32_t>(config.stat_bit));
+    const bool ctl_bit = read_bit(*this, config.ctl_reg, static_cast<uint32_t>(config.ctl_bit));
     return (stat_bit && ctl_bit);
 }
 

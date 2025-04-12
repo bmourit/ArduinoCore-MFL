@@ -95,8 +95,8 @@ void GPIO::reset() {
 void GPIO::set_pin_mode(Pin_Number pin, Pin_Mode mode, Output_Speed speed) {
     if (pin == Pin_Number::INVALID || mode == Pin_Mode::INVALID) return;
 
-    const uint32_t shift = (static_cast<size_t>(pin) & 0x7U) << 2U;
-    const GPIO_Regs reg = (static_cast<size_t>(pin) >= 8U) ? GPIO_Regs::CTL1 : GPIO_Regs::CTL0;
+    const uint32_t shift = (static_cast<uint32_t>(pin) & 0x7U) << 2U;
+    const GPIO_Regs reg = (static_cast<uint32_t>(pin) >= 8U) ? GPIO_Regs::CTL1 : GPIO_Regs::CTL0;
     uint32_t ctl = read_register<uint32_t>(*this, reg) & ~(0xFU << shift);
     bool compensation = false;
 
@@ -139,7 +139,6 @@ void GPIO::set_pin_mode(Pin_Number pin, Pin_Mode mode, Output_Speed speed) {
         write_bit(*this, GPIO_Regs::SPD, static_cast<uint32_t>(pin), true);
         AFIO_I.set_compensation(true);
         while (!AFIO_I.get_compensation()) {
-            // Wait for ready
         }
     }
 }

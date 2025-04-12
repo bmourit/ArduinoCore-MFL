@@ -405,7 +405,7 @@ FMC_Error_Type OB::ob_ready_wait_bank0(uint32_t timeout) {
     do {
         state = ob_get_bank0_state();
         timeout = timeout - 1;
-    } while ((state == FMC_Error_Type::BUSY) && (timeout != Clear));
+    } while (state == FMC_Error_Type::BUSY && timeout != Clear);
 
     if (state == FMC_Error_Type::BUSY) {
         state = FMC_Error_Type::TIMEOUT;
@@ -435,7 +435,7 @@ FMC_Error_Type OB::ob_ready_wait_bank1(uint32_t timeout) {
     do {
         state = ob_get_bank1_state();
         timeout = timeout - 1;
-    } while ((state == FMC_Error_Type::BUSY) && (timeout != Clear));
+    } while (state == FMC_Error_Type::BUSY && timeout != Clear);
 
     if (state == FMC_Error_Type::BUSY) {
         state = FMC_Error_Type::TIMEOUT;

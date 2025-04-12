@@ -780,7 +780,7 @@ void USART::set_hwfc_cts_enable(bool enable) {
  */
 bool USART::get_flag(Status_Flags flag) {
     const auto& config = status_config[static_cast<size_t>(flag)];
-    return read_bit_range(*this, config.reg, config.bit) != Clear;
+    return read_bit(*this, config.reg, static_cast<uint32_t>(config.bit));
 }
 
 /**
@@ -796,7 +796,7 @@ bool USART::get_flag(Status_Flags flag) {
  */
 void USART::clear_flag(Status_Flags flag) {
     const auto& config = status_config[static_cast<size_t>(flag)];
-    write_bit_range(*this, config.reg, config.bit, Clear);
+    write_bit(*this, config.reg, static_cast<uint32_t>(config.bit), false);
 }
 
 /**
@@ -815,9 +815,8 @@ void USART::clear_flag(Status_Flags flag) {
  */
 bool USART::get_interrupt_flag(Interrupt_Flags flag) {
     const auto& config = interrupt_flags_config[static_cast<size_t>(flag)];
-    bool flag_set = read_bit_range(*this, config.reg, config.bit) != Clear;
-    auto bit_value = config.invert ? Set : Clear;
-    bool is_enabled = read_bit_range(*this, config.enable_reg, config.enable_bit) != bit_value;
+    bool flag_set = read_bit(*this, config.reg, static_cast<uint32_t>(config.bit));
+    bool is_enabled = read_bit(*this, config.enable_reg, static_cast<uint32_t>(config.enable_bit)) != config.invert;
     return (flag_set && is_enabled);
 }
 
@@ -834,7 +833,7 @@ bool USART::get_interrupt_flag(Interrupt_Flags flag) {
  */
 void USART::clear_interrupt_flag(Interrupt_Flags flag) {
     const auto& config = interrupt_flags_config[static_cast<size_t>(flag)];
-    write_bit_range(*this, config.reg, config.bit, Clear);
+    write_bit(*this, config.reg, static_cast<uint32_t>(config.bit), false);
 }
 
 /**
@@ -874,7 +873,7 @@ void USART::set_interrupt_enable(Interrupt_Type type, bool enable) {
     }
     const auto& config = interrupt_config[static_cast<size_t>(type)];
     bool bit_value = config.invert ? !enable : enable;
-    write_bit_range(*this, config.reg, config.bit_info, bit_value ? Set : Clear);
+    write_bit(*this, config.reg, static_cast<uint32_t>(config.bit_info), bit_value);
 }
 
 /**
@@ -1103,6 +1102,7 @@ void USART::prepare_receive_interrupts() {
 bool USART::usart_receive_interrupt(uint8_t& data) {
     while (config_.state == USART_State::BUSY_COMPLETION ||
             config_.state == USART_State::BUSY_TRANSMIT) {
+        __asm volatile("nop");
     }
     set_interrupt_enable(Interrupt_Type::INTR_ERRIE, true);
     set_interrupt_enable(Interrupt_Type::INTR_RBNEIE, true);

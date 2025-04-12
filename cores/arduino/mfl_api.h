@@ -2,7 +2,6 @@
 
 
 ///////////////////////////////// STARTUP /////////////////////////////////
-#include <type_traits>
 
 #include "mcu_common.hpp"
 #include "CONFIG.hpp"
@@ -70,13 +69,12 @@
 #include "WWDGT.hpp"
 #include "wwdgt_config.hpp"
 
-
 #ifndef F_CPU
-    if constexpr (std::is_same_v<mcu::ChipSeries, mcu::F103R>) {
+    #if defined(GD32F103RC) || defined(GD32F103RE)
         #define F_CPU   108'000'000U
-    } else {
+    #elif defined(GD32F303RE)
         #define F_CPU   120'000'000U
-    }
+    #endif
 #endif
 
 template<typename T>

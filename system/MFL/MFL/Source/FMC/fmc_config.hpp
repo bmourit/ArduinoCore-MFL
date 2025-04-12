@@ -136,7 +136,7 @@ enum class WPX_Bits : uint32_t {
 
 struct index_to_bits {
     FMC_Regs register_offset;
-    uint32_t bit_info;
+    uint8_t bit_info;
 };
 
 enum class Status_Flags : uint8_t {
@@ -152,22 +152,22 @@ enum class Status_Flags : uint8_t {
 };
 
 static inline constexpr std::array<index_to_bits, 9> status_flag_index {{
-        {FMC_Regs::STAT0, REG_BIT_DEF(0, 0)},
-        {FMC_Regs::STAT0, REG_BIT_DEF(2, 2)},
-        {FMC_Regs::STAT0, REG_BIT_DEF(4, 4)},
-        {FMC_Regs::STAT0, REG_BIT_DEF(5, 5)},
-        {FMC_Regs::OBSTAT, REG_BIT_DEF(0, 0)},
-        {FMC_Regs::STAT1, REG_BIT_DEF(0, 0)},
-        {FMC_Regs::STAT1, REG_BIT_DEF(2, 2)},
-        {FMC_Regs::STAT1, REG_BIT_DEF(4, 4)},
-        {FMC_Regs::STAT1, REG_BIT_DEF(5, 5)}
+        {FMC_Regs::STAT0, 0},
+        {FMC_Regs::STAT0, 2},
+        {FMC_Regs::STAT0, 4},
+        {FMC_Regs::STAT0, 5},
+        {FMC_Regs::OBSTAT, 0},
+        {FMC_Regs::STAT1, 0},
+        {FMC_Regs::STAT1, 2},
+        {FMC_Regs::STAT1, 4},
+        {FMC_Regs::STAT1, 5}
     }};
 
 struct index_to_reg_bits {
     FMC_Regs flag_register_offset;
-    uint32_t flag_bit_info;
+    uint8_t flag_bit_info;
     FMC_Regs interrupt_register_offset;
-    uint32_t interrupt_bit_info;
+    uint8_t interrupt_bit_info;
 };
 
 enum class Interrupt_Flags : uint8_t {
@@ -180,12 +180,12 @@ enum class Interrupt_Flags : uint8_t {
 };
 
 static inline constexpr std::array<index_to_reg_bits, 6> interrupt_flag_index {{
-        {FMC_Regs::STAT0, REG_BIT_DEF(2, 2), FMC_Regs::CTL0, REG_BIT_DEF(10, 10)},
-        {FMC_Regs::STAT0, REG_BIT_DEF(4, 4), FMC_Regs::CTL0, REG_BIT_DEF(10, 10)},
-        {FMC_Regs::STAT0, REG_BIT_DEF(5, 5), FMC_Regs::CTL0, REG_BIT_DEF(12, 12)},
-        {FMC_Regs::STAT1, REG_BIT_DEF(2, 2), FMC_Regs::CTL1, REG_BIT_DEF(10, 10)},
-        {FMC_Regs::STAT1, REG_BIT_DEF(4, 4), FMC_Regs::CTL1, REG_BIT_DEF(10, 10)},
-        {FMC_Regs::STAT1, REG_BIT_DEF(5, 5), FMC_Regs::CTL1, REG_BIT_DEF(12, 12)}
+        {FMC_Regs::STAT0, 2, FMC_Regs::CTL0, 10},
+        {FMC_Regs::STAT0, 4, FMC_Regs::CTL0, 10},
+        {FMC_Regs::STAT0, 5, FMC_Regs::CTL0, 12},
+        {FMC_Regs::STAT1, 2, FMC_Regs::CTL1, 10},
+        {FMC_Regs::STAT1, 4, FMC_Regs::CTL1, 10},
+        {FMC_Regs::STAT1, 5, FMC_Regs::CTL1, 12}
     }};
 
 enum class Interrupt_Types : uint8_t {
@@ -196,10 +196,10 @@ enum class Interrupt_Types : uint8_t {
 };
 
 static inline constexpr std::array<index_to_bits, 4> interrupt_type_index {{
-        {FMC_Regs::CTL0, REG_BIT_DEF(12, 12)},
-        {FMC_Regs::CTL0, REG_BIT_DEF(10, 10)},
-        {FMC_Regs::CTL1, REG_BIT_DEF(12, 12)},
-        {FMC_Regs::CTL1, REG_BIT_DEF(10, 10)}
+        {FMC_Regs::CTL0, 12},
+        {FMC_Regs::CTL0, 10},
+        {FMC_Regs::CTL1, 12},
+        {FMC_Regs::CTL1, 10}
     }};
 
 enum class Wait_State : uint8_t {

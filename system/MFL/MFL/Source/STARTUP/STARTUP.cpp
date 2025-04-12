@@ -64,21 +64,22 @@ void STARTUP::startup_init() {
     // Enable HXTAL
     rcu::RCU::get_instance().set_osci_enable(rcu::OSCI_Select::HXTAL, true);
     // Wait until HXTAL is stable
-    while (!rcu::RCU::get_instance().is_osci_stable(rcu::OSCI_Select::HXTAL)) {}
+    while (!rcu::RCU::get_instance().is_osci_stable(rcu::OSCI_Select::HXTAL)) {
+    }
 
     if constexpr (std::is_same_v<mcu::ChipSeries, mcu::F303R>) {
         // TODO: Make this a configurable setting
         //  Note:
         //  According to the manual, this can only be set while main PLL
         //  is off. This setting takes effect on the 1.2V power domain
-        //  when the main PLL is on. The manual states the when the main
+        //  when the main PLL is on. The manual states that when the main
         //  PLL is off, this is automatically set to LDO_VOLATGE_LOW
         //  This helps lower power requirements at the expense of driving
         //  capabilities.
         //  Since we need PLL off for this, we should make this a
         //  configurable setting for different user requirments.
         //  For now, if you need something different comment out the
-        //  default (LOW) and uncomment one of the other choices below.
+        //  default (HIGH) and uncomment one of the other choices below.
         //pmu::PMU::get_instance().set_ldo_output(pmu::Output_Voltage::LDO_VOLTAGE_LOW);
         //pmu::PMU::get_instance().set_ldo_output(pmu::Output_Voltage::LDO_VOLTAGE_MID);
         pmu::PMU::get_instance().set_ldo_output(pmu::Output_Voltage::LDO_VOLTAGE_HIGH);
@@ -103,7 +104,8 @@ void STARTUP::startup_init() {
     // Enable PLL
     rcu::RCU::get_instance().set_osci_enable(rcu::OSCI_Select::PLL_CK, true);
     // Wait for PLL to stablize
-    while (!rcu::RCU::get_instance().is_osci_stable(rcu::OSCI_Select::PLL_CK)) {}
+    while (!rcu::RCU::get_instance().is_osci_stable(rcu::OSCI_Select::PLL_CK)) {
+    }
 
     if constexpr (std::is_same_v<mcu::ChipSeries, mcu::F303R>) {
         // Enable high-drive for high clock frequency
@@ -115,7 +117,8 @@ void STARTUP::startup_init() {
     // PLL as system clock
     rcu::RCU::get_instance().set_system_source(rcu::System_Clock_Source::SOURCE_PLL);
     // Verify PLL is set as system clock
-    while (rcu::RCU::get_instance().get_system_source() != rcu::System_Clock_Source::SOURCE_PLL) {}
+    while (rcu::RCU::get_instance().get_system_source() != rcu::System_Clock_Source::SOURCE_PLL) {
+    }
 
     // ADC prescaler
     if constexpr (std::is_same_v<mcu::ChipSeries, mcu::F103R>) {

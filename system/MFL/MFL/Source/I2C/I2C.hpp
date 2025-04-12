@@ -85,42 +85,6 @@ private:
     I2C_Clock_Config I2C_pclk_info_;
     uint32_t base_address_;
 
-    inline bool get_value(Status_Flags flag) const {
-        const auto &info = status_flag_index[static_cast<size_t>(flag)];
-        uint32_t reg_value = *reg_address(info.register_offset);
-
-        const uint32_t width = info.bit_info & 0xFFU;
-        const uint32_t bitno = info.bit_info >> 16U;
-
-        reg_value >>= bitno;
-        reg_value &= ((1U << width) - 1U);
-
-        return reg_value;
-    }
-
-    inline bool get_value(Interrupt_Flags flag) const {
-        const auto &info = interrupt_flag_index[static_cast<size_t>(flag)];
-        uint32_t reg_value0 = *reg_address(info.register0_offset);
-        uint32_t reg_value1 = *reg_address(info.register1_offset);
-        uint32_t buf_enable = read_bit_range(*this, I2C_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::BUFIE));
-
-        const uint32_t width0 = info.bit_info0 & 0xFFU;
-        const uint32_t bitno0 = info.bit_info0 >> 16U;
-        const uint32_t width1 = info.bit_info1 & 0xFFU;
-        const uint32_t bitno1 = info.bit_info1 >> 16U;
-
-        reg_value0 >>= bitno0;
-        reg_value1 >>= bitno1;
-        reg_value0 &= ((1U << width0) - 1U);
-        reg_value1 &= ((1U << width1) - 1U);
-
-        if ((flag == Interrupt_Flags::INTR_FLAG_RBNE) || (flag == Interrupt_Flags::INTR_FLAG_TBE)) {
-            reg_value0 = (reg_value0 && buf_enable) ? 1U : 0U;
-        }
-
-        return ((reg_value0) && (reg_value1));
-    }
-
     template <I2C_Base Base>
     friend I2C& get_instance_for_base();
 };
