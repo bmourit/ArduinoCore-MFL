@@ -1,0 +1,26 @@
+#######################################
+# Syntax Coloring Map for SoftwareSerial
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+SoftwareSerial	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+begin	KEYWORD2
+end	KEYWORD2
+read	KEYWORD2
+write	KEYWORD2
+available	KEYWORD2
+flush	KEYWORD2
+peek	KEYWORD2
+listen	KEYWORD2
+stopListening	KEYWORD2
+setInterruptPriority	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
