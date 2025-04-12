@@ -72,7 +72,7 @@
 #ifndef F_CPU
     #if defined(GD32F103RC) || defined(GD32F103RE)
         #define F_CPU   108'000'000U
-    #elif defined(GD32F303RE)
+    #else
         #define F_CPU   120'000'000U
     #endif
 #endif
