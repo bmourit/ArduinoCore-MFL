@@ -10,7 +10,7 @@ Any additional uses of the core are welcomed.
 ## Current State and Testing
 
 This is a very new core, with most functionality only tested on the currently supported boards.
-Specifically, the Wire I2C, SPI, and upcoming SoftwareSerial libraries could benefit from additional testing.
+Specifically, the Wire I2C, SPI, and SoftwareSerial libraries would benefit from additional testing.
 Any contributions of additional functionality/bug fixes are welcome.
 
 ## Installation on Arduino IDE
