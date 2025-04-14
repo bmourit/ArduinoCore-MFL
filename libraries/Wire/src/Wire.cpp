@@ -18,7 +18,8 @@
  */
 
 #include <Arduino.h>
-
+#include <PinOpsMap.hpp>
+#include <PinOps.hpp>
 #include "Wire.h"
 
 namespace arduino {
@@ -172,27 +173,34 @@ void TwoWire::beginTransmission(uint8_t address) {
  * @see beginTransmission()
  */
 uint8_t TwoWire::endTransmission(bool stopBit) {
-    i2c::I2C_Error_Type result = i2c::I2C_Error_Type::OK;
+    uint8_t txLength = txBuffer_.available();
 
-    while (txBuffer_.available()) {
-        uint8_t data = txBuffer_.read_char();
-        result = masterTransmit(txAddress_, &data, 1U, stopBit);
-        if (result != i2c::I2C_Error_Type::OK) {
-            if (result == i2c::I2C_Error_Type::NACK_ADDRESS) {
-                return 2U;
-            } else if (result == i2c::I2C_Error_Type::NACK_DATA) {
-                return 3U;
-            } else if (result == i2c::I2C_Error_Type::DATA_SIZE_ERROR) {
-                return 1U;
-            } else {
-                return 4U;
-            }
-        }
+    if (txLength == 0) {
+        // Nothing to transmit
+        transmitting_ = false;
+        return 0U;
     }
+
+    // Transmit all bytes in the buffer
+    i2c::I2C_Error_Type result = masterTransmit(txAddress_, txLength, stopBit);
+
+    // Clear the buffer and reset transmitting flag
     txBuffer_.clear();
     transmitting_ = false;
 
-    return 0U;
+    // Map error codes to Arduino Wire error codes
+    switch (result) {
+        case i2c::I2C_Error_Type::OK:
+            return 0U;
+        case i2c::I2C_Error_Type::DATA_SIZE_ERROR:
+            return 1U;
+        case i2c::I2C_Error_Type::NACK_ADDRESS:
+            return 2U;
+        case i2c::I2C_Error_Type::NACK_DATA:
+            return 3U;
+        default:
+            return 4U;
+    }
 }
 
 /**
@@ -212,76 +220,49 @@ uint8_t TwoWire::endTransmission() {
 /**
  * @brief Request data from a slave device.
  *
- * This function sends a request to the slave device for the specified number of
- * bytes. If the slave device responds with more bytes than the requested amount,
- * the extra bytes are discarded and not stored in the receive buffer. If the
- * slave device responds with less bytes than the requested amount, the receive
- * buffer will contain the received bytes and the remaining bytes will be
- * filled with zeros. The function returns the actual number of bytes received.
+ * This function initiates a data request from a specified slave device on the
+ * I2C bus. It sends a request to the device with the given address and attempts
+ * to receive the specified number of bytes. The received data is stored in the
+ * internal receive buffer, and the function returns the number of bytes successfully
+ * received. If the requested length exceeds the buffer size, it will be clamped to
+ * the buffer size.
  *
- * If a start condition is sent, the function first sends the slave address with
- * the read bit set. The slave address is the 7-bit address of the slave device
- * plus the read bit set to 1 (0x01). The address is sent in the format:
- * [MSB] [R/W bit] [LSB].
- *
- * The function then waits for the slave device to send the requested number of
- * bytes. If the slave device does not respond, the function will timeout and
- * return 0.
- *
- * If a stop condition is sent, the function will send a stop condition after the
- * last byte is received.
- *
- * @param address The address of the slave device to request data from
- * @param len The number of bytes to request from the slave device
- * @param stopBit If true, a stop condition is sent after the last byte is received
- * @return The actual number of bytes received from the slave device
+ * @param address The 7-bit address of the slave device.
+ * @param len The number of bytes to request.
+ * @param stopBit If true, a stop condition will be sent after the data is received.
+ * 
+ * @return The number of bytes successfully received.
  */
 size_t TwoWire::requestFrom(uint8_t address, size_t len, bool stopBit) {
-    if (len > 0U) {
-        // Send internal address; this mode allows sending a repeated start to access
-        // some devices' internal registers. This function is executed by the hardware
-        // TWI module on other processors (for example Due's TWI_IADR and TWI_MMR registers)
-        beginTransmission(address);
-
-        // Maximum size is 3 bytes
-        if (len > 3U) {
-            len = 3U;
-        }
-
-        // Write internal register address (MSB first)
-        while (len-- > 0U) {
-            write((address >> (len * 8U)));
-        }
-        endTransmission(false);
+    // Check for valid length
+    if (len == 0U) {
+        return 0;
     }
 
+    // Clamp length to buffer size
     if (len > BUFFER_LENGTH) {
-        len = BUFFER_LENGTH;    // Clamp to buffer length
+        len = BUFFER_LENGTH;
     }
 
-    size_t receivedLen = 0U;
-    if (masterReceive(address << 1U, rxBuffer_._aucBuffer, len, stopBit) == i2c::I2C_Error_Type::OK) {
-        for (size_t i = 0U; i < len; ++i) {
-            uint8_t receivedByte = rxBuffer_.read_char();
-            rxBuffer_.store_char(receivedByte);
-        }
-        receivedLen = len;
+    // Receive data from the specified address
+    if (masterReceive(address << 1U, len, stopBit) == i2c::I2C_Error_Type::OK) {
+        return len;
     }
 
-    return receivedLen;
+    return 0;
 }
 
 /**
- * @brief Request data bytes from a slave device.
+ * @brief Request data from a slave device.
  *
- * @param[in] address 7-bit address of the slave device.
- * @param[in] len Number of bytes to receive.
- * @return Number of bytes received.
+ * This function is a wrapper around requestFrom(address, len, true) and is
+ * provided for convenience. It will send a stop condition after the data is
+ * received.
  *
- * This function sends a request to a slave device and then receives
- * data bytes from the slave device. The received data bytes are stored
- * in the internal receive buffer. The function returns the number of
- * bytes received.
+ * @param address The 7-bit address of the slave device.
+ * @param len The number of bytes to request.
+ * 
+ * @return The number of bytes successfully received.
  */
 size_t TwoWire::requestFrom(uint8_t address, size_t len) {
     return requestFrom(address, len, true);
@@ -300,13 +281,15 @@ size_t TwoWire::requestFrom(uint8_t address, size_t len) {
  */
 size_t TwoWire::write(uint8_t data) {
     if (transmitting_) {
+        // Master mode - store data in transmit buffer
         if (txBuffer_.availableForStore()) {
             txBuffer_.store_char(data);
             return 1;
         }
-        return 0;   // Buffer is full
+        // Buffer is full
+        return 0;
     } else {
-        // Slave mode
+        // Slave mode - directly write to slave buffer
         return (writeSlaveBuffer(&data, 1U) == i2c::I2C_Error_Type::OK) ? 1U : 0U;
     }
 }
@@ -325,25 +308,26 @@ size_t TwoWire::write(uint8_t data) {
  * function returns the number of bytes sent.
  */
 size_t TwoWire::write(const uint8_t* buffer, size_t len) {
-    size_t result = len;
-
-    if (transmitting_) {
-        for (size_t i = 0U; i < len; ++i) {
-            if (txBuffer_.availableForStore() > 0) {
-                txBuffer_.store_char(buffer[i]);
-            } else {
-                result = i;
-                break;
-            }
-        }
-    } else {
-        // Slave mode
-        if (writeSlaveBuffer(buffer, len) != i2c::I2C_Error_Type::OK) {
-            result = 0U;
-        }
+    // Check for null buffer or zero length
+    if (buffer == nullptr || len == 0) {
+        return 0;
     }
 
-    return result;
+    if (transmitting_) {
+        // Master mode - store data in transmit buffer
+        size_t i;
+        for (i = 0U; i < len; ++i) {
+            if (!txBuffer_.availableForStore()) {
+                // Buffer is full, return number of bytes stored so far
+                return i;
+            }
+            txBuffer_.store_char(buffer[i]);
+        }
+        return i; // Return number of bytes stored
+    } else {
+        // Slave mode - directly write to slave buffer
+        return (writeSlaveBuffer(buffer, len) == i2c::I2C_Error_Type::OK) ? len : 0;
+    }
 }
 
 /**
@@ -354,8 +338,8 @@ size_t TwoWire::write(const uint8_t* buffer, size_t len) {
  * This function returns the number of bytes available to read from the
  * receive buffer. If the receive buffer is empty, the function returns 0.
  */
-int TwoWire::available(void) {
-    return static_cast<int>(rxBuffer_.available());
+int TwoWire::available() {
+    return rxBuffer_.available();
 }
 
 /**
@@ -368,7 +352,7 @@ int TwoWire::available(void) {
  * the byte read from the receive buffer.
  */
 int TwoWire::read() {
-    return (rxBuffer_.available() > 0) ? rxBuffer_.read_char() : -1;
+    return rxBuffer_.read_char();
 }
 
 /**
@@ -380,8 +364,8 @@ int TwoWire::read() {
  * it. If the receive buffer is empty, the function returns -1. If data is
  * available, the function returns the byte peeked from the receive buffer.
  */
-int TwoWire::peek(void) {
-    return (rxBuffer_.available() > 0) ? rxBuffer_.peek() : -1;
+int TwoWire::peek() {
+    return rxBuffer_.peek();
 }
 
 /**
@@ -391,7 +375,6 @@ int TwoWire::peek(void) {
  */
 void TwoWire::flush() {
     while (txBuffer_.available() > 0) {
-        // wait for transmit data to be sent
     }
 }
 
@@ -437,46 +420,64 @@ void TwoWire::onRequest(void(*function)(void)) {
  * @param stopBit If true, generate a stop condition after transmitting the data.
  * @return i2c::I2C_Error_Type::OK if transmission was successful, otherwise an error value.
  */
-i2c::I2C_Error_Type TwoWire::masterTransmit(uint8_t address, uint8_t* buffer, uint8_t len, bool stopBit) {
-    i2c::I2C_Error_Type result = i2c::I2C_Error_Type::OK;
-
+i2c::I2C_Error_Type TwoWire::masterTransmit(uint8_t address, uint8_t len, bool stopBit) {
+    // Special case for zero-length transmissions
     if (len == 0U) {
         return waitForReadyState(address);
     }
 
+    // Check if bus is busy before starting transmission
     if (checkBusyState() == i2c::I2C_Error_Type::BUSY) {
         return i2c::I2C_Error_Type::BUSY;
     }
 
+    // Generate start condition and wait for it to be sent
     i2c_.generate_start_condition();
     uint32_t timeout = I2C_TIMEOUT_DEFAULT;
-    while ((!i2c_.get_flag(i2c::Status_Flags::FLAG_SBSEND)) && (--timeout != 0U));
-    if (timeout == 0U) {
-        return i2c::I2C_Error_Type::TIMEOUT;
+    while (!i2c_.get_flag(i2c::Status_Flags::FLAG_SBSEND)) {
+        if (--timeout == 0U) {
+            return i2c::I2C_Error_Type::TIMEOUT;
+        }
     }
 
+    // Set direction and address, then wait for address to be sent
     i2c_.set_direction_address(i2c::Transfer_Direction::TRANSMIT, address);
     timeout = I2C_TIMEOUT_DEFAULT;
-    while ((!i2c_.get_flag(i2c::Status_Flags::FLAG_ADDSEND)) && (--timeout != 0U));
-    if (timeout == 0U) {
-        result = i2c::I2C_Error_Type::NACK_ADDRESS;
+    while (!i2c_.get_flag(i2c::Status_Flags::FLAG_ADDSEND)) {
+        if (--timeout == 0U) {
+            return i2c::I2C_Error_Type::NACK_ADDRESS;
+        }
     }
+
+    // Clear address sent flag
     i2c_.clear_flag(i2c::Clear_Flags::FLAG_ADDSEND);
 
-    for (uint32_t i = 0U; i < len; i++) {
-        if (result != i2c::I2C_Error_Type::OK) {
+    // Transmit specified number of bytes from the buffer
+    for (uint8_t i = 0U; i < len; i++) {
+        if (txBuffer_.available() == 0) {
+            // No more data in buffer
             break;
         }
-        if (writeByte(buffer[i]) != i2c::I2C_Error_Type::OK) {
-            result = i2c::I2C_Error_Type::NACK_DATA;
+
+        uint8_t data = txBuffer_.read_char();
+        if (writeByte(data) != i2c::I2C_Error_Type::OK) {
+            // Generate stop condition if requested
+            if (stopBit) {
+                stop();
+            }
+            return i2c::I2C_Error_Type::NACK_DATA;
         }
     }
 
+    // Generate stop condition if requested
     if (stopBit) {
-        stop();
+        i2c::I2C_Error_Type stopResult = stop();
+        if (stopResult != i2c::I2C_Error_Type::OK) {
+            return stopResult;
+        }
     }
 
-    return result;
+    return i2c::I2C_Error_Type::OK;
 }
 
 /**
@@ -488,109 +489,116 @@ i2c::I2C_Error_Type TwoWire::masterTransmit(uint8_t address, uint8_t* buffer, ui
  * the end of the transmission.
  *
  * @param address The address of the slave device.
- * @param buffer The buffer to store the received data in.
  * @param len The number of bytes to receive.
  * @param stopBit Whether a stop condition should be sent at the end of the
  * transmission.
  *
  * @return i2c::I2C_Error_Type::OK on success, an error code otherwise.
  */
-i2c::I2C_Error_Type TwoWire::masterReceive(uint8_t address, uint8_t* buffer, uint8_t len, bool stopBit) {
-    i2c::I2C_Error_Type result = i2c::I2C_Error_Type::OK;
-
+i2c::I2C_Error_Type TwoWire::masterReceive(uint8_t address, uint8_t len, bool stopBit) {
+    // Check if bus is busy before starting reception
     if (checkBusyState() == i2c::I2C_Error_Type::BUSY) {
         return i2c::I2C_Error_Type::BUSY;
     }
 
+    // Clear the buffer before receiving new data
+    rxBuffer_.clear();
+
+    // Check if there's enough space in the buffer
+    if (rxBuffer_.availableForStore() < len) {
+        return i2c::I2C_Error_Type::DATA_SIZE_ERROR;
+    }
+
+    // Configure ACK behavior based on number of bytes to receive
     if (len == 1U) {
+        // For single byte, disable ACK before reception
         i2c_.set_ack_enable(false);
     } else if (len == 2U) {
+        // For two bytes, set ACK position to next and disable ACK
         i2c_.set_ack_position(i2c::ACK_Select::NEXT);
         i2c_.set_ack_enable(false);
     } else {
+        // For more than two bytes, enable ACK
         i2c_.set_ack_enable(true);
     }
 
-    uint32_t timeout = I2C_TIMEOUT_DEFAULT;
-
+    // Generate start condition and wait for it to be sent
     i2c_.generate_start_condition();
-    while ((!i2c_.get_flag(i2c::Status_Flags::FLAG_SBSEND)) && (--timeout != 0U));
-    if (timeout == 0U) {
-        return i2c::I2C_Error_Type::TIMEOUT;
+    uint32_t timeout = I2C_TIMEOUT_DEFAULT;
+    while (!i2c_.get_flag(i2c::Status_Flags::FLAG_SBSEND)) {
+        if (--timeout == 0U) {
+            return i2c::I2C_Error_Type::TIMEOUT;
+        }
     }
 
+    // Set direction to receive and send address
     i2c_.set_direction_address(i2c::Transfer_Direction::RECEIVE, address);
+
+    // Wait for address to be sent
     timeout = I2C_TIMEOUT_DEFAULT;
-    while ((!i2c_.get_flag(i2c::Status_Flags::FLAG_ADDSEND)) && (--timeout != 0U));
-    if (timeout == 0U) {
-        result = i2c::I2C_Error_Type::NACK_ADDRESS;
+    while (!i2c_.get_flag(i2c::Status_Flags::FLAG_ADDSEND)) {
+        if (--timeout == 0U) {
+            return i2c::I2C_Error_Type::NACK_ADDRESS;
+        }
     }
 
+    // Clear address sent flag
     i2c_.clear_flag(i2c::Clear_Flags::FLAG_ADDSEND);
 
+    // Receive all bytes
     for (uint32_t i = 0U; i < len; i++) {
-        if (result != i2c::I2C_Error_Type::OK) {
-            break;
-        }
+        // Special handling for multi-byte transfers
         if (len > 2U && i == static_cast<uint32_t>(len) - 3U) {
+            // For transfers > 2 bytes, wait for byte transfer complete before
+            // disabling ACK on the third-to-last byte
             timeout = I2C_TIMEOUT_DEFAULT;
-            while ((!i2c_.get_flag(i2c::Status_Flags::FLAG_BTC)) && (--timeout != 0U));
-            if (timeout == 0U) {
-                result = i2c::I2C_Error_Type::NACK_DATA;
+            while (!i2c_.get_flag(i2c::Status_Flags::FLAG_BTC)) {
+                if (--timeout == 0U) {
+                    if (stopBit) {
+                        stop();
+                    }
+                    return i2c::I2C_Error_Type::NACK_DATA;
+                }
             }
             i2c_.set_ack_enable(false);
         } else if (len == 2U && i == 0U) {
+            // For 2-byte transfers, wait for byte transfer complete after first byte
             timeout = I2C_TIMEOUT_DEFAULT;
-            while ((!i2c_.get_flag(i2c::Status_Flags::FLAG_BTC)) && (--timeout != 0U));
-            if (timeout == 0U) {
-                result = i2c::I2C_Error_Type::NACK_DATA;
+            while (!i2c_.get_flag(i2c::Status_Flags::FLAG_BTC)) {
+                if (--timeout == 0U) {
+                    if (stopBit) {
+                        stop();
+                    }
+                    return i2c::I2C_Error_Type::NACK_DATA;
+                }
             }
         }
+
+        // Wait for receive buffer not empty
         timeout = I2C_TIMEOUT_DEFAULT;
-        while ((!i2c_.get_flag(i2c::Status_Flags::FLAG_RBNE)) && (--timeout != 0U));
-        if (timeout == 0U) {
-            result = i2c::I2C_Error_Type::NACK_DATA;
-        } else {
-            buffer[i] = i2c_.receive_data();
+        while (!i2c_.get_flag(i2c::Status_Flags::FLAG_RBNE)) {
+            if (--timeout == 0U) {
+                if (stopBit) {
+                    stop();
+                }
+                return i2c::I2C_Error_Type::NACK_DATA;
+            }
         }
+
+        // Read data from receive buffer and store in ring buffer
+        uint8_t receivedByte = i2c_.receive_data();
+        rxBuffer_.store_char(receivedByte);
     }
 
+    // Generate stop condition if requested
     if (stopBit) {
-        stop();
-    }
-
-    return result;
-}
-
-/**
- * @brief Receive a single byte from the I2C bus as slave.
- *
- * This function will wait until a byte is received from the I2C bus.
- * If the last parameter is true, the ACK will be disabled after receiving the byte.
- * If the last parameter is false, the ACK will be enabled after receiving the byte.
- * The function will block until a byte is received or a timeout occurs.
- * If a timeout occurs, the function will return i2c::I2C_Error_Type::TIMEOUT.
- * Otherwise, the function will return the received byte.
- *
- * @param last If true, the ACK will be disabled after receiving the byte. If false, the ACK will be enabled.
- * @return Received byte if successful, otherwise i2c::I2C_Error_Type::TIMEOUT.
- */
-uint8_t TwoWire::readByte(uint32_t last) {
-    if (last) {
-        i2c_.set_ack_enable(false);
-    } else {
-        i2c_.set_ack_enable(true);
-    }
-
-    // Wait until byte is received
-    uint32_t timeout = I2C_TIMEOUT_DEFAULT;
-    while ((i2c_.get_flag(i2c::Status_Flags::FLAG_RBNE)) == Clear) {
-        if ((timeout--) == 0U) {
-            return static_cast<uint8_t>(i2c::I2C_Error_Type::TIMEOUT);
+        i2c::I2C_Error_Type stopResult = stop();
+        if (stopResult != i2c::I2C_Error_Type::OK) {
+            return stopResult;
         }
     }
 
-    return i2c_.receive_data();
+    return i2c::I2C_Error_Type::OK;
 }
 
 /**
@@ -604,12 +612,20 @@ uint8_t TwoWire::readByte(uint32_t last) {
  * @return i2c::I2C_Error_Type::OK if transmission was successful, otherwise i2c::I2C_Error_Type::TIMEOUT.
  */
 i2c::I2C_Error_Type TwoWire::writeByte(uint8_t data) {
+    // Transmit the data byte
     i2c_.transmit_data(data);
-    // Wait for transmission
+
+    // Wait for either transmit buffer empty or byte transfer complete
     uint32_t timeout = I2C_TIMEOUT_DEFAULT;
-    while (((i2c_.get_flag(i2c::Status_Flags::FLAG_TBE)) == Clear) &&
-            ((i2c_.get_flag(i2c::Status_Flags::FLAG_BTC)) == Clear)) {
-        if ((timeout--) == 0U) {
+    while (true) {
+        // Check if either flag is set
+        if (i2c_.get_flag(i2c::Status_Flags::FLAG_TBE) || 
+            i2c_.get_flag(i2c::Status_Flags::FLAG_BTC)) {
+            break;
+        }
+
+        // Check for timeout
+        if (--timeout == 0U) {
             return i2c::I2C_Error_Type::TIMEOUT;
         }
     }
@@ -630,15 +646,15 @@ i2c::I2C_Error_Type TwoWire::writeByte(uint8_t data) {
  * @return i2c::I2C_Error_Type::OK if data was stored successfully, otherwise i2c::I2C_Error_Type::DATA_SIZE_ERROR.
  */
 i2c::I2C_Error_Type TwoWire::writeSlaveBuffer(const uint8_t* buffer, uint8_t len) {
-    if (txBuffer_.availableForStore() > 0) {
+    // Check if there's enough space in the ring buffer
+    if (txBuffer_.availableForStore() >= len) {
         for (uint8_t i = 0U; i < len; i++) {
             txBuffer_.store_char(buffer[i]);
         }
-    } else  {
-        return i2c::I2C_Error_Type::DATA_SIZE_ERROR;
+        return i2c::I2C_Error_Type::OK;
     }
 
-    return i2c::I2C_Error_Type::OK;
+    return i2c::I2C_Error_Type::DATA_SIZE_ERROR;
 }
 
 /**
@@ -656,7 +672,7 @@ i2c::I2C_Error_Type TwoWire::stop() {
     // wait for stop bit reset with timeout
     uint32_t timeout = I2C_TIMEOUT_DEFAULT;
     while (i2c_.get_stop_condition()) {
-        if ((timeout--) == 0U) {
+        if (--timeout == 0U) {
             return i2c::I2C_Error_Type::TIMEOUT;
         }
     }
@@ -675,51 +691,133 @@ i2c::I2C_Error_Type TwoWire::stop() {
  * @return i2c::I2C_Error_Type::OK if the bus is ready, otherwise i2c::I2C_Error_Type::BUSY or i2c::I2C_Error_Type::TIMEOUT.
  */
 i2c::I2C_Error_Type TwoWire::waitForReadyState(uint8_t address) {
-    i2c::I2C_Error_Type result = i2c::I2C_Error_Type::OK;
-    bool addsend = false;
-    bool aerr = false;
-
+    // Check if bus is busy
     if (checkBusyState() == i2c::I2C_Error_Type::BUSY) {
         return i2c::I2C_Error_Type::BUSY;
     }
 
-    uint32_t timeout = I2C_TIMEOUT_DEFAULT;
+    // Generate start condition
     i2c_.generate_start_condition();
-    while ((!i2c_.get_flag(i2c::Status_Flags::FLAG_SBSEND)) && (--timeout != 0U));
-    if (timeout == 0U) {
-        result = i2c::I2C_Error_Type::TIMEOUT;
-    }
 
-    i2c_.set_direction_address(i2c::Transfer_Direction::TRANSMIT, address);
-    timeout = I2C_TIMEOUT_DEFAULT;
-
-    do {
-        addsend = i2c_.get_flag(i2c::Status_Flags::FLAG_ADDSEND);
-        aerr = i2c_.get_flag(i2c::Status_Flags::FLAG_AERR);
-    } while ((addsend | aerr) && (--timeout != 0U));
-
-    if (timeout == 0U) {
-        result = i2c::I2C_Error_Type::TIMEOUT;
-    } else if (addsend) {
-        i2c_.clear_flag(i2c::Clear_Flags::FLAG_ADDSEND);
-        i2c_.generate_stop_condition();
-        result = i2c::I2C_Error_Type::OK;
-    } else {
-        i2c_.clear_flag(i2c::Clear_Flags::FLAG_AERR);
-        result = i2c::I2C_Error_Type::NACK_ADDRESS;
-    }
-
-    i2c_.generate_stop_condition();
-
-    timeout = I2C_TIMEOUT_DEFAULT;
-
-    while (i2c_.get_stop_condition() != 0U) {
-        if ((timeout--) == 0U) {
+    // Wait for start bit to be sent
+    uint32_t timeout = I2C_TIMEOUT_DEFAULT;
+    while (!i2c_.get_flag(i2c::Status_Flags::FLAG_SBSEND)) {
+        if (--timeout == 0U) {
             return i2c::I2C_Error_Type::TIMEOUT;
         }
     }
 
-    return result;
+    // Set direction and address
+    i2c_.set_direction_address(i2c::Transfer_Direction::TRANSMIT, address);
+
+    // Wait for address to be sent or error
+    timeout = I2C_TIMEOUT_DEFAULT;
+    bool addsend = false;
+    bool aerr = false;
+
+    do {
+        addsend = i2c_.get_flag(i2c::Status_Flags::FLAG_ADDSEND);
+        aerr = i2c_.get_flag(i2c::Status_Flags::FLAG_AERR);
+
+        if (--timeout == 0U) {
+            // Generate stop condition
+            i2c_.generate_stop_condition();
+
+            // Wait for stop condition with timeout
+            uint32_t stopTimeout = I2C_TIMEOUT_DEFAULT;
+            while (i2c_.get_stop_condition() != 0U) {
+                if (--stopTimeout == 0U) {
+                    return i2c::I2C_Error_Type::TIMEOUT;
+                }
+            }
+
+            return i2c::I2C_Error_Type::TIMEOUT;
+        }
+    } while (!(addsend || aerr)); // Continue until either flag is set
+
+    // Handle result based on which flag was set
+    if (addsend) {
+        i2c_.clear_flag(i2c::Clear_Flags::FLAG_ADDSEND);
+        i2c_.generate_stop_condition();
+
+        // Wait for stop condition with timeout
+        timeout = I2C_TIMEOUT_DEFAULT;
+        while (i2c_.get_stop_condition() != 0U) {
+            if (--timeout == 0U) {
+                return i2c::I2C_Error_Type::TIMEOUT;
+            }
+        }
+
+        return i2c::I2C_Error_Type::OK;
+    } else {
+        // Must be aerr
+        i2c_.clear_flag(i2c::Clear_Flags::FLAG_AERR);
+        i2c_.generate_stop_condition();
+
+        // Wait for stop condition with timeout
+        timeout = I2C_TIMEOUT_DEFAULT;
+        while (i2c_.get_stop_condition() != 0U) {
+            if (--timeout == 0U) {
+                return i2c::I2C_Error_Type::TIMEOUT;
+            }
+        }
+
+        return i2c::I2C_Error_Type::NACK_ADDRESS;
+    }
+}
+
+/**
+ * @brief Configures the SDA and SCL pins for I2C communication.
+ *
+ * If a custom pin is specified for SDA or SCL, the function will configure that
+ * pin. Otherwise, it will use the pin mapping defined in the Variant.h file.
+ *
+ * The function will set the pin mode and speed according to the pin operations
+ * defined for the I2C peripheral and the pin.
+ *
+ * The function will also check if a remap is required for the pin and apply it
+ * if necessary.
+ */
+void TwoWire::configurePins() {
+    // SDA pin
+    if (customSdaPin_ != NO_PIN) {
+        pinOpsPinout(I2C_SDA_PinOps, customSdaPin_);
+    } else {
+        auto sdaPinOps = getPinOpsByPeripheral(I2C_SDA_PinOps, base_);
+        if (sdaPinOps == invalidPinOps) {
+            return;
+        }
+        auto sdaMode = getPackedPinMode(sdaPinOps.packedPinOps);
+        auto sdaSpeed = getPackedPinSpeed(sdaPinOps.packedPinOps);
+        // Initialize pin
+        auto& sdaPort = gpio::GPIO::get_instance(sdaPinOps.port).value();
+        sdaPort.set_pin_mode(sdaPinOps.pin, sdaMode, sdaSpeed);
+        // Check remap
+        auto sdaRemap = getPackedPinRemap(sdaPinOps.packedPinOps);
+        if (sdaRemap != gpio::Pin_Remap_Select::NO_REMAP) {
+            AFIO_I.set_remap(sdaRemap);
+        }
+    }
+
+    // SCL pin
+    if (customSclPin_ != NO_PIN) {
+        pinOpsPinout(I2C_SCL_PinOps, customSclPin_);
+    } else {
+        auto sclPinOps = getPinOpsByPeripheral(I2C_SCL_PinOps, base_);
+        if (sclPinOps == invalidPinOps) {
+            return;
+        }
+        auto sclMode = getPackedPinMode(sclPinOps.packedPinOps);
+        auto sclSpeed = getPackedPinSpeed(sclPinOps.packedPinOps);
+        // Initialize pin
+        auto& sclPort = gpio::GPIO::get_instance(sclPinOps.port).value();
+        sclPort.set_pin_mode(sclPinOps.pin, sclMode, sclSpeed);
+        // Check remap
+        auto sclRemap = getPackedPinRemap(sclPinOps.packedPinOps);
+        if (sclRemap != gpio::Pin_Remap_Select::NO_REMAP) {
+            AFIO_I.set_remap(sclRemap);
+        }
+    }
 }
 
 /**
@@ -732,10 +830,13 @@ i2c::I2C_Error_Type TwoWire::waitForReadyState(uint8_t address) {
  * @return i2c::I2C_Error_Type::OK if the bus is not busy, otherwise i2c::I2C_Error_Type::BUSY or i2c::I2C_Error_Type::TIMEOUT.
  */
 i2c::I2C_Error_Type TwoWire::checkBusyState() {
+    // Wait until the I2C bus is not busy or timeout occurs
     uint32_t timeout = I2C_TIMEOUT_DEFAULT;
-    while ((i2c_.get_flag(i2c::Status_Flags::FLAG_I2CBSY)) && (--timeout != 0U));
-    if (timeout == 0U) {
-        return i2c::I2C_Error_Type::BUSY;
+
+    while (i2c_.get_flag(i2c::Status_Flags::FLAG_I2CBSY)) {
+        if (--timeout == 0U) {
+            return i2c::I2C_Error_Type::BUSY;
+        }
     }
 
     return i2c::I2C_Error_Type::OK;
@@ -753,41 +854,40 @@ i2c::I2C_Error_Type TwoWire::checkBusyState() {
  * @see begin()
  */
 void TwoWire::setSlaveInterruptEnable() {
+    // Configure NVIC priorities and enable interrupts based on I2C instance
     switch (base_) {
         case i2c::I2C_Base::I2C0_BASE:
+            // Set priorities for I2C0 event and error interrupts
             CORTEX_I.set_nvic_priority(I2C0_EV_IRQn, 2U, 3U);
-            NVIC_EnableIRQ(I2C0_EV_IRQn);
             CORTEX_I.set_nvic_priority(I2C0_ER_IRQn, 2U, 2U);
+            // Enable I2C0 event and error interrupts
+            NVIC_EnableIRQ(I2C0_EV_IRQn);
             NVIC_EnableIRQ(I2C0_ER_IRQn);
             break;
         case i2c::I2C_Base::I2C1_BASE:
+            // Set priorities for I2C1 event and error interrupts
             CORTEX_I.set_nvic_priority(I2C1_EV_IRQn, 2U, 3U);
-            NVIC_EnableIRQ(I2C1_EV_IRQn);
             CORTEX_I.set_nvic_priority(I2C1_ER_IRQn, 2U, 2U);
+            // Enable I2C1 event and error interrupts
+            NVIC_EnableIRQ(I2C1_EV_IRQn);
             NVIC_EnableIRQ(I2C1_ER_IRQn);
             break;
         default:
-            break;
+            // Invalid I2C base, do nothing
+            return;
     }
 
+    // Enable I2C peripheral interrupts
     i2c_.set_interrupt_enable(i2c::Interrupt_Type::INTR_ERR, true);
     i2c_.set_interrupt_enable(i2c::Interrupt_Type::INTR_EV, true);
     i2c_.set_interrupt_enable(i2c::Interrupt_Type::INTR_BUF, true);
 }
 
 /**
- * @brief Handles errors in the I2C peripheral.
+ * @brief Error handler for I2C events.
  *
- * This function checks the I2C status flags for error conditions and
- * clears the corresponding flags if an error is detected.
- *
- * The errors handled by this function are:
- * - Arbitration lost (INTR_FLAG_LOSTARB)
- * - Bus error (INTR_FLAG_BERR)
- * - CRC mismatch (INTR_FLAG_PECERR)
- * - Overrun or underrun when SCL stretch is disabled (INTR_FLAG_OUERR)
- * - SMBus alert (INTR_FLAG_SMBALT)
- * - SMBus mode bus timeout (INTR_FLAG_SMBTO)
+ * This function is called when an error occurs on the I2C bus. It checks
+ * the interrupt flags and clears them if set.
  */
 void TwoWire::errorHandler() {
     if (i2c_.get_interrupt_flag(i2c::Interrupt_Flags::INTR_FLAG_AERR)) {
@@ -887,62 +987,9 @@ void TwoWire::interruptHandler() {
     }
 }
 
-/**
- * @brief Configures the SDA and SCL pins for I2C communication.
- *
- * If a custom pin is specified for SDA or SCL, the function will configure that
- * pin. Otherwise, it will use the pin mapping defined in the Variant.h file.
- *
- * The function will set the pin mode and speed according to the pin operations
- * defined for the I2C peripheral and the pin.
- *
- * The function will also check if a remap is required for the pin and apply it
- * if necessary.
- */
-void TwoWire::configurePins() {
-    // SDA pin
-    if (customSdaPin_ != NO_PIN) {
-        pinOpsPinout(I2C_SDA_PinOps, customSdaPin_);
-    } else {
-        auto sdaPinOps = getPinOpsByPeripheral(I2C_SDA_PinOps, base_);
-        if (sdaPinOps == invalidPinOps) {
-            return;
-        }
-        auto sdaMode = getPackedPinMode(sdaPinOps.packedPinOps);
-        auto sdaSpeed = getPackedPinSpeed(sdaPinOps.packedPinOps);
-        // Initialize pin
-        auto& sdaPort = gpio::GPIO::get_instance(sdaPinOps.port).value();
-        sdaPort.set_pin_mode(sdaPinOps.pin, sdaMode, sdaSpeed);
-        // Check remap
-        auto sdaRemap = getPackedPinRemap(sdaPinOps.packedPinOps);
-        if (sdaRemap != gpio::Pin_Remap_Select::NO_REMAP) {
-            AFIO_I.set_remap(sdaRemap);
-        }
-    }
-
-    // SCL pin
-    if (customSclPin_ != NO_PIN) {
-        pinOpsPinout(I2C_SCL_PinOps, customSclPin_);
-    } else {
-        auto sclPinOps = getPinOpsByPeripheral(I2C_SCL_PinOps, base_);
-        if (sclPinOps == invalidPinOps) {
-            return;
-        }
-        auto sclMode = getPackedPinMode(sclPinOps.packedPinOps);
-        auto sclSpeed = getPackedPinSpeed(sclPinOps.packedPinOps);
-        // Initialize pin
-        auto& sclPort = gpio::GPIO::get_instance(sclPinOps.port).value();
-        sclPort.set_pin_mode(sclPinOps.pin, sclMode, sclSpeed);
-        // Check remap
-        auto sclRemap = getPackedPinRemap(sclPinOps.packedPinOps);
-        if (sclRemap != gpio::Pin_Remap_Select::NO_REMAP) {
-            AFIO_I.set_remap(sclRemap);
-        }
-    }
-}
-
 
 } // namespace arduino
+
 
 #ifdef SUPPORT_I2C0
     arduino::TwoWire& Wire = arduino::TwoWire::get_instance(i2c::I2C_Base::I2C0_BASE);

@@ -1,5 +1,6 @@
 /*
  * TWI/I2C library for the MFL Ardunio Core
+ *
  * Copyright (c) 2025 Arduino LLC. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or
@@ -19,11 +20,9 @@
 
 #pragma once
 
-#include "Arduino.h"
-#include "api/HardwareI2C.h"
-#include "api/RingBuffer.h"
-#include "PinOpsMap.hpp"
-#include "PinOps.hpp"
+#include <Arduino.h>
+#include <api/HardwareI2C.h>
+#include <api/RingBuffer.h>
 
 namespace arduino {
 
@@ -47,8 +46,8 @@ public:
     void onReceive(void(*)(int)) override;
     void onRequest(void(*)(void)) override;
 
-    virtual size_t write(uint8_t data);
-    virtual size_t write(const uint8_t* buffer, size_t len);
+    size_t write(uint8_t data);
+    size_t write(const uint8_t* buffer, size_t len);
 
     virtual int available();
     virtual int read();
@@ -64,7 +63,6 @@ public:
     // Interrupt handlers
     void errorHandler();
     void interruptHandler();
-    void configurePins();
 
 private:
     TwoWire(i2c::I2C_Base Base, pin_size_t sdaPin, pin_size_t sclPin);
@@ -76,24 +74,26 @@ private:
     RingBufferN<WIRE_BUFFER_LENGTH> rxBuffer_;
     RingBufferN<WIRE_BUFFER_LENGTH> txBuffer_;
     uint8_t ownerAddress_;
-    uint32_t txAddress_;
+    uint8_t txAddress_;
     bool transmitting_;
 
     // Master helpers
-    i2c::I2C_Error_Type masterTransmit(uint8_t address, uint8_t* buffer, uint8_t len, bool stopBit);
-    i2c::I2C_Error_Type masterReceive(uint8_t address, uint8_t* buffer, uint8_t len, bool stopBit);
+    i2c::I2C_Error_Type masterTransmit(uint8_t address, uint8_t len, bool stopBit);
+    i2c::I2C_Error_Type masterReceive(uint8_t address, uint8_t len, bool stopBit);
 
     // Slave helper
     i2c::I2C_Error_Type writeSlaveBuffer(const uint8_t* buffer, uint8_t len);
 
-    // Read/write
-    uint8_t readByte(uint32_t last);
+    // Write helper
     i2c::I2C_Error_Type writeByte(uint8_t data);
 
     // State check helpers
     i2c::I2C_Error_Type waitForReadyState(uint8_t address);
     i2c::I2C_Error_Type checkBusyState();
     i2c::I2C_Error_Type stop();
+
+    // Pin configuration
+    void configurePins();
 
     // Interrupt helpers
     void setSlaveInterruptEnable();
