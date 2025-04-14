@@ -29,8 +29,7 @@
 static ServoConfig servos[MAX_SERVOS];
 static volatile int8_t timerChannel[static_cast<uint8_t>(Timers16Bit::timerCount)] = {-1};  // counter for the servo being pulsed for each timer (or -1 if refresh interval)
 
-timer::TIMER_Base timer_base = static_cast<timer::TIMER_Base>(TIMER_SERVO);
-auto& servoTimer = GeneralTimer::get_instance(timer_base);
+static auto& servoTimer = GeneralTimer::get_instance(static_cast<timer::TIMER_Base>(TIMER_SERVO));
 
 uint8_t ServoCount = 0U;    // the total number of attached servos
 
@@ -42,34 +41,36 @@ uint8_t ServoCount = 0U;    // the total number of attached servos
 volatile uint32_t TotalCount = 0;
 
 static void Servo_PeriodElapsedCallback() {
-    uint8_t timerId = static_cast<uint8_t>(Timers16Bit::timerIndex);
+    constexpr Timers16Bit timerId = Timers16Bit::timer1;
+    const uint8_t idx = static_cast<uint8_t>(timerId);
+    int8_t channel = timerChannel[idx];
 
-    if (timerChannel[timerId] < 0) {
-        TotalCount = 0U;
-    } else {
-        if (timerChannel[timerId] < ServoCount && servos[timerChannel[timerId]].pinNumber.isActive == true) {
-            digitalWrite(servos[timerChannel[timerId]].pinNumber.pin, LOW);  // Pulse this channel low if activated
-        }
+    if (channel < 0) {
+        TotalCount = 0;
+    } else if (channel < ServoCount && servos[channel].pinNumber.isActive == true) {
+        digitalWrite(servos[channel].pinNumber.pin, LOW);   // Pulse LOW if active
     }
 
     // Increment to the next channel
-    timerChannel[timerId] = timerChannel[timerId] + 1;
-    if (timerChannel[timerId] < ServoCount && timerChannel[timerId] < SERVOS_PER_TIMER) {
-        servoTimer.setRolloverValue(servos[timerChannel[timerId]].ticks, TimerFormat::TICK);
-        TotalCount = TotalCount + servos[timerChannel[timerId]].ticks;
-        if (servos[timerChannel[timerId]].pinNumber.isActive == true) {
-            digitalWrite(servos[timerChannel[timerId]].pinNumber.pin, HIGH);   // It is an active channel so pulse it high
+    ++channel;
+    timerChannel[idx] = channel;
+
+    if (channel < ServoCount && channel < SERVOS_PER_TIMER) {
+        const auto& servo = servos[channel];
+        servoTimer.setRolloverValue(servo.ticks, TimerFormat::TICK);
+        TotalCount = TotalCount + servo.ticks;
+
+        if (servo.pinNumber.isActive) {
+            digitalWrite(servo.pinNumber.pin, HIGH);    // Pulse HIGH if active
         }
     } else {
         // Finished all channels so wait for the refresh period to expire before starting over
         if (TotalCount + 4U < REFRESH_INTERVAL) {
-            // Allow a few ticks to ensure the next OCR1A not missed
             servoTimer.setRolloverValue(REFRESH_INTERVAL - TotalCount, TimerFormat::TICK);
         } else {
-            // Generate update to restart immediately from the beginning with the 1st servo
-            servoTimer.refresh();
+            servoTimer.refresh();   // Start over immediately
         }
-        timerChannel[timerId] = -1; // This will get incremented at the end of the refresh period to start again at the first channel
+        timerChannel[idx] = -1;     // Prepare for restart
     }
 }
 
@@ -85,20 +86,23 @@ static void TimerServoInit() {
 // Check active status
 static bool isTimerActive() {
     for (uint8_t channel = 0U; channel < SERVOS_PER_TIMER; channel++) {
-        if (servos[channel].pinNumber.isActive == true) {
+        if (servos[channel].pinNumber.isActive) {
             return true;
         }
     }
-
     return false;
 }
 
-Servo::Servo() : servoIndex(0), min(0), max(0) {
+Servo::Servo() :
+    servoIndex(0),
+    min(0),
+    max(0)
+{
     if (ServoCount < MAX_SERVOS) {
-        this->servoIndex = ServoCount++;                      // assign a servo index to this instance
-        servos[this->servoIndex].ticks = DEFAULT_PULSE_WIDTH; // store default values
+        this->servoIndex = ServoCount++;                      // Assign a servo index to this instance
+        servos[this->servoIndex].ticks = DEFAULT_PULSE_WIDTH; // Store default values
     } else {
-        this->servoIndex = INVALID_SERVO;                     // too many servos
+        this->servoIndex = INVALID_SERVO;                     // Too many servos
     }
 }
 

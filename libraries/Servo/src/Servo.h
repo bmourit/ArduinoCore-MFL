@@ -28,7 +28,7 @@
 #include <inttypes.h>
 
 enum class Timers16Bit : uint8_t {
-    timerIndex,
+    timer1,
     timerCount,
 };
 
@@ -50,7 +50,7 @@ inline constexpr uint8_t SERVO_VERSION = 2U;
 inline constexpr uint8_t SERVOS_PER_TIMER = 12U;
 inline constexpr uint16_t INVALID_SERVO = 255U;
 inline constexpr uint32_t REFRESH_INTERVAL = 20000U;
-inline constexpr uint16_t MAX_SERVOS = (static_cast<uint16_t>(Timers16Bit::timerCount) * SERVOS_PER_TIMER);
+inline constexpr uint16_t MAX_SERVOS = static_cast<uint16_t>(static_cast<uint8_t>(Timers16Bit::timerCount)) * SERVOS_PER_TIMER;
 
 class Servo {
 public:
