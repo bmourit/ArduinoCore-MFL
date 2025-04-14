@@ -2,7 +2,7 @@
 
 This repository contains the source code and configuration files of the Arduino MFL Core
 for Gigadevice's GD32F103x Cortex-M3 and GD32F303x Cortex-M4 processors.
-Board support is currently limited to 3D printer based boards, as this core is used with
+Board support is currently limited to 3D printer based boards. This core is used with
 the recently upstreamed GD32 MFL HAL for the excellent and widely-used [Marlin Firmware](//https://github.com/MarlinFirmware/Marlin/).
 
 Any additional uses of the core are welcomed.
