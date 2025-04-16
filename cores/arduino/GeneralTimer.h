@@ -1,5 +1,5 @@
 // gd32f30x General purpose Timer driver for Arduino Core
-// Copyright (c) 2025 B. Mourit <bnmguy@gmail.com>
+// Copyright (c) 2025 B. Mouritsen <bnmguy@gmail.com>
 // All rights reserved.
 
 #pragma once
@@ -114,7 +114,7 @@ public:
     uint32_t getTimerClockFrequency();
 
     inline IRQn_Type getTimerUpIRQ() { return timerToUpIrq(); }
-    inline IRQn_Type getTimerCCIRQ() { return timerToChIrq(); }
+    inline IRQn_Type getTimerChIRQ() { return timerToChIrq(); }
 
 protected:
     explicit GeneralTimer(timer::TIMER_Base Base);
