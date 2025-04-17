@@ -35,6 +35,9 @@
 #include <Arduino.h>
 #include <api/RingBuffer.h>
 
+#define OVERSAMPLE  3               // In RX, Timer will generate interruption OVERSAMPLE time during a bit. Thus OVERSAMPLE ticks in a bit. (interrupt not synchonized with edge).
+#define HALFDUPLEX_SWITCH_DELAY 5   // In bit-periods
+
 #ifndef _SS_BUFFER_SIZE
     #define _SS_BUFFER_SIZE 64
 #endif
@@ -100,14 +103,144 @@ private:
 
     // Private methods
     void setSpeed(uint32_t speed);
-    void setTX();
-    void setRX();
-    void setRXTX(bool input);
-    void send();
-    void receive();
 
-    // Static interrupt handler
-    static void handleInterrupt();
+    inline void setTX() {
+        if (inverseLogic_) {
+            gpio::fast_clear_pin(txPort_, txPinNumber_);
+        } else {
+            gpio::fast_set_pin(txPort_, txPinNumber_);
+        }
+        setPinOpsFast(txPort_, txPinNumber_, gpio::Pin_Mode::OUTPUT_PUSHPULL);
+    }
+
+    inline void setRX() {
+        setPinOpsFast(rxPort_, rxPinNumber_, inverseLogic_ ? gpio::Pin_Mode::INPUT_PULLDOWN : gpio::Pin_Mode::INPUT_PULLUP);    // Pullup for normal logic
+    }
+
+    inline void setRXTX(bool input) {
+        if (!halfDuplex_) {
+            return;
+        }
+
+        if (input) {
+            // Switch to RX mode
+            if (rxActive != this) {
+                setRX();
+                rxBitCount = -1;    // Waiting for start bit
+                rxTickCount = 2;    // Next interrupt will be discarded. 2 interrupts required to consider RX pin level
+                rxActive = this;
+            }
+        } else {
+            // Switch to TX mode
+            if (rxActive == this) {
+                setTX();
+                rxActive = nullptr;
+            }
+        }
+    }
+
+    inline void send() {
+        if (--txTickCount > 0) {
+            // If txTickCount > 0, interrupt is discarded
+            return;
+        }
+
+        // Only when txTickCount reaches 0 we set TX pin
+        if (txBitCount < 10) {  // Transmission not finished (10 = 1 start + 8 bits + 1 stop)
+            // Send data (including start and stop bits)
+            if (txBuffer & 1) {
+                gpio::fast_set_pin(txPort_, txPinNumber_);
+            } else {
+                gpio::fast_clear_pin(txPort_, txPinNumber_);
+            }
+
+            txBuffer >>= 1;
+            txTickCount = OVERSAMPLE;  // Wait OVERSAMPLE ticks to send next bit
+            txBitCount++;
+        } else {  // Transmission finished
+            txTickCount = 1;
+
+            if (outputPending_) {
+                txActive = nullptr;
+            } else if (txBitCount > 10 + OVERSAMPLE * HALFDUPLEX_SWITCH_DELAY) {
+                // When in half-duplex mode, wait for HALFDUPLEX_SWITCH_DELAY bit-periods 
+                // after the byte has been transmitted before allowing the switch to RX mode
+                if (halfDuplex_ && activeListener == this) {
+                    setRXTX(true);
+                }
+                txActive = nullptr;
+            }
+        }
+    }
+
+    inline void receive() {
+        rxTickCount = rxTickCount - 1;
+        if (rxTickCount > 0) {
+            // If rxTickCount > 0, interrupt is discarded
+            return;
+        }
+
+        // Only when rxTickCount reaches 0, RX pin is considered
+        bool inbit = gpio::fast_read_pin(rxPort_, rxPinNumber_);
+        if (inverseLogic_) {
+            inbit = !inbit;
+        }
+
+        if (rxBitCount == -1) {
+            // Waiting for start bit
+            if (!inbit) {
+                // Got start bit
+                rxBitCount = 0;
+                // Wait 1 bit (OVERSAMPLE ticks) + 1 tick to sample RX pin in the middle of the edge
+                rxTickCount = OVERSAMPLE + 1;
+                rxBuffer = 0;
+            } else {
+                // Waiting for start bit, but didn't get right level
+                // Wait for next interrupt to check RX pin level
+                rxTickCount = 1;
+            }
+        } else if (rxBitCount >= 8) {
+            // Waiting for stop bit
+            if (inbit) {
+                // Stop bit read complete, add to buffer
+                if (!rxBuffer_.isFull()) {
+                    // Save new data in buffer
+                    rxBuffer_.store_char(rxBuffer);
+                } else {
+                    bufferOverflow_ = true;
+                }
+            }
+
+            // Full frame received. Restart waiting for start bit at next interrupt
+            rxTickCount = 1;
+            rxBitCount = -1;
+        } else {
+            // Data bits (0-7)
+            rxBuffer >>= 1;
+            if (inbit) {
+                rxBuffer |= 0x80;
+            }
+
+            // Prepare for next bit
+            rxBitCount++;
+            // Wait OVERSAMPLE ticks before sampling next bit
+            rxTickCount = OVERSAMPLE;
+        }
+    }
+
+    // Interrupt handler
+    static inline void handleInterrupt() {
+        // Process receive first to minimize latency for incoming data
+        SoftwareSerial* rx = rxActive;
+        if (rx) {
+            rx->receive();
+        }
+
+        SoftwareSerial* tx = txActive;
+        if (tx) {
+            tx->send();
+        }
+    }
 
     // Static members for interrupt-based communication
     static constexpr timer::TIMER_Base TIMER_SERIAL_BASE = static_cast<timer::TIMER_Base>(TIMER_SERIAL);
