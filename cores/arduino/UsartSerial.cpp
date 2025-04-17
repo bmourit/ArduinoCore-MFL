@@ -140,7 +140,7 @@ void UsartSerial::begin(unsigned long baudrate, uint16_t config) {
  */
 void UsartSerial::end() {
     while (usart_.get_config().state != usart::USART_State::IDLE) {
-        // Wait for the USART to become idle
+        __asm volatile("nop");  // Wait for the USART to become idle
     }
     flush();
     dataTransmitted_[static_cast<size_t>(base_)] = false;
@@ -171,7 +171,7 @@ int UsartSerial::available() {
         }
     }
     while (usart_.get_config().state != usart::USART_State::IDLE) {
-        // Wait for the USART to become idle
+        __asm volatile("nop");  // Wait for the USART to become idle
     }
     updateRxDmaBuffer();
     return usart_.available_for_read(true);
@@ -191,7 +191,7 @@ int UsartSerial::peek() {
             return -1;
         }
         while (usart_.get_config().state != usart::USART_State::IDLE) {
-            // Wait for the USART to become idle
+            __asm volatile("nop");  // Wait for the USART to become idle
         }
     }
     updateRxDmaBuffer();
@@ -216,7 +216,7 @@ int UsartSerial::read() {
             return -1;
         }
         while (usart_.get_config().state != usart::USART_State::IDLE) {
-            // Wait for the USART to become idle
+            __asm volatile("nop");  // Wait for the USART to become idle
         }
     }
     updateRxDmaBuffer();
@@ -239,10 +239,11 @@ int UsartSerial::read() {
  */
 void UsartSerial::flush() {
     while (usart_.get_config().state != usart::USART_State::IDLE) {
-        // Wait for the USART to become idle
+        __asm volatile("nop");  // Wait for the USART to become idle
     }
     // Wait for any outstanding data to be sent
-    while (!usart_.buffer_is_empty(false));
+    while (!usart_.buffer_is_empty(false)) {
+    }
 }
 
 /**
@@ -259,7 +260,7 @@ void UsartSerial::flush() {
 size_t UsartSerial::write(uint8_t byte) {
     dataTransmitted_[static_cast<size_t>(base_)] = true;
     while (usart_.get_config().state != usart::USART_State::IDLE) {
-        // Wait for the USART to become idle
+        __asm volatile("nop");  // Wait for the USART to become idle
     }
     while (!usart_.usart_transmit_interrupt(byte)) {
         // Wait for room in buffer
