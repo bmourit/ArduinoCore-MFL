@@ -37,7 +37,16 @@ class UsartSerial : public HardwareSerial {
 public:
     static UsartSerial& get_instance(usart::USART_Base Base, pin_size_t rxPin = NO_PIN, pin_size_t txPin = NO_PIN);
 
-    void begin(unsigned long baudrate, uint16_t config) override;
+    void begin(unsigned long baudrate, uint16_t config, bool useDmaRx);
+    inline void begin(unsigned long baudrate, uint16_t config) override {
+        // Temporary compatability with SERIAL_USE_DMA_RX define
+        // Until all users move to the new begin function.
+        bool useDmaRx = false;
+    #ifdef SERIAL_USE_DMA_RX
+        useDmaRx = true;
+    #endif
+        begin(baudrate, config, useDmaRx);
+    }
     inline void begin(unsigned long baudrate) override { begin(baudrate, SERIAL_8N1); }
     void end() override;
     int available() override;

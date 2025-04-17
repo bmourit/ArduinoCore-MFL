@@ -18,31 +18,35 @@ void setPinOp(pin_size_t pin, uint32_t packedPinOps) {
     if (remap != gpio::Pin_Remap_Select::NO_REMAP) {
         gpio::AFIO::get_instance().set_remap(remap);
     }
+
     gpio::GPIO_Base port = getPortFromPin(pin);
     if (port == gpio::GPIO_Base::INVALID) {
+        core_debug("Invalid port");
         return;
     }
+
     gpio::Pin_Number pinInPort = getPinInPort(pin);
     if (pinInPort == gpio::Pin_Number::INVALID) {
         core_debug("Invalid pin number");
         return;
     }
+
     gpio::Pin_Mode pinMode = getPackedPinMode(packedPinOps);
     if (pinMode == gpio::Pin_Mode::INVALID) {
         core_debug("Invalid pin mode");
         return;
     }
+
     gpio::Output_Speed pinSpeed = getPackedPinSpeed(packedPinOps);
     if (pinSpeed == gpio::Output_Speed::INVALID) {
         core_debug("Invalid output speed");
         return;
     }
+
     auto result = gpio::GPIO::get_instance(port);
-    if (result.error() != gpio::GPIO_Error_Type::OK) {
-        return;
+    if (result.error() == gpio::GPIO_Error_Type::OK) {
+        result.value().set_pin_mode(pinInPort, pinMode, pinSpeed);
     }
-    auto& instance = result.value();
-    instance.set_pin_mode(pinInPort, pinMode, pinSpeed);
 }
 
 /**
@@ -61,22 +65,23 @@ void setPinOp(gpio::GPIO_Base port, gpio::Pin_Number pin, uint32_t packedPinOps)
     if (remap != gpio::Pin_Remap_Select::NO_REMAP) {
         gpio::AFIO::get_instance().set_remap(remap);
     }
+
     gpio::Pin_Mode mode = getPackedPinMode(packedPinOps);
     if (mode == gpio::Pin_Mode::INVALID) {
         core_debug("Invalid pin mode");
         return;
     }
+
     gpio::Output_Speed speed = getPackedPinSpeed(packedPinOps);
     if (speed == gpio::Output_Speed::INVALID) {
         core_debug("Invalid output speed");
         return;
     }
+
     auto result = gpio::GPIO::get_instance(port);
-    if (result.error() != gpio::GPIO_Error_Type::OK) {
-        return;
+    if (result.error() == gpio::GPIO_Error_Type::OK) {
+        result.value().set_pin_mode(pin, mode, speed);
     }
-    auto& instance = result.value();
-    instance.set_pin_mode(pin, mode, speed);
 }
 
 uint32_t portOutputRegister(gpio::GPIO_Base port) {
