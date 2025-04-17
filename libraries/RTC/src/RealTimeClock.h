@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Arduino.h"
+#include <Arduino.h>
 
 #ifndef RTC_IRQ_PRIORITY
     #define RTC_IRQ_PRIORITY      2

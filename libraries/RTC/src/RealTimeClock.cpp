@@ -1,5 +1,5 @@
 
-#include "Arduino.h"
+#include <Arduino.h>
 #include "RealTimeClock.h"
 
 constexpr uint8_t irqPriority = RTC_IRQ_PRIORITY;
