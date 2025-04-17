@@ -19,10 +19,8 @@
 
 #pragma once
 
-#include "Arduino.h"
-#include "api/HardwareSPI.h"
-#include "PinOpsMap.hpp"
-#include "PinOps.hpp"
+#include <Arduino.h>
+#include <api/HardwareSPI.h>
 
 namespace arduino {
 
@@ -56,7 +54,6 @@ public:
     void setDataMode(SPIMode dataMode);
     void setBitOrder(BitOrder bitOrder);
     void setClockDivider(uint32_t clock);
-    void configurePins();
 
 private:
     SPIClassMFL(spi::SPI_Base Base, pin_size_t mosiPin, pin_size_t misoPin,
@@ -75,6 +72,7 @@ private:
 
     SPISettings const DEFAULT_SPI_SETTINGS = SPISettings(1000000, MSBFIRST, SPI_MODE0);
 
+    void configurePins();
     void updateSettings(SPISettings settings);
 };
 

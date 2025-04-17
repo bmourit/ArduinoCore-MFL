@@ -19,7 +19,8 @@
 
 #include <Arduino.h>
 #include <assert.h>
-
+#include <PinOpsMap.hpp>
+#include <PinOps.hpp>
 #include "SPI.h"
 
 namespace arduino {
@@ -160,7 +161,8 @@ void SPIClassMFL::endTransaction() {
  */
 uint8_t SPIClassMFL::transfer(uint8_t data) {
     spi_.data_transmit(data);
-    while (!spi_.get_flag(spi::Status_Flags::FLAG_RBNE)) {}
+    while (!spi_.get_flag(spi::Status_Flags::FLAG_RBNE)) {
+    }
     return static_cast<uint8_t>(spi_.data_receive() & 0xFF);
 }
 
@@ -175,7 +177,8 @@ uint8_t SPIClassMFL::transfer(uint8_t data) {
  */
 uint16_t SPIClassMFL::transfer16(uint16_t data) {
     spi_.data_transmit(data);
-    while (!spi_.get_flag(spi::Status_Flags::FLAG_RBNE)) {}
+    while (!spi_.get_flag(spi::Status_Flags::FLAG_RBNE)) {
+    }
     return spi_.data_receive();
 }
 
