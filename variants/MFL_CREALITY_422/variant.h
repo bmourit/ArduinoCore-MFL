@@ -65,19 +65,19 @@
 #define PC5     37
 #define PC6     38
 #define PC7     39
-#define PC8	    40
-#define PC9	    41
-#define PC10	42
-#define PC11	43
-#define PC12	44
-#define PC13	45
-#define PC14	46
-#define PC15	47
+#define PC8     40
+#define PC9     41
+#define PC10    42
+#define PC11    43
+#define PC12    44
+#define PC13    45
+#define PC14    46
+#define PC15    47
 
 // GPIOD
-#define PD0	    48
+#define PD0     48
 #define PD1     49
-#define PD2	    50
+#define PD2     50
 
 // Pin numbers
 #define DIGITAL_PIN_COUNT   51
@@ -100,9 +100,6 @@
 #ifndef USER_BTN
     #define USER_BTN    PC13
 #endif
-
-// Deprecated
-#define SERIAL_USE_DMA_RX
 
 #ifndef ADC_CHANNEL_TEMPSENSOR
     #define ADC_CHANNEL_TEMPSENSOR  16
