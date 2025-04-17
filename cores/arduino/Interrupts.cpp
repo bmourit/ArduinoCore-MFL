@@ -24,8 +24,8 @@ struct CallbackWrapper {
     void* param;
 };
 
-static CallbackWrapper callbackStorage[MAX_EXTI_LINES];
-static bool usedSlots[MAX_EXTI_LINES] = {false};
+static CallbackWrapper callbackStorage[maxExtiLines_];
+static bool usedSlots[maxExtiLines_] = {false};
 static uint8_t currentSlot = 0U;
 
 /**
@@ -74,7 +74,7 @@ void callbackWrapper(void* param) {
 void attachInterruptParam(pin_size_t pin, voidFuncPtrParam callback, PinStatus mode, void* param) {
     // Find a free slot
     int slotIndex = -1;
-    for (int i = 0; i < static_cast<int>(MAX_EXTI_LINES); i++) {
+    for (int i = 0; i < static_cast<int>(maxExtiLines_); i++) {
         if (!usedSlots[i]) {
             slotIndex = i;
             break;
@@ -138,7 +138,7 @@ void detachInterrupt(pin_size_t pin) {
     ExtiManager::get_instance().disablePinExtiInterrupt(pin);
 
     // Free the used slot
-    for (int i = 0; i < static_cast<int>(MAX_EXTI_LINES); i++) {
+    for (int i = 0; i < static_cast<int>(maxExtiLines_); i++) {
         if (usedSlots[i]) {
             usedSlots[i] = false;
             break;

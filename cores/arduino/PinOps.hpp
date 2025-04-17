@@ -388,7 +388,7 @@ inline gpio::GPIO portToInstance(gpio::GPIO_Base port) {
  *         GPIO_Base::INVALID if the pin number is invalid.
  */
 inline constexpr gpio::GPIO_Base getPortFromPin(pin_size_t pin) {
-    uint32_t portIndex = static_cast<uint32_t>(pin >> static_cast<uint32_t>(4U));
+    uint32_t portIndex = static_cast<uint32_t>(pin >> 4U);
     if (portIndex >= static_cast<uint32_t>(gpio::GPIO_Base::INVALID)) {
         return gpio::GPIO_Base::INVALID;
     }
@@ -407,8 +407,7 @@ inline constexpr gpio::GPIO_Base getPortFromPin(pin_size_t pin) {
  *         Pin_Number::INVALID if the pin number is invalid.
  */
 inline constexpr gpio::Pin_Number getPinInPort(pin_size_t pin) {
-    uint32_t pinInPort = static_cast<uint32_t>(pin & 0xF);
-
+    uint8_t pinInPort = static_cast<uint8_t>(pin & 0xF);
     if (pinInPort <= 15U) {
         return static_cast<gpio::Pin_Number>(pinInPort);
     }

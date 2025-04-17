@@ -24,18 +24,20 @@
 
 inline constexpr uint32_t Max_Frequency = 0x0000FFFFU;
 
-struct TimerPinInfo {
+struct TonePinInfo {
     pin_size_t pin;
     int32_t count;
+    gpio::GPIO_Base port;
+    gpio::Pin_Number pinNum;
 };
 
-static TimerPinInfo pinInfo = { NO_PIN, 0 };
+static TonePinInfo pinInfo = { NO_PIN, 0, gpio::GPIO_Base::INVALID, gpio::Pin_Number::INVALID };
 volatile bool destruct_ = false;
 
 static void timerTonePinInit(pin_size_t pin, uint32_t frequency, uint32_t duration);
 static void toneHandler();
 
-GeneralTimer& toneInstance = GeneralTimer::get_instance(static_cast<timer::TIMER_Base>(TIMER_TONE));
+static GeneralTimer& toneInstance = GeneralTimer::get_instance(static_cast<timer::TIMER_Base>(TIMER_TONE));
 
 /**
  * @brief Initializes the timer for generating a tone on a specified pin.
@@ -60,6 +62,11 @@ static void timerTonePinInit(pin_size_t pin, uint32_t frequency, uint32_t durati
     } else if (frequency <= Max_Frequency) {
         pinInfo.pin = pin;
         pinInfo.count = (duration > 0) ? ((toneFreq * duration) / 1000) : -1;
+        pinInfo.port = getPortFromPin(pinInfo.pin);
+        pinInfo.pinNum = getPinInPort(pinInfo.pin);
+        if (pinInfo.port == gpio::GPIO_Base::INVALID || pinInfo.pinNum == gpio::Pin_Number::INVALID) {
+            return;
+        }
 
         setPinOp(pinInfo.pin, createPackedPinOps(
                      gpio::Pin_Mode::OUTPUT_PUSHPULL,
@@ -133,22 +140,22 @@ void noTone(uint8_t pin) {
  * Decrements the pin's count and turns off the pin when the count reaches zero.
  */
 static void toneHandler() {
-    gpio::GPIO_Base port = getPortFromPin(pinInfo.pin);
-    if (port == gpio::GPIO_Base::INVALID) {
+    if (pinInfo.port == gpio::GPIO_Base::INVALID || pinInfo.pinNum == gpio::Pin_Number::INVALID) {
         return;
     }
-    auto& instance = gpio::GPIO::get_instance(port).value();
-    gpio::Pin_Number pinNum = getPinInPort(pinInfo.pin);
-    if (pinNum == gpio::Pin_Number::INVALID) {
+
+    auto result = gpio::GPIO::get_instance(pinInfo.port);
+    if (result.error() != gpio::GPIO_Error_Type::OK) {
         return;
     }
+    auto& instance = result.value();
 
     if (pinInfo.count != 0) {
         if (pinInfo.count > 0) {
             pinInfo.count--;
         }
-        instance.toggle_pin(pinNum);
+        instance.toggle_pin(pinInfo.pinNum);
     } else {
-        instance.write_pin(pinNum, false);
+        instance.write_pin(pinInfo.pinNum, false);
     }
 }

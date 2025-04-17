@@ -87,18 +87,17 @@ UsartSerial::UsartSerial(usart::USART_Base Base, pin_size_t rxPin, pin_size_t tx
  *
  * @param baudrate The baudrate to use for this instance.
  * @param config The configuration to use for this instance.
+ * @param useDmaRx True to enable DMA on rx, otherwise false.
  */
-void UsartSerial::begin(unsigned long baudrate, uint16_t config) {
+void UsartSerial::begin(unsigned long baudrate, uint16_t config, bool useDmaRx) {
     if (!(dataTransmitted_[static_cast<size_t>(base_)])) {
         end();
     }
+
     // Configure pins
     configurePins();
 
-    usart::USART_DMA_Config dmaMode = usart::USART_DMA_Config::DMA_NONE;
-#ifdef SERIAL_USE_DMA_RX
-    dmaMode = usart::USART_DMA_Config::DMA_RX;
-#endif
+    usart::USART_DMA_Config dmaMode = useDmaRx ? usart::USART_DMA_Config::DMA_RX : usart::USART_DMA_Config::DMA_NONE;
 
     usart_.init({
         static_cast<uint32_t>(baudrate),
@@ -120,8 +119,8 @@ void UsartSerial::begin(unsigned long baudrate, uint16_t config) {
     // Check DMA config is valid
     checkDmaConfig();
 
-    if (dmaMode == usart::USART_DMA_Config::DMA_NONE) {
-        // Dont prepare receive interrupts if DMA is used
+    // Dont prepare receive interrupts if DMA is used
+    if (!useDmaRx) {
         usart_.prepare_receive_interrupts();
     }
 
@@ -375,17 +374,17 @@ void UsartSerial::configurePins() {
  * exits without making changes.
  */
 void UsartSerial::checkDmaConfig() {
-    if (usart_.get_config().dma_ops == usart::USART_DMA_Config::DMA_NONE) {
+    usart::USART_DMA_Config dmaOps = usart_.get_config().dma_ops;
+    if (dmaOps == usart::USART_DMA_Config::DMA_NONE) {
         return;
     }
 
-    if (usart_.get_config().dma_ops == usart::USART_DMA_Config::DMA_TX ||
-            usart_.get_config().dma_ops == usart::USART_DMA_Config::DMA_DUAL) {
+    if (dmaOps == usart::USART_DMA_Config::DMA_TX || dmaOps == usart::USART_DMA_Config::DMA_DUAL) {
         core_debug("DMA_TX and DMA_DUAL modes are not supported");
         return;
     }
 
-    if (usart_.get_config().dma_ops == usart::USART_DMA_Config::DMA_RX) {
+    if (dmaOps == usart::USART_DMA_Config::DMA_RX) {
         setDmaRxEnable();
     }
 }

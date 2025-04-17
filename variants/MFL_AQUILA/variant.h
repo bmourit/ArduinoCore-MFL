@@ -101,9 +101,8 @@
     #define USER_BTN    PC13
 #endif
 
-#ifndef SERIAL_USE_DMA_RX
-    #define SERIAL_USE_DMA_RX
-#endif
+// Deprecated
+#define SERIAL_USE_DMA_RX
 
 #ifndef ADC_CHANNEL_TEMPSENSOR
     #define ADC_CHANNEL_TEMPSENSOR  16

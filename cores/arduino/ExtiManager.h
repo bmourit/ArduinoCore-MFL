@@ -13,7 +13,9 @@
     #define EXTI_IRQ_SUBPRIORITY    0U
 #endif
 
-#define MAX_EXTI_LINES      16
+#define MAX_EXTI_LINES  16
+
+inline constexpr uint8_t maxExtiLines_ = MAX_EXTI_LINES;
 
 struct exti_to_irq {
     uint8_t line_number;
@@ -31,20 +33,17 @@ public:
     void handleCallback(gpio::Pin_Number pin);
 
 private:
-    static std::array<exti_to_irq, MAX_EXTI_LINES> irq_index;
+    static std::array<exti_to_irq, maxExtiLines_> irq_index;
 
     ExtiManager();
 
     exti::EXTI& exti_;
-    EXTICallback callbacks_[MAX_EXTI_LINES];
+    EXTICallback callbacks_[maxExtiLines_];
 
     inline IRQn_Type extiToIrq(uint8_t extiIndex) {
-        for (const auto& index : irq_index) {
-            if (index.line_number == extiIndex) {
-                return index.irq_type;
-            }
+        if (extiIndex < maxExtiLines_) {
+            return irq_index[extiIndex].irq_type;
         }
-        // Return invalid
         return INVALID_IRQ;
     }
 };
