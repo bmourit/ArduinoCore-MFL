@@ -115,18 +115,10 @@
 #define PIN_SPI_MISO    PA6
 #define PIN_SPI_SCK     PA5
 
-inline constexpr uint8_t MOSI = PIN_SPI_MOSI;
-inline constexpr uint8_t MISO = PIN_SPI_MISO;
-inline constexpr uint8_t SCK = PIN_SPI_SCK;
-inline constexpr uint8_t SS = PIN_SPI_SS;
-
 // I2C Definitions
 #define SUPPORT_I2C0
 #define PIN_WIRE_SDA    PB7
 #define PIN_WIRE_SCL    PB6
-
-inline constexpr uint8_t SDA = PIN_WIRE_SDA;
-inline constexpr uint8_t SCL = PIN_WIRE_SCL;
 
 #ifndef TIMER_TONE
     #define TIMER_TONE  2  // TIMER_TONE must be defined in this file
@@ -151,6 +143,15 @@ inline constexpr uint8_t SCL = PIN_WIRE_SCL;
 
 // C++ only
 #ifdef __cplusplus
+
+    inline constexpr uint8_t MOSI = PIN_SPI_MOSI;
+    inline constexpr uint8_t MISO = PIN_SPI_MISO;
+    inline constexpr uint8_t SCK = PIN_SPI_SCK;
+    inline constexpr uint8_t SS = PIN_SPI_SS;
+
+    inline constexpr uint8_t SDA = PIN_WIRE_SDA;
+    inline constexpr uint8_t SCL = PIN_WIRE_SCL;
+
     // These serial port names are intended to allow libraries and architecture-neutral
     // sketches to automatically default to the correct port name for a particular type
     // of use.  For example, a GPS module would normally connect to SERIAL_PORT_HARDWARE_OPEN,
