@@ -75,7 +75,7 @@ static void Servo_PeriodElapsedCallback() {
 }
 
 static void TimerServoInit() {
-    servoTimer.setChannelMode(1, InputOutputMode::TIMING, INVALID_PIN);
+    servoTimer.setChannelMode(1, InputOutputMode::TIMING, INVALID_PIN_NUMBER);
     servoTimer.setPrescaler(static_cast<uint16_t>(servoTimer.getTimerClockFrequency() / 1'000'000U));
     servoTimer.setRolloverValue(REFRESH_INTERVAL, TimerFormat::TICK);
     servoTimer.attachInterrupt(Servo_PeriodElapsedCallback);

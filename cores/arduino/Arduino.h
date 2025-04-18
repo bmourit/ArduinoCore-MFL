@@ -5,10 +5,10 @@
 #include "api/itoa.h"
 #include "api/deprecated-avr-comp/avr/dtostrf.h"
 #include "CoreHandler.h"
+#include "variant.h"
 
 #if defined(__cplusplus)
     #include "mfl_api.h"
-    #include "variant.h"
 
     using namespace arduino;
 

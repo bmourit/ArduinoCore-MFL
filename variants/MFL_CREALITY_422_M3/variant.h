@@ -87,7 +87,7 @@
 #define ADC_TEMP            (TOTAL_PIN_COUNT + 1)
 #define ADC_VREF            (ADC_TEMP + 1)
 #define MAX_PIN_NUM         (ADC_VREF)
-#define INVALID_PIN         (ADC_VREF + 1)
+#define INVALID_PIN_NUMBER  (ADC_VREF + 1)
 
 // On-board LED pin number
 #ifndef LED_BUILTIN
