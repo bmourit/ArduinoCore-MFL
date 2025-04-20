@@ -7,12 +7,10 @@
 #include "CoreHandler.h"
 #include "variant.h"
 
-#if defined(__cplusplus)
+#ifdef __cplusplus
     #include "mfl_api.h"
-
     using namespace arduino;
-
-#endif // __cplusplus
+#endif  // __cplusplus
 
 #define interrupts()      __enable_irq()
 #define noInterrupts()    __disable_irq()
@@ -20,36 +18,43 @@
 #ifdef __cplusplus
     // We currently support less than this
     inline constexpr pin_size_t NO_PIN = 70;
+    // Arduino API extensions
+    inline constexpr PinMode INPUT_ANALOG = static_cast<PinMode>(0x5);
+    inline constexpr IRQn_Type INVALID_IRQ = static_cast<IRQn_Type>(99);
 #else
-    #define NO_PIN	70
-#endif
+    #define NO_PIN  70
+    #define INPUT_ANALOG    ((PinMode)0x5)
+    #define INVALID_IRQ     ((IRQn_Type)99)
+#endif  // __cplusplus
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+    // Extra analog functions
+    void analogReadResolution(int resolution);
+    void analogWriteResolution(int resolution);
+    void analogWriteFrequency(uint32_t frequency);
 
-// Extra analog functions
-void analogReadResolution(int resolution);
-void analogWriteResolution(int resolution);
-void analogWriteFrequency(uint32_t frequency);
-// Extra digital function
-void digitalToggle(pin_size_t pin);
-// Free debug pins for other use
-void freeDebugPins(pin_size_t pin);
+    // Opaque type for C code
+    typedef uint32_t GPIO_Port_t;
 
-inline constexpr PinMode INPUT_ANALOG = static_cast<PinMode>(0x5);
-inline constexpr IRQn_Type INVALID_IRQ = static_cast<IRQn_Type>(99);
+    // Pin functions
+    bool isPinNumberValid(pin_size_t pin);
+    GPIO_Port_t digitalPinToPort(pin_size_t pin);
+    pin_size_t digitalPinToInterrupt(pin_size_t pin);
+    pin_size_t analogInputToDigitalPin(pin_size_t pin);
 
-bool isPinNumberValid(pin_size_t pin);
-pin_size_t digitalPinToInterrupt(pin_size_t pin);
-pin_size_t analogInputToDigitalPin(pin_size_t pin);
-gpio::GPIO_Base digitalPinToPort(pin_size_t pin);
+    // Port functions
+    uint32_t portOutputRegister(GPIO_Port_t port);
+    uint32_t portInputRegister(GPIO_Port_t port);
+    uint32_t portSetRegister(GPIO_Port_t port);
+    uint32_t portClearRegister(GPIO_Port_t port);
 
-uint32_t portOutputRegister(gpio::GPIO_Base port);
-uint32_t portInputRegister(gpio::GPIO_Base port);
-uint32_t portSetRegister(gpio::GPIO_Base port);
-uint32_t portClearRegister(gpio::GPIO_Base port);
+    // Extra digital function
+    void digitalToggle(pin_size_t pin);
 
+    // Free debug pins for other use
+    void freeDebugPins(pin_size_t pin);
 #ifdef __cplusplus
 }
 #endif

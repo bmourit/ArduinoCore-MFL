@@ -84,18 +84,26 @@ void setPinOp(gpio::GPIO_Base port, gpio::Pin_Number pin, uint32_t packedPinOps)
     }
 }
 
-uint32_t portOutputRegister(gpio::GPIO_Base port) {
-    return reinterpret_cast<uint32_t>(portToInstance(port).reg_address(gpio::GPIO_Regs::OCTL));
+bool isPinNumberValid(pin_size_t pin) {
+    return (pin >= 0U && pin <= DIGITAL_PIN_COUNT);
 }
 
-uint32_t portInputRegister(gpio::GPIO_Base port) {
-    return reinterpret_cast<uint32_t>(portToInstance(port).reg_address(gpio::GPIO_Regs::ISTAT));
+uint32_t portOutputRegister(GPIO_Port_t port) {
+    return getPortOutputRegister(static_cast<gpio::GPIO_Base>(port));
 }
 
-uint32_t portSetRegister(gpio::GPIO_Base port) {
-    return reinterpret_cast<uint32_t>(portToInstance(port).reg_address(gpio::GPIO_Regs::BOP));
+uint32_t portInputRegister(GPIO_Port_t port) {
+    return getPortInputRegister(static_cast<gpio::GPIO_Base>(port));
 }
 
-uint32_t portClearRegister(gpio::GPIO_Base port) {
-    return reinterpret_cast<uint32_t>(portToInstance(port).reg_address(gpio::GPIO_Regs::BC));
+uint32_t portSetRegister(GPIO_Port_t port) {
+    return getPortSetRegister(static_cast<gpio::GPIO_Base>(port));
+}
+
+uint32_t portClearRegister(GPIO_Port_t port) {
+    return getPortClearRegister(static_cast<gpio::GPIO_Base>(port));
+}
+
+GPIO_Port_t digitalPinToPort(pin_size_t pin) {
+    return static_cast<GPIO_Port_t>(getPortFromPin(pin));
 }

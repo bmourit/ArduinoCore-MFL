@@ -445,8 +445,21 @@ inline void setPinOpsFast(gpio::GPIO_Base port, gpio::Pin_Number pin, gpio::Pin_
     instance.set_pin_mode(pin, mode);
 }
 
-inline bool isPinNumberValid(pin_size_t pin) {
-    return ((pin >= 0U) && (pin <= DIGITAL_PIN_COUNT));
+// C++ wrappers called from C compatable functions
+inline uint32_t getPortOutputRegister(gpio::GPIO_Base port) {
+    return reinterpret_cast<uint32_t>(portToInstance(port).reg_address(gpio::GPIO_Regs::OCTL));
+}
+
+inline uint32_t getPortInputRegister(gpio::GPIO_Base port) {
+    return reinterpret_cast<uint32_t>(portToInstance(port).reg_address(gpio::GPIO_Regs::ISTAT));
+}
+
+inline uint32_t getPortSetRegister(gpio::GPIO_Base port) {
+    return reinterpret_cast<uint32_t>(portToInstance(port).reg_address(gpio::GPIO_Regs::BOP));
+}
+
+inline uint32_t getPortClearRegister(gpio::GPIO_Base port) {
+    return reinterpret_cast<uint32_t>(portToInstance(port).reg_address(gpio::GPIO_Regs::BC));
 }
 
 inline pin_size_t digitalPinToInterrupt(pin_size_t pin) {
@@ -455,8 +468,4 @@ inline pin_size_t digitalPinToInterrupt(pin_size_t pin) {
 
 inline pin_size_t analogInputToDigitalPin(pin_size_t pin) {
     return pin;
-}
-
-inline gpio::GPIO_Base digitalPinToPort(pin_size_t pin) {
-    return getPortFromPin(pin);
 }
