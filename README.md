@@ -7,6 +7,11 @@ the recently upstreamed GD32 MFL HAL for the excellent and widely-used [Marlin F
 
 Any additional uses of the core are welcomed.
 
+## Branches
+
+The default main branch is the developement branch and should NOT be use in production.
+You should use release branches (Eg. branch V1.0.x) for production builds.
+
 ## Current State and Testing
 
 This is a very new core, with most functionality only tested on the currently supported boards.
