@@ -422,12 +422,13 @@ void SPIClassMFL::configurePins() {
 
 } // namespace arduino
 
-#ifdef SUPPORT_SPI0
+
+#ifdef BOARD_USE_SPI0
     arduino::SPIClassMFL& SPI = arduino::SPIClassMFL::get_instance(spi::SPI_Base::SPI0_BASE);
 #endif
-#ifdef SUPPORT_SPI1
+#ifdef BOARD_USE_SPI1
     arduino::SPIClassMFL& SPI1 = arduino::SPIClassMFL::get_instance(spi::SPI_Base::SPI1_BASE);
 #endif
-#ifdef SUPPORT_SPI2
+#ifdef BOARD_USE_SPI2
     arduino::SPIClassMFL& SPI2 = arduino::SPIClassMFL::get_instance(spi::SPI_Base::SPI2_BASE);
 #endif

@@ -109,7 +109,7 @@ bool FWatchdogTimer::set(uint32_t timeout) {
     uint32_t reload = static_cast<uint32_t>(timeout_sec / divider) - 1U;
 
     // Update prescaler and reload values
-    if (fwdgt_.set_prescaler(static_cast<fwdgt::Prescaler_Value>(prescaler)) || fwdgt_.set_reload(reload)) {
+    if (!fwdgt_.set_prescaler(static_cast<fwdgt::Prescaler_Value>(prescaler)) || !fwdgt_.set_reload(reload)) {
         return false;
     }
 

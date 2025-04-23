@@ -108,18 +108,52 @@
     #define ADC_CHANNEL_VREFINT     17
 #endif
 
-// SPI Definitions
-#define SUPPORT_SPI0
+//
+// SPI
+//
+// Each define will create a global instance
+// Leave undefined to call your own
+//
+#define BOARD_USE_SPI0
+//#define BOARD_USE_SPI1
+//#define BOARD_USE_SPI2
+
+// SPI0
 #define PIN_SPI_SS      PA4
 #define PIN_SPI_MOSI    PA7
 #define PIN_SPI_MISO    PA6
 #define PIN_SPI_SCK     PA5
 
-// I2C Definitions
-#define SUPPORT_I2C0
+// SPI1
+#define PIN_SPI1_SS     PB12
+#define PIN_SPI1_MOSI   PB15
+#define PIN_SPI1_MISO   PB14
+#define PIN_SPI1_SCK    PB13
+
+// SPI2
+#define PIN_SPI2_SS     PA15
+#define PIN_SPI2_MOSI   PB5
+#define PIN_SPI2_MISO   PB4
+#define PIN_SPI2_SCK    PB3
+
+//
+// I2C
+//
+// Each define will create a global instance
+// Leave undefined to call your own
+//
+#define BOARD_USE_I2C0
+//#define BOARD_USE_I2C1
+
+// I2C0
 #define PIN_WIRE_SDA    PB7
 #define PIN_WIRE_SCL    PB6
 
+// I2C1
+#define PIN_WIRE1_SDA   PB11
+#define PIN_WIRE1_SCL   PB10
+
+// Timer
 #ifndef TIMER_TONE
     #define TIMER_TONE  2  // TIMER_TONE must be defined in this file
 #endif
@@ -143,14 +177,6 @@
 
 // C++ only
 #ifdef __cplusplus
-
-    inline constexpr uint8_t MOSI = PIN_SPI_MOSI;
-    inline constexpr uint8_t MISO = PIN_SPI_MISO;
-    inline constexpr uint8_t SCK = PIN_SPI_SCK;
-    inline constexpr uint8_t SS = PIN_SPI_SS;
-
-    inline constexpr uint8_t SDA = PIN_WIRE_SDA;
-    inline constexpr uint8_t SCL = PIN_WIRE_SCL;
 
     // These serial port names are intended to allow libraries and architecture-neutral
     // sketches to automatically default to the correct port name for a particular type

@@ -104,10 +104,9 @@ private:
 } // namespace arduino
 
 
-#ifdef SUPPORT_I2C0
+#ifdef BOARD_USE_I2C0
     extern arduino::TwoWire& Wire;
 #endif
-
-#ifdef SUPPORT_I2C1
+#ifdef BOARD_USE_I2C1
     extern arduino::TwoWire& Wire1;
 #endif

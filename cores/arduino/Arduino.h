@@ -30,6 +30,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
     // Extra analog functions
     void analogReadResolution(int resolution);
     void analogWriteResolution(int resolution);
@@ -55,6 +56,7 @@ extern "C" {
 
     // Free debug pins for other use
     void freeDebugPins(pin_size_t pin);
+
 #ifdef __cplusplus
 }
 #endif

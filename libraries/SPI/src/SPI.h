@@ -78,12 +78,13 @@ private:
 
 } // namespace arduino
 
-#ifdef SUPPORT_SPI0
+
+#ifdef BOARD_USE_SPI0
     extern arduino::SPIClassMFL& SPI;
 #endif
-#ifdef SUPPORT_SPI1
+#ifdef BOARD_USE_SPI1
     extern arduino::SPIClassMFL& SPI1;
 #endif
-#ifdef SUPPORT_SPI2
+#ifdef BOARD_USE_SPI2
     extern arduino::SPIClassMFL& SPI2;
 #endif
