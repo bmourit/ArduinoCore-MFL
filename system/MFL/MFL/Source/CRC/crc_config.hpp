@@ -29,7 +29,7 @@ namespace crc {
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
-enum class CRC_Regs : uint32_t {
+enum class CRC_Regs : uint8_t {
     DATA = 0x00U,
     FDATA = 0x04U,
     CTL = 0x08U

@@ -71,7 +71,7 @@ public:
     void set_interrupt_enable(Interrupt_Type type, bool enable);
 
     // Accessor methods
-    I2C_Base get_base() { return base_; }
+    inline I2C_Base get_base() { return base_; }
 
     inline volatile uint32_t* reg_address(I2C_Regs reg) const {
         return reinterpret_cast<volatile uint32_t*>(base_address_ + static_cast<uint32_t>(reg));

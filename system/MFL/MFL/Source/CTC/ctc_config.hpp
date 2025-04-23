@@ -30,7 +30,7 @@ namespace ctc {
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
-enum class CTC_Regs : uint32_t {
+enum class CTC_Regs : uint8_t {
     CTL0 = 0x00U,
     CTL1 = 0x04U,
     STAT = 0x08U,

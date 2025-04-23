@@ -46,25 +46,32 @@ EXTI::EXTI() {}
  *                should generate an interrupt or event.
  */
 void EXTI::init(EXTI_Line line, EXTI_Mode mode, EXTI_Trigger trigger) {
+    // Early return for invalid line
     if (line == EXTI_Line::INVALID) {
         return;
     }
 
-    // Reset
-    write_bit(*this, EXTI_Regs::EVEN, static_cast<uint32_t>(line), false);
-    write_bit(*this, EXTI_Regs::INTEN, static_cast<uint32_t>(line), false);
-    write_bit(*this, EXTI_Regs::RTEN, static_cast<uint32_t>(line), false);
-    write_bit(*this, EXTI_Regs::FTEN, static_cast<uint32_t>(line), false);
+    const uint32_t line_bit = static_cast<uint32_t>(line);
 
-    // EXTI mode with interrupts or events
-    const EXTI_Regs reg = (mode == EXTI_Mode::EXTI_INTERRUPT) ? EXTI_Regs::INTEN : EXTI_Regs::EVEN;
-    write_bit(*this, reg, static_cast<uint32_t>(line), true);
+    // Reset all registers for this line
+    // This ensures a clean configuration state
+    write_bit(*this, EXTI_Regs::EVEN, line_bit, false);
+    write_bit(*this, EXTI_Regs::INTEN, line_bit, false);
+    write_bit(*this, EXTI_Regs::RTEN, line_bit, false);
+    write_bit(*this, EXTI_Regs::FTEN, line_bit, false);
 
-    // EXTI trigger edge
-    const bool rising_edge = (trigger == EXTI_Trigger::TRIG_FALLING) ? false : true;
-    const bool falling_edge = (trigger == EXTI_Trigger::TRIG_RISING) ? false : true;
-    write_bit(*this, EXTI_Regs::RTEN, static_cast<uint32_t>(line), rising_edge);
-    write_bit(*this, EXTI_Regs::FTEN, static_cast<uint32_t>(line), falling_edge);
+    // Set EXTI mode (interrupt or event)
+    // Only one of these registers should be set based on the mode
+    const EXTI_Regs mode_reg = (mode == EXTI_Mode::EXTI_INTERRUPT) ? EXTI_Regs::INTEN : EXTI_Regs::EVEN;
+    write_bit(*this, mode_reg, line_bit, true);
+
+    // Configure trigger edges
+    const bool rising_edge = (trigger != EXTI_Trigger::TRIG_FALLING);
+    const bool falling_edge = (trigger != EXTI_Trigger::TRIG_RISING);
+
+    // Set trigger edges
+    write_bit(*this, EXTI_Regs::RTEN, line_bit, rising_edge);
+    write_bit(*this, EXTI_Regs::FTEN, line_bit, falling_edge);
 }
 
 /**

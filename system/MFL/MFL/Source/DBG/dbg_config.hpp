@@ -29,7 +29,7 @@ namespace armdbg {
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
-enum class DBG_Regs : uint32_t {
+enum class DBG_Regs : uint8_t {
     ID = 0x00U,
     CTL0 = 0x04U
 };

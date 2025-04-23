@@ -29,7 +29,7 @@ namespace pmu {
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
-enum class PMU_Regs : uint32_t {
+enum class PMU_Regs : uint8_t {
     CTL = 0x00U,
     CS = 0x04U
 };

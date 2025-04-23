@@ -20,7 +20,6 @@
 #include <type_traits>
 
 #include "ADC.hpp"
-#include "RCU.hpp"
 
 namespace adc {
 
@@ -727,89 +726,7 @@ void ADC::set_interrupt_enable(Interrupt_Type type, bool enable) {
     write_bit(*this, ADC_Regs::CTL0, static_cast<uint32_t>(type), enable);
 }
 
-/**
- * @brief Configures the sampling time for a given ADC channel.
- *
- * This function sets the sampling time for a specified ADC channel. The
- * sampling time is specified as a member of the ADC_Sample_Time enumeration.
- *
- * @param channel The ADC channel to configure. Must be a valid channel
- *                from the ADC_Channel enumeration.
- * @param sample_time The desired sampling time for the specified channel.
- *                    Must be a valid member of the ADC_Sample_Time enumeration.
- */
-inline void ADC::set_sampling_time(ADC_Channel channel, ADC_Sample_Time sample_time) {
-    if (channel == ADC_Channel::INVALID) {
-        return;
-    }
-
-    const uint32_t chan = static_cast<uint32_t>(channel);
-    const uint32_t sampt = static_cast<uint32_t>(sample_time);
-    const uint32_t shift = (channel >= ADC_Channel::CHANNEL_10) ? (chan - 10U) * 3U : chan * 3U;
-    const ADC_Regs reg = (channel >= ADC_Channel::CHANNEL_10) ? ADC_Regs::SAMPT0 : ADC_Regs::SAMPT1;
-
-    const uint32_t mask = ~(static_cast<uint32_t>(0x7U) << shift);
-    uint32_t reg_value = read_register<uint32_t>(*this, reg);
-    reg_value = (reg_value & mask) | (sampt << shift);
-    write_register(*this, reg, reg_value);
-
-    // Handle temperature sensor channels
-    if (channel == ADC_Channel::CHANNEL_16 || channel == ADC_Channel::CHANNEL_17) {
-        set_temperature_voltage_reference_enable(true);
-        // Calculate delay cycles
-        const uint32_t delay_cycles = (RCU_I.get_system_clock() / 100'000U); // Simplified from (1M * 10)
-        for (uint32_t i = 0; i < delay_cycles; ++i) {
-            __asm__ volatile("nop");
-        }
-    }
-}
-
 ///////////////////////////// OPERATIONAL MODE SPECIFIC METHODS /////////////////////////////
-
-/**
- * @brief Configures the ADC for a regular conversion mode.
- *
- * This function sets up the ADC for a regular conversion mode. It does not
- * start the conversion, but rather configures the ADC to be ready for a
- * conversion. The function is used in conjunction with the start_regular_conversion()
- * function to complete a regular conversion.
- *
- * @note This function does not support internal channels.
- */
-inline void ADC::setup_regular_conversion() {
-    // Make sure flag is cleared
-    clear_flag(Status_Flags::FLAG_EOC);
-    // Internal channels not supported yet in this function
-    write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::TSVREN), false);
-    // In single conversion mode length is forced to zero
-    write_bit_range(*this, ADC_Regs::RSQ0, static_cast<uint32_t>(RSQX_Bits::RL), Clear);
-    // Disable conflicting modes
-    write_bits_sequence(*this, ADC_Regs::CTL0,
-                        static_cast<uint32_t>(CTL0_Bits::DISRC), false,
-                        static_cast<uint32_t>(CTL0_Bits::SM), false);
-    write_bit_range(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::SYNCM), Clear);
-    write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::CTN), false);
-}
-
-/**
- * @brief Clean up after a regular conversion.
- *
- * This function is used to clean up the ADC after a regular conversion. It
- * resets the ADC back to its default state, so that it is ready for another
- * conversion. The function should be called after a regular conversion is
- * complete to ensure the ADC is properly cleaned up.
- */
-inline void ADC::cleanup_regular_conversion() {
-    write_register(*this, ADC_Regs::RSQ2, Clear);
-    write_register(*this, ADC_Regs::RSQ1, Clear);
-    write_register(*this, ADC_Regs::RSQ0, Clear);
-    write_register(*this, ADC_Regs::SAMPT0, Clear);
-    write_register(*this, ADC_Regs::SAMPT1, Clear);
-    write_bit_range(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::ETSRC), Clear);
-    write_bits_sequence(*this, ADC_Regs::CTL1,
-                        static_cast<uint32_t>(CTL1_Bits::ETERC), false,
-                        static_cast<uint32_t>(CTL1_Bits::SWRCST), false);
-}
 
 /**
  * @brief Do a regular single conversion (no interrupt - software trigger only)
@@ -846,6 +763,7 @@ uint32_t ADC::start_regular_single_conversion(ADC_Channel channel, ADC_Sample_Ti
         write_bit_ranges(*this, ADC_Regs::OVSAMPCTL,
                          static_cast<uint32_t>(OVSAMPCTL_Bits::OVSR), static_cast<uint32_t>(Oversampling_Ratio::OVERSAMPLING_RATIO_MUL16),
                          static_cast<uint32_t>(OVSAMPCTL_Bits::OVSS), static_cast<uint32_t>(Oversampling_Shift::OVERSAMPLING_SHIFT_4BIT));
+
         // Enable oversampling
         write_bits_sequence(*this, ADC_Regs::OVSAMPCTL,
                             static_cast<uint32_t>(OVSAMPCTL_Bits::TOVS), false,
@@ -859,6 +777,7 @@ uint32_t ADC::start_regular_single_conversion(ADC_Channel channel, ADC_Sample_Ti
     write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::ADCON), true);
     while (!read_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::ADCON))) {
     }
+
     // If calibration is enabled, wait for the calibration to finish
     if (calibrate) {
         calibration_delay();
@@ -868,13 +787,16 @@ uint32_t ADC::start_regular_single_conversion(ADC_Channel channel, ADC_Sample_Ti
     // Set trigger and trigger source
     write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::ETERC), true);
     write_bit_range(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::ETSRC), static_cast<uint32_t>(External_Trigger_Source::ADC0_1_REGULAR_SOFTWARE));
+
     // Generate software trigger
     write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::SWRCST), true);
     // Wait for the flag to be set
     while (!get_flag(Status_Flags::FLAG_EOC)) {
     }
+
     // Get converted data
     uint32_t converted_data = read_bit_range(*this, ADC_Regs::RDATA, static_cast<uint32_t>(RDATA_Bits::RDATA));
+
     // Clear the flag
     clear_flag(Status_Flags::FLAG_EOC);
     // Cleanup
@@ -885,53 +807,5 @@ uint32_t ADC::start_regular_single_conversion(ADC_Channel channel, ADC_Sample_Ti
     return converted_data;
 }
 
-/**
- * @brief Applies the required delay before calibration begins
- *
- * The delay is calculated based on the ADC prescaler and the system clock.
- * The ADC prescaler is obtained from the RCU interface.
- */
-inline void ADC::calibration_delay() {
-    // Hardware requires delay before starting calibration
-    if (prescaler_ == 0U) {
-        return;
-    }
-
-    volatile uint32_t wait_count = ((RCU_I.get_system_clock() /
-                                    (RCU_I.get_clock_frequency(rcu::Clock_Frequency::CK_APB2) / prescaler_))
-                                    * Calibration_Delay_Cycles);
-
-    while (wait_count != 0) {
-        wait_count = wait_count - 1U;
-    }
-}
-
-/**
- * @brief Gets the current ADC prescaler value.
- *
- * This function retrieves the current ADC prescaler value from the RCU
- * interface and returns it as an unsigned 32-bit integer. The prescaler value
- * determines the division factor applied to the clock signal provided to the
- * ADC module.
- *
- * @return The current ADC prescaler value as an unsigned 32-bit integer.
- */
-inline uint32_t ADC::get_prescaler_value() {
-    rcu::ADC_Prescaler adc_prescaler = RCU_I.get_adc_prescaler();
-
-    switch (adc_prescaler) {
-        case rcu::ADC_Prescaler::CKAPB2_DIV2: case rcu::ADC_Prescaler::CKAPB2_DIV2B: return 2U;
-        case rcu::ADC_Prescaler::CKAPB2_DIV4: return 4U;
-        case rcu::ADC_Prescaler::CKAPB2_DIV6: case rcu::ADC_Prescaler::CKAHB_DIV6: return 6U;
-        case rcu::ADC_Prescaler::CKAPB2_DIV8: case rcu::ADC_Prescaler::CKAPB2_DIV8B: return 8U;
-        case rcu::ADC_Prescaler::CKAPB2_DIV12: return 12U;
-        case rcu::ADC_Prescaler::CKAPB2_DIV16: return 16U;
-        case rcu::ADC_Prescaler::CKAHB_DIV5: return 5U;
-        case rcu::ADC_Prescaler::CKAHB_DIV10: return 10U;
-        case rcu::ADC_Prescaler::CKAHB_DIV20: return 20U;
-        case rcu::ADC_Prescaler::INVALID:
-        default: return 0U;
-    }
-}
 
 }  // namespace adc

@@ -31,7 +31,7 @@ namespace timer {
 
 ///////////////////////////// BASE ADDRESS /////////////////////////////
 
-enum class TIMER_Base : uint32_t {
+enum class TIMER_Base : uint8_t {
     TIMER0_BASE,
     TIMER1_BASE,
     TIMER2_BASE,
@@ -57,7 +57,7 @@ static inline constexpr uintptr_t TIMER_baseAddress[] = {
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
-enum class TIMER_Regs : uint32_t {
+enum class TIMER_Regs : uint8_t {
     CTL0 = 0x00U,
     CTL1 = 0x04U,
     SMCFG = 0x08U,
@@ -599,20 +599,20 @@ enum class TIMER_Error_Type : uint8_t {
 ///////////////////////////// STRUCTURES /////////////////////////////
 
 struct TIMER_Clock_Config {
-    rcu::RCU_PCLK clock_reg;
-    rcu::RCU_PCLK_Reset reset_reg;
+    rcu::RCU_PCLK clock_reg : 6;
+    rcu::RCU_PCLK_Reset reset_reg : 6;
 };
 
 static inline constexpr std::array<TIMER_Clock_Config, 8> TIMER_pclk_index {{
-        {rcu::RCU_PCLK::PCLK_TIMER0, rcu::RCU_PCLK_Reset::PCLK_TIMER0RST},
-        {rcu::RCU_PCLK::PCLK_TIMER1, rcu::RCU_PCLK_Reset::PCLK_TIMER1RST},
-        {rcu::RCU_PCLK::PCLK_TIMER2, rcu::RCU_PCLK_Reset::PCLK_TIMER2RST},
-        {rcu::RCU_PCLK::PCLK_TIMER3, rcu::RCU_PCLK_Reset::PCLK_TIMER3RST},
-        {rcu::RCU_PCLK::PCLK_TIMER4, rcu::RCU_PCLK_Reset::PCLK_TIMER4RST},
-        {rcu::RCU_PCLK::PCLK_TIMER5, rcu::RCU_PCLK_Reset::PCLK_TIMER5RST},
-        {rcu::RCU_PCLK::PCLK_TIMER6, rcu::RCU_PCLK_Reset::PCLK_TIMER6RST},
-        {rcu::RCU_PCLK::PCLK_TIMER7, rcu::RCU_PCLK_Reset::PCLK_TIMER7RST}
-    }};
+    {rcu::RCU_PCLK::PCLK_TIMER0, rcu::RCU_PCLK_Reset::PCLK_TIMER0RST},
+    {rcu::RCU_PCLK::PCLK_TIMER1, rcu::RCU_PCLK_Reset::PCLK_TIMER1RST},
+    {rcu::RCU_PCLK::PCLK_TIMER2, rcu::RCU_PCLK_Reset::PCLK_TIMER2RST},
+    {rcu::RCU_PCLK::PCLK_TIMER3, rcu::RCU_PCLK_Reset::PCLK_TIMER3RST},
+    {rcu::RCU_PCLK::PCLK_TIMER4, rcu::RCU_PCLK_Reset::PCLK_TIMER4RST},
+    {rcu::RCU_PCLK::PCLK_TIMER5, rcu::RCU_PCLK_Reset::PCLK_TIMER5RST},
+    {rcu::RCU_PCLK::PCLK_TIMER6, rcu::RCU_PCLK_Reset::PCLK_TIMER6RST},
+    {rcu::RCU_PCLK::PCLK_TIMER7, rcu::RCU_PCLK_Reset::PCLK_TIMER7RST}
+}};
 
 struct TIMER_Break {
     uint16_t dead_time;

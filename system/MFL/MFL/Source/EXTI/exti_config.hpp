@@ -29,7 +29,7 @@ namespace exti {
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
-enum class EXTI_Regs : uint32_t {
+enum class EXTI_Regs : uint8_t {
     INTEN = 0x00U,
     EVEN = 0x04U,
     RTEN = 0x08U,

@@ -132,11 +132,11 @@ public:
     void disable_all_interrupts();
 
     // Accessor methods
-    TIMER_Base get_base() { return base_; }
-    TIMER_Config& get_config() { return config_; }
-    TIMER_Break& get_break_config() { return break_config_; }
-    TIMER_Input_Capture& get_capture_config() { return capture_config_; }
-    TIMER_Output_Compare& get_compare_config() { return compare_config_; }
+    inline TIMER_Base get_base() { return base_; }
+    inline TIMER_Config& get_config() { return config_; }
+    inline TIMER_Break& get_break_config() { return break_config_; }
+    inline TIMER_Input_Capture& get_capture_config() { return capture_config_; }
+    inline TIMER_Output_Compare& get_compare_config() { return compare_config_; }
 
     inline volatile uint32_t* reg_address(TIMER_Regs reg) const {
         return reinterpret_cast<volatile uint32_t*>(base_address_ + static_cast<uint32_t>(reg));
@@ -157,10 +157,12 @@ private:
     inline bool is_advanced_timer() const {
         return (base_ == TIMER_Base::TIMER0_BASE || base_ == TIMER_Base::TIMER7_BASE);
     }
+
     inline bool is_general_purpose_timer() const {
-        return (base_ == TIMER_Base::TIMER1_BASE || base_ == TIMER_Base::TIMER2_BASE
-                || base_ == TIMER_Base::TIMER3_BASE || base_ == TIMER_Base::TIMER4_BASE);
+        return (base_ == TIMER_Base::TIMER1_BASE || base_ == TIMER_Base::TIMER2_BASE ||
+                base_ == TIMER_Base::TIMER3_BASE || base_ == TIMER_Base::TIMER4_BASE);
     }
+
     inline bool is_basic_timer() const {
         return (base_ == TIMER_Base::TIMER5_BASE || base_ == TIMER_Base::TIMER6_BASE);
     }

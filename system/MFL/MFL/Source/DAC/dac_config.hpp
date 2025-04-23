@@ -29,7 +29,7 @@ namespace dac {
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
-enum class DAC_Regs : uint32_t {
+enum class DAC_Regs : uint8_t {
     CTL = 0x00U,
     SWT = 0x04U,
     DAC0_R12DH = 0x08U,

@@ -29,7 +29,7 @@ namespace rtc {
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
-enum class RTC_Regs : uint32_t {
+enum class RTC_Regs : uint8_t {
     INTEN = 0x00U,
     CTL = 0x04U,
     PSCH = 0x08U,

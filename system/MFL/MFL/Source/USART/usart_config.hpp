@@ -31,7 +31,7 @@ namespace usart {
 
 ///////////////////////////// BASE ADDRESS /////////////////////////////
 
-enum class USART_Base : uint32_t {
+enum class USART_Base : uint8_t {
     USART0_BASE,
     USART1_BASE,
     USART2_BASE,
@@ -52,7 +52,7 @@ static inline constexpr uintptr_t USART_baseAddress[] = {
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
-enum class USART_Regs : uint32_t {
+enum class USART_Regs : uint8_t {
     STAT0 = 0x00U,
     DATA = 0x04U,
     BAUD = 0x08U,
@@ -121,7 +121,7 @@ enum class CTL1_Bits : uint32_t {
     LMEN = 14
 };
 
-enum class CTL2_Bits : uint32_t {
+enum class CTL2_Bits : uint8_t {
     ERRIE = 0,
     IREN = 1,
     IRLP = 2,
@@ -156,7 +156,7 @@ enum class RT_Bits : uint32_t {
     BL = REG_BIT_DEF(24, 31)
 };
 
-enum class STAT1_Bits : uint32_t {
+enum class STAT1_Bits : uint8_t {
     RTF = 11,
     EBF = 12,
     BSY = 16
@@ -319,81 +319,81 @@ enum class USART_Error_Type : uint8_t {
 ///////////////////////////// STRUCTURES /////////////////////////////
 
 struct USART_Clock_Config {
-    rcu::RCU_PCLK clock_reg;
-    rcu::RCU_PCLK_Reset reset_reg;
+    rcu::RCU_PCLK clock_reg : 6;
+    rcu::RCU_PCLK_Reset reset_reg : 6;
 };
 
 static inline constexpr std::array<USART_Clock_Config, 5> USART_pclk_index {{
-        {rcu::RCU_PCLK::PCLK_USART0, rcu::RCU_PCLK_Reset::PCLK_USART0RST},
-        {rcu::RCU_PCLK::PCLK_USART1, rcu::RCU_PCLK_Reset::PCLK_USART1RST},
-        {rcu::RCU_PCLK::PCLK_USART2, rcu::RCU_PCLK_Reset::PCLK_USART2RST},
-        {rcu::RCU_PCLK::PCLK_UART3, rcu::RCU_PCLK_Reset::PCLK_UART3RST},
-        {rcu::RCU_PCLK::PCLK_UART4, rcu::RCU_PCLK_Reset::PCLK_UART4RST}
-    }};
+    {rcu::RCU_PCLK::PCLK_USART0, rcu::RCU_PCLK_Reset::PCLK_USART0RST},
+    {rcu::RCU_PCLK::PCLK_USART1, rcu::RCU_PCLK_Reset::PCLK_USART1RST},
+    {rcu::RCU_PCLK::PCLK_USART2, rcu::RCU_PCLK_Reset::PCLK_USART2RST},
+    {rcu::RCU_PCLK::PCLK_UART3, rcu::RCU_PCLK_Reset::PCLK_UART3RST},
+    {rcu::RCU_PCLK::PCLK_UART4, rcu::RCU_PCLK_Reset::PCLK_UART4RST}
+}};
 
 struct Status_Config {
-    USART_Regs reg;
-    uint8_t bit;
+    USART_Regs reg : 8;
+    uint8_t bit : 5;
 };
 
 static inline constexpr std::array<Status_Config, 13> status_config {{
-        {USART_Regs::STAT0, 0},
-        {USART_Regs::STAT0, 1},
-        {USART_Regs::STAT0, 2},
-        {USART_Regs::STAT0, 3},
-        {USART_Regs::STAT0, 4},
-        {USART_Regs::STAT0, 5},
-        {USART_Regs::STAT0, 6},
-        {USART_Regs::STAT0, 7},
-        {USART_Regs::STAT0, 8},
-        {USART_Regs::STAT0, 9},
-        {USART_Regs::STAT1, 11},
-        {USART_Regs::STAT1, 12},
-        {USART_Regs::STAT1, 16}
-    }};
+    {USART_Regs::STAT0, 0},
+    {USART_Regs::STAT0, 1},
+    {USART_Regs::STAT0, 2},
+    {USART_Regs::STAT0, 3},
+    {USART_Regs::STAT0, 4},
+    {USART_Regs::STAT0, 5},
+    {USART_Regs::STAT0, 6},
+    {USART_Regs::STAT0, 7},
+    {USART_Regs::STAT0, 8},
+    {USART_Regs::STAT0, 9},
+    {USART_Regs::STAT1, 11},
+    {USART_Regs::STAT1, 12},
+    {USART_Regs::STAT1, 16}
+}};
 
 struct Interrupt_Flags_Config {
-    USART_Regs reg;
-    USART_Regs enable_reg;
+    USART_Regs reg : 8;
+    USART_Regs enable_reg : 8;
     bool invert;
-    uint8_t bit;
-    uint8_t enable_bit;
+    uint8_t bit : 4;
+    uint8_t enable_bit : 4;
 };
 
 static inline constexpr std::array<Interrupt_Flags_Config, 13> interrupt_flags_config {{
-        {USART_Regs::STAT0, USART_Regs::CTL0, false, 0, 8},
-        {USART_Regs::STAT0, USART_Regs::CTL0, false, 7, 7},
-        {USART_Regs::STAT0, USART_Regs::CTL0, false, 6, 6},
-        {USART_Regs::STAT0, USART_Regs::CTL0, false, 5, 5},
-        {USART_Regs::STAT0, USART_Regs::CTL0, false, 3, 5},
-        {USART_Regs::STAT0, USART_Regs::CTL0, false, 4, 4},
-        {USART_Regs::STAT0, USART_Regs::CTL1, false, 8, 6},
-        {USART_Regs::STAT0, USART_Regs::CTL2, false, 9, 10},
-        {USART_Regs::STAT0, USART_Regs::CTL2, false, 3, 0},
-        {USART_Regs::STAT0, USART_Regs::CTL2, false, 2, 0},
-        {USART_Regs::STAT0, USART_Regs::CTL2, false, 1, 0},
-        {USART_Regs::STAT1, USART_Regs::CTL3, true, 12, 5},
-        {USART_Regs::STAT1, USART_Regs::CTL3, true, 11, 4}
-    }};
+    {USART_Regs::STAT0, USART_Regs::CTL0, false, 0, 8},
+    {USART_Regs::STAT0, USART_Regs::CTL0, false, 7, 7},
+    {USART_Regs::STAT0, USART_Regs::CTL0, false, 6, 6},
+    {USART_Regs::STAT0, USART_Regs::CTL0, false, 5, 5},
+    {USART_Regs::STAT0, USART_Regs::CTL0, false, 3, 5},
+    {USART_Regs::STAT0, USART_Regs::CTL0, false, 4, 4},
+    {USART_Regs::STAT0, USART_Regs::CTL1, false, 8, 6},
+    {USART_Regs::STAT0, USART_Regs::CTL2, false, 9, 10},
+    {USART_Regs::STAT0, USART_Regs::CTL2, false, 3, 0},
+    {USART_Regs::STAT0, USART_Regs::CTL2, false, 2, 0},
+    {USART_Regs::STAT0, USART_Regs::CTL2, false, 1, 0},
+    {USART_Regs::STAT1, USART_Regs::CTL3, true, 12, 5},
+    {USART_Regs::STAT1, USART_Regs::CTL3, true, 11, 4}
+}};
 
 struct Interrupt_Config {
-    USART_Regs reg;
+    USART_Regs reg : 8;
     bool invert;
-    uint8_t bit_info;
+    uint8_t bit_info : 4;
 };
 
 static inline constexpr std::array<Interrupt_Config, 10> interrupt_config {{
-        {USART_Regs::CTL0, false, 8},
-        {USART_Regs::CTL0, false, 7},
-        {USART_Regs::CTL0, false, 6},
-        {USART_Regs::CTL0, false, 5},
-        {USART_Regs::CTL0, false, 4},
-        {USART_Regs::CTL1, false, 6},
-        {USART_Regs::CTL2, false, 10},
-        {USART_Regs::CTL2, false, 0},
-        {USART_Regs::CTL3, true, 5},
-        {USART_Regs::CTL3, true, 4}
-    }};
+    {USART_Regs::CTL0, false, 8},
+    {USART_Regs::CTL0, false, 7},
+    {USART_Regs::CTL0, false, 6},
+    {USART_Regs::CTL0, false, 5},
+    {USART_Regs::CTL0, false, 4},
+    {USART_Regs::CTL1, false, 6},
+    {USART_Regs::CTL2, false, 10},
+    {USART_Regs::CTL2, false, 0},
+    {USART_Regs::CTL3, true, 5},
+    {USART_Regs::CTL3, true, 4}
+}};
 
 struct USART_sc_params {
     uint8_t guat;

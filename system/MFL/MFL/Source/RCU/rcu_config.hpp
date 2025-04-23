@@ -30,7 +30,7 @@ namespace rcu {
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
-enum class RCU_Regs : uint32_t {
+enum class RCU_Regs : uint8_t {
     CTL = 0x00U,
     CFG0 = 0x04U,
     INTR = 0x08U,
@@ -318,54 +318,54 @@ enum class RCU_PCLK : uint8_t {
 };
 
 struct index_to_bits {
-    RCU_Regs register_offset;
-    uint8_t bit_info;
+    RCU_Regs register_offset : 8;
+    uint8_t bit_info : 5;
 };
 
 static inline constexpr std::array<index_to_bits, 42> pclk_index {{
-        {RCU_Regs::AHBEN, 0},
-        {RCU_Regs::AHBEN, 1},
-        {RCU_Regs::AHBEN, 6},
-        {RCU_Regs::AHBEN, 8},
-        {RCU_Regs::AHBEN, 10},
-        {RCU_Regs::APB1EN, 0},
-        {RCU_Regs::APB1EN, 1},
-        {RCU_Regs::APB1EN, 2},
-        {RCU_Regs::APB1EN, 3},
-        {RCU_Regs::APB1EN, 4},
-        {RCU_Regs::APB1EN, 5},
-        {RCU_Regs::APB1EN, 11},
-        {RCU_Regs::APB1EN, 14},
-        {RCU_Regs::APB1EN, 15},
-        {RCU_Regs::APB1EN, 17},
-        {RCU_Regs::APB1EN, 18},
-        {RCU_Regs::APB1EN, 19},
-        {RCU_Regs::APB1EN, 20},
-        {RCU_Regs::APB1EN, 21},
-        {RCU_Regs::APB1EN, 22},
-        {RCU_Regs::APB1EN, 23},
-        {RCU_Regs::APB1EN, 25},
-        {RCU_Regs::APB1EN, 27},
-        {RCU_Regs::APB1EN, 28},
-        {RCU_Regs::APB1EN, 29},
-        {RCU_Regs::BDCTL, 15},
-        {RCU_Regs::ADDAPB1EN, 27},
-        {RCU_Regs::APB2EN, 0},
-        {RCU_Regs::APB2EN, 2},
-        {RCU_Regs::APB2EN, 3},
-        {RCU_Regs::APB2EN, 4},
-        {RCU_Regs::APB2EN, 5},
-        {RCU_Regs::APB2EN, 6},
-        {RCU_Regs::APB2EN, 7},
-        {RCU_Regs::APB2EN, 8},
-        {RCU_Regs::APB2EN, 9},
-        {RCU_Regs::APB2EN, 10},
-        {RCU_Regs::APB2EN, 11},
-        {RCU_Regs::APB2EN, 12},
-        {RCU_Regs::APB2EN, 13},
-        {RCU_Regs::APB2EN, 14},
-        {RCU_Regs::APB2EN, 15}
-    }};
+    {RCU_Regs::AHBEN, 0},
+    {RCU_Regs::AHBEN, 1},
+    {RCU_Regs::AHBEN, 6},
+    {RCU_Regs::AHBEN, 8},
+    {RCU_Regs::AHBEN, 10},
+    {RCU_Regs::APB1EN, 0},
+    {RCU_Regs::APB1EN, 1},
+    {RCU_Regs::APB1EN, 2},
+    {RCU_Regs::APB1EN, 3},
+    {RCU_Regs::APB1EN, 4},
+    {RCU_Regs::APB1EN, 5},
+    {RCU_Regs::APB1EN, 11},
+    {RCU_Regs::APB1EN, 14},
+    {RCU_Regs::APB1EN, 15},
+    {RCU_Regs::APB1EN, 17},
+    {RCU_Regs::APB1EN, 18},
+    {RCU_Regs::APB1EN, 19},
+    {RCU_Regs::APB1EN, 20},
+    {RCU_Regs::APB1EN, 21},
+    {RCU_Regs::APB1EN, 22},
+    {RCU_Regs::APB1EN, 23},
+    {RCU_Regs::APB1EN, 25},
+    {RCU_Regs::APB1EN, 27},
+    {RCU_Regs::APB1EN, 28},
+    {RCU_Regs::APB1EN, 29},
+    {RCU_Regs::BDCTL, 15},
+    {RCU_Regs::ADDAPB1EN, 27},
+    {RCU_Regs::APB2EN, 0},
+    {RCU_Regs::APB2EN, 2},
+    {RCU_Regs::APB2EN, 3},
+    {RCU_Regs::APB2EN, 4},
+    {RCU_Regs::APB2EN, 5},
+    {RCU_Regs::APB2EN, 6},
+    {RCU_Regs::APB2EN, 7},
+    {RCU_Regs::APB2EN, 8},
+    {RCU_Regs::APB2EN, 9},
+    {RCU_Regs::APB2EN, 10},
+    {RCU_Regs::APB2EN, 11},
+    {RCU_Regs::APB2EN, 12},
+    {RCU_Regs::APB2EN, 13},
+    {RCU_Regs::APB2EN, 14},
+    {RCU_Regs::APB2EN, 15}
+}};
 
 ///////////////////////////// PCLK RESET /////////////////////////////
 
@@ -409,43 +409,43 @@ enum class RCU_PCLK_Reset : uint8_t {
 };
 
 static inline constexpr std::array<index_to_bits, 36> pclk_reset_index {{
-        {RCU_Regs::APB1RST, 0},
-        {RCU_Regs::APB1RST, 1},
-        {RCU_Regs::APB1RST, 2},
-        {RCU_Regs::APB1RST, 3},
-        {RCU_Regs::APB1RST, 4},
-        {RCU_Regs::APB1RST, 5},
-        {RCU_Regs::APB1RST, 11},
-        {RCU_Regs::APB1RST, 14},
-        {RCU_Regs::APB1RST, 15},
-        {RCU_Regs::APB1RST, 17},
-        {RCU_Regs::APB1RST, 18},
-        {RCU_Regs::APB1RST, 19},
-        {RCU_Regs::APB1RST, 20},
-        {RCU_Regs::APB1RST, 21},
-        {RCU_Regs::APB1RST, 22},
-        {RCU_Regs::APB1RST, 23},
-        {RCU_Regs::APB1RST, 25},
-        {RCU_Regs::APB1RST, 27},
-        {RCU_Regs::APB1RST, 28},
-        {RCU_Regs::APB1RST, 29},
-        {RCU_Regs::ADDAPB1RST, 27},
-        {RCU_Regs::APB2RST, 0},
-        {RCU_Regs::APB2RST, 2},
-        {RCU_Regs::APB2RST, 3},
-        {RCU_Regs::APB2RST, 4},
-        {RCU_Regs::APB2RST, 5},
-        {RCU_Regs::APB2RST, 6},
-        {RCU_Regs::APB2RST, 7},
-        {RCU_Regs::APB2RST, 8},
-        {RCU_Regs::APB2RST, 9},
-        {RCU_Regs::APB2RST, 10},
-        {RCU_Regs::APB2RST, 11},
-        {RCU_Regs::APB2RST, 12},
-        {RCU_Regs::APB2RST, 13},
-        {RCU_Regs::APB2RST, 14},
-        {RCU_Regs::APB2RST, 15}
-    }};
+    {RCU_Regs::APB1RST, 0},
+    {RCU_Regs::APB1RST, 1},
+    {RCU_Regs::APB1RST, 2},
+    {RCU_Regs::APB1RST, 3},
+    {RCU_Regs::APB1RST, 4},
+    {RCU_Regs::APB1RST, 5},
+    {RCU_Regs::APB1RST, 11},
+    {RCU_Regs::APB1RST, 14},
+    {RCU_Regs::APB1RST, 15},
+    {RCU_Regs::APB1RST, 17},
+    {RCU_Regs::APB1RST, 18},
+    {RCU_Regs::APB1RST, 19},
+    {RCU_Regs::APB1RST, 20},
+    {RCU_Regs::APB1RST, 21},
+    {RCU_Regs::APB1RST, 22},
+    {RCU_Regs::APB1RST, 23},
+    {RCU_Regs::APB1RST, 25},
+    {RCU_Regs::APB1RST, 27},
+    {RCU_Regs::APB1RST, 28},
+    {RCU_Regs::APB1RST, 29},
+    {RCU_Regs::ADDAPB1RST, 27},
+    {RCU_Regs::APB2RST, 0},
+    {RCU_Regs::APB2RST, 2},
+    {RCU_Regs::APB2RST, 3},
+    {RCU_Regs::APB2RST, 4},
+    {RCU_Regs::APB2RST, 5},
+    {RCU_Regs::APB2RST, 6},
+    {RCU_Regs::APB2RST, 7},
+    {RCU_Regs::APB2RST, 8},
+    {RCU_Regs::APB2RST, 9},
+    {RCU_Regs::APB2RST, 10},
+    {RCU_Regs::APB2RST, 11},
+    {RCU_Regs::APB2RST, 12},
+    {RCU_Regs::APB2RST, 13},
+    {RCU_Regs::APB2RST, 14},
+    {RCU_Regs::APB2RST, 15}
+}};
 
 
 ///////////////////////////// SLEEP /////////////////////////////
@@ -456,9 +456,9 @@ enum class RCU_PCLK_Sleep : uint8_t {
 };
 
 static inline constexpr std::array<index_to_bits, 2> pclk_sleep_index {{
-        {RCU_Regs::AHBEN, 2},
-        {RCU_Regs::AHBEN, 4}
-    }};
+    {RCU_Regs::AHBEN, 2},
+    {RCU_Regs::AHBEN, 4}
+}};
 
 
 ///////////////////////////// INTERRUPTS AND FLAGS /////////////////////////////
@@ -479,19 +479,19 @@ enum class Status_Flags : uint8_t {
 };
 
 static inline constexpr std::array<index_to_bits, 12> status_flag_index {{
-        {RCU_Regs::CTL, 1},
-        {RCU_Regs::CTL, 17},
-        {RCU_Regs::CTL, 25},
-        {RCU_Regs::BDCTL, 1},
-        {RCU_Regs::RSTSCK, 1},
-        {RCU_Regs::ADDCTL, 17},
-        {RCU_Regs::RSTSCK, 26},
-        {RCU_Regs::RSTSCK, 27},
-        {RCU_Regs::RSTSCK, 28},
-        {RCU_Regs::RSTSCK, 29},
-        {RCU_Regs::RSTSCK, 30},
-        {RCU_Regs::RSTSCK, 31}
-    }};
+    {RCU_Regs::CTL, 1},
+    {RCU_Regs::CTL, 17},
+    {RCU_Regs::CTL, 25},
+    {RCU_Regs::BDCTL, 1},
+    {RCU_Regs::RSTSCK, 1},
+    {RCU_Regs::ADDCTL, 17},
+    {RCU_Regs::RSTSCK, 26},
+    {RCU_Regs::RSTSCK, 27},
+    {RCU_Regs::RSTSCK, 28},
+    {RCU_Regs::RSTSCK, 29},
+    {RCU_Regs::RSTSCK, 30},
+    {RCU_Regs::RSTSCK, 31}
+}};
 
 enum class Interrupt_Flags : uint8_t {
     INTR_FLAG_IRC40KSTB,
@@ -504,14 +504,14 @@ enum class Interrupt_Flags : uint8_t {
 };
 
 static inline constexpr std::array<index_to_bits, 7> interrupt_flag_index {{
-        {RCU_Regs::INTR, 0},
-        {RCU_Regs::INTR, 1},
-        {RCU_Regs::INTR, 2},
-        {RCU_Regs::INTR, 3},
-        {RCU_Regs::INTR, 4},
-        {RCU_Regs::INTR, 7},
-        {RCU_Regs::ADDINTR, 6}
-    }};
+    {RCU_Regs::INTR, 0},
+    {RCU_Regs::INTR, 1},
+    {RCU_Regs::INTR, 2},
+    {RCU_Regs::INTR, 3},
+    {RCU_Regs::INTR, 4},
+    {RCU_Regs::INTR, 7},
+    {RCU_Regs::ADDINTR, 6}
+}};
 
 enum class Clear_Flags : uint8_t {
     INTR_FLAG_IRC40KSTB_CLR,
@@ -524,14 +524,14 @@ enum class Clear_Flags : uint8_t {
 };
 
 static inline constexpr std::array<index_to_bits, 7> clear_flag_index {{
-        {RCU_Regs::INTR, 16},
-        {RCU_Regs::INTR, 17},
-        {RCU_Regs::INTR, 18},
-        {RCU_Regs::INTR, 19},
-        {RCU_Regs::INTR, 20},
-        {RCU_Regs::INTR, 23},
-        {RCU_Regs::ADDINTR, 22}
-    }};
+    {RCU_Regs::INTR, 16},
+    {RCU_Regs::INTR, 17},
+    {RCU_Regs::INTR, 18},
+    {RCU_Regs::INTR, 19},
+    {RCU_Regs::INTR, 20},
+    {RCU_Regs::INTR, 23},
+    {RCU_Regs::ADDINTR, 22}
+}};
 
 enum class Interrupt_Type : uint8_t {
     INTR_IRC40KSTB,
@@ -543,13 +543,13 @@ enum class Interrupt_Type : uint8_t {
 };
 
 static inline constexpr std::array<index_to_bits, 6> interrupt_type_index {{
-        {RCU_Regs::INTR, 8},
-        {RCU_Regs::INTR, 9},
-        {RCU_Regs::INTR, 10},
-        {RCU_Regs::INTR, 11},
-        {RCU_Regs::INTR, 12},
-        {RCU_Regs::ADDINTR, 14}
-    }};
+    {RCU_Regs::INTR, 8},
+    {RCU_Regs::INTR, 9},
+    {RCU_Regs::INTR, 10},
+    {RCU_Regs::INTR, 11},
+    {RCU_Regs::INTR, 12},
+    {RCU_Regs::ADDINTR, 14}
+}};
 
 ///////////////////////////// OSCI /////////////////////////////
 
@@ -563,13 +563,13 @@ enum class OSCI_Select : uint8_t {
 };
 
 static inline constexpr std::array<index_to_bits, 6> osci_select_index {{
-        {RCU_Regs::CTL, 16},
-        {RCU_Regs::BDCTL, 0},
-        {RCU_Regs::CTL, 0},
-        {RCU_Regs::ADDCTL, 16},
-        {RCU_Regs::RSTSCK, 0},
-        {RCU_Regs::CTL, 24}
-    }};
+    {RCU_Regs::CTL, 16},
+    {RCU_Regs::BDCTL, 0},
+    {RCU_Regs::CTL, 0},
+    {RCU_Regs::ADDCTL, 16},
+    {RCU_Regs::RSTSCK, 0},
+    {RCU_Regs::CTL, 24}
+}};
 
 
 ///////////////////////////// SYSTEM CLOCK /////////////////////////////
@@ -590,15 +590,15 @@ enum class System_Clock_Source : uint8_t {
 };
 
 struct System_Clock_Source_Mapping {
-    uint32_t value;
-    System_Clock_Source source;
+    uint8_t value : 2;
+    System_Clock_Source source : 2;
 };
 
 static inline constexpr std::array<System_Clock_Source_Mapping, 3> source_mapping {{
-        {0, System_Clock_Source::SOURCE_IRC8M},
-        {1, System_Clock_Source::SOURCE_HXTAL},
-        {2, System_Clock_Source::SOURCE_PLL}
-    }};
+    {0, System_Clock_Source::SOURCE_IRC8M},
+    {1, System_Clock_Source::SOURCE_HXTAL},
+    {2, System_Clock_Source::SOURCE_PLL}
+}};
 
 ///////////////////////////// AHB?APB1/APB2 BUSES /////////////////////////////
 
@@ -654,14 +654,14 @@ enum class PLL_Source : uint8_t {
 };
 
 struct PLL_Source_Mapping {
-    bool value;
-    PLL_Source source;
+    bool value : 1;
+    PLL_Source source : 2;
 };
 
 static inline constexpr std::array<PLL_Source_Mapping, 2> pll_mapping {{
-        {false, PLL_Source::PLLSRC_IRC8M_DIV2},
-        {true, PLL_Source::PLLSRC_HXTAL_IRC48M}
-    }};
+    {false, PLL_Source::PLLSRC_IRC8M_DIV2},
+    {true, PLL_Source::PLLSRC_HXTAL_IRC48M}
+}};
 
 enum class PLLMF_Select : uint8_t {
     PLL_MUL2,
@@ -705,14 +705,14 @@ enum class PLL_Presel : uint8_t {
 };
 
 struct PLL_Presel_Mapping {
-    bool value;
-    PLL_Presel source;
+    bool value : 1;
+    PLL_Presel source : 2;
 };
 
 static inline constexpr std::array<PLL_Presel_Mapping, 2> pll_presel_mapping {{
-        {false, PLL_Presel::PLLPRESRC_HXTAL},
-        {true, PLL_Presel::PLLPRESRC_IRC48M}
-    }};
+    {false, PLL_Presel::PLLPRESRC_HXTAL},
+    {true, PLL_Presel::PLLPRESRC_IRC48M}
+}};
 
 
 ///////////////////////////// USB /////////////////////////////

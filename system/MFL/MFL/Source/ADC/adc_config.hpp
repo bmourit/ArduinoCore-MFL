@@ -31,7 +31,7 @@ namespace adc {
 
 ///////////////////////////// BASE ADDRESS /////////////////////////////
 
-enum class ADC_Base : uint32_t {
+enum class ADC_Base : uint8_t {
     ADC0_BASE,
     ADC1_BASE,
     ADC2_BASE,
@@ -47,7 +47,7 @@ static inline constexpr uintptr_t ADC_baseAddress[] = {
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
-enum class ADC_Regs : uint32_t {
+enum class ADC_Regs : uint8_t {
     STAT = 0x00U,
     CTL0 = 0x04U,
     CTL1 = 0x08U,
@@ -360,23 +360,23 @@ enum class ADC_Error_Type : uint8_t {
 };
 
 
-///////////////////////////// CONSTANTS /////////////////////////////
-
-static inline constexpr uint32_t Calibration_Delay_Cycles = 14U;
-
-
 ///////////////////////////// STRUCTURES /////////////////////////////
 
 struct ADC_Clock_Config {
-    rcu::RCU_PCLK clock_reg;
-    rcu::RCU_PCLK_Reset reset_reg;
+    rcu::RCU_PCLK clock_reg : 6;
+    rcu::RCU_PCLK_Reset reset_reg : 6;
 };
 
 static inline constexpr std::array<ADC_Clock_Config, 3> ADC_pclk_index {{
-        {rcu::RCU_PCLK::PCLK_ADC0, rcu::RCU_PCLK_Reset::PCLK_ADC0RST},
-        {rcu::RCU_PCLK::PCLK_ADC1, rcu::RCU_PCLK_Reset::PCLK_ADC1RST},
-        {rcu::RCU_PCLK::PCLK_ADC2, rcu::RCU_PCLK_Reset::PCLK_ADC2RST}
-    }};
+    {rcu::RCU_PCLK::PCLK_ADC0, rcu::RCU_PCLK_Reset::PCLK_ADC0RST},
+    {rcu::RCU_PCLK::PCLK_ADC1, rcu::RCU_PCLK_Reset::PCLK_ADC1RST},
+    {rcu::RCU_PCLK::PCLK_ADC2, rcu::RCU_PCLK_Reset::PCLK_ADC2RST}
+}};
+
+
+///////////////////////////// CONSTANTS /////////////////////////////
+
+static inline constexpr uint32_t Calibration_Delay_Cycles = 14U;
 
 
 ///////////////////////////// UNUSED DOCUMENTATION ONLY /////////////////////////////

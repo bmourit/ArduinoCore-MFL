@@ -153,6 +153,7 @@ public:
         if (tx_buffer_.isFull()) return false;
         return tx_buffer_.write(data);
     }
+
     inline void modify_rx_buffer_head(uint8_t head) { rx_buffer_.setHead(head); }
     inline void modify_tx_buffer_head(uint8_t head) { tx_buffer_.setHead(head); }
     inline void modify_rx_buffer_tail(uint8_t tail) { rx_buffer_.setTail(tail); }

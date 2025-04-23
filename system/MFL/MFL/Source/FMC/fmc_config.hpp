@@ -47,7 +47,7 @@ enum class FMC_Regs : uint32_t {
     PID = 0x100U
 };
 
-enum class OB_Regs : uint32_t {
+enum class OB_Regs : uint8_t {
     SPC = 0x00U,
     USER = 0x02U,
     DATA1 = 0x04U,
@@ -152,16 +152,16 @@ enum class Status_Flags : uint8_t {
 };
 
 static inline constexpr std::array<index_to_bits, 9> status_flag_index {{
-        {FMC_Regs::STAT0, 0},
-        {FMC_Regs::STAT0, 2},
-        {FMC_Regs::STAT0, 4},
-        {FMC_Regs::STAT0, 5},
-        {FMC_Regs::OBSTAT, 0},
-        {FMC_Regs::STAT1, 0},
-        {FMC_Regs::STAT1, 2},
-        {FMC_Regs::STAT1, 4},
-        {FMC_Regs::STAT1, 5}
-    }};
+    {FMC_Regs::STAT0, 0},
+    {FMC_Regs::STAT0, 2},
+    {FMC_Regs::STAT0, 4},
+    {FMC_Regs::STAT0, 5},
+    {FMC_Regs::OBSTAT, 0},
+    {FMC_Regs::STAT1, 0},
+    {FMC_Regs::STAT1, 2},
+    {FMC_Regs::STAT1, 4},
+    {FMC_Regs::STAT1, 5}
+}};
 
 struct index_to_reg_bits {
     FMC_Regs flag_register_offset;
@@ -180,13 +180,13 @@ enum class Interrupt_Flags : uint8_t {
 };
 
 static inline constexpr std::array<index_to_reg_bits, 6> interrupt_flag_index {{
-        {FMC_Regs::STAT0, 2, FMC_Regs::CTL0, 10},
-        {FMC_Regs::STAT0, 4, FMC_Regs::CTL0, 10},
-        {FMC_Regs::STAT0, 5, FMC_Regs::CTL0, 12},
-        {FMC_Regs::STAT1, 2, FMC_Regs::CTL1, 10},
-        {FMC_Regs::STAT1, 4, FMC_Regs::CTL1, 10},
-        {FMC_Regs::STAT1, 5, FMC_Regs::CTL1, 12}
-    }};
+    {FMC_Regs::STAT0, 2, FMC_Regs::CTL0, 10},
+    {FMC_Regs::STAT0, 4, FMC_Regs::CTL0, 10},
+    {FMC_Regs::STAT0, 5, FMC_Regs::CTL0, 12},
+    {FMC_Regs::STAT1, 2, FMC_Regs::CTL1, 10},
+    {FMC_Regs::STAT1, 4, FMC_Regs::CTL1, 10},
+    {FMC_Regs::STAT1, 5, FMC_Regs::CTL1, 12}
+}};
 
 enum class Interrupt_Types : uint8_t {
     INTR_BANK0_END,
@@ -196,11 +196,11 @@ enum class Interrupt_Types : uint8_t {
 };
 
 static inline constexpr std::array<index_to_bits, 4> interrupt_type_index {{
-        {FMC_Regs::CTL0, 12},
-        {FMC_Regs::CTL0, 10},
-        {FMC_Regs::CTL1, 12},
-        {FMC_Regs::CTL1, 10}
-    }};
+    {FMC_Regs::CTL0, 12},
+    {FMC_Regs::CTL0, 10},
+    {FMC_Regs::CTL1, 12},
+    {FMC_Regs::CTL1, 10}
+}};
 
 enum class Wait_State : uint8_t {
     WS_WSCNT_0,

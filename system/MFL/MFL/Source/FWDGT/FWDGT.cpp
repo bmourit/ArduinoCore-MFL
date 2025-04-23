@@ -81,27 +81,27 @@ void FWDGT::set_write_enable(bool enable) {
  * This function enables write access to the FWDGT registers and attempts to
  * set the prescaler to the specified value. It waits for the PUD flag to clear
  * before proceeding with the operation. If the PUD flag does not clear, the function
- * returns true indicating failure. Otherwise, it returns false indicating success.
+ * returns false indicating failure. Otherwise, it returns true indicating success.
  *
  * @param value The prescaler value to set.
- * @return false on success, true on failure.
+ * @return true on success, false on failure.
  */
 bool FWDGT::set_prescaler(Prescaler_Value value) {
     // Enable write access
     write_register(*this, FWDGT_Regs::CTL, WriteEnable);
 
-    bool status = false;
-    do {
-        status = read_bit(*this, FWDGT_Regs::STAT, static_cast<uint32_t>(STAT_Bits::PUD));
-    } while (status != false);
-
-    // If the PUD flag didn't clear, return true for failure
-    if (status != false) { return true; }
+    // Wait for PUD flag to clear, but bail out on timeout
+    uint32_t cycles = 0;
+    while (read_bit(*this, FWDGT_Regs::STAT, static_cast<uint32_t>(STAT_Bits::PUD))) {
+        if (++cycles >= TimeoutCycles) {
+            return false; // Timeout
+        }
+    }
 
     // Set the prescaler value
     write_register(*this, FWDGT_Regs::PSC, static_cast<uint32_t>(value));
 
-    return false; // Success
+    return true; // Success
 }
 
 /**
@@ -124,26 +124,26 @@ uint32_t FWDGT::get_prescaler() {
  * This function enables write access to the FWDGT registers and attempts to
  * set the reload value to the specified value. It waits for the RUD flag to clear
  * before proceeding with the operation. If the RUD flag does not clear, the function
- * returns true indicating failure. Otherwise, it returns false indicating success.
+ * returns false indicating failure. Otherwise, it returns true indicating success.
  *
  * @param reload The reload value to set.
- * @return false on success, true on failure.
+ * @return true on success, false on failure.
  */
 bool FWDGT::set_reload(uint32_t reload) {
     // Enable write access
     write_register(*this, FWDGT_Regs::CTL, WriteEnable);
 
-    bool status = false;
-    do {
-        status = read_bit(*this, FWDGT_Regs::STAT, static_cast<uint32_t>(STAT_Bits::RUD));
-    } while (status != false);
-
-    if (status != false) {
-        return true;
+    uint32_t cycles = 0;
+    while (read_bit(*this, FWDGT_Regs::STAT, static_cast<uint32_t>(STAT_Bits::RUD))) {
+        if (++cycles >= TimeoutCycles) {
+            return false; // Timeout
+        }
     }
+
+    // Set the reload value
     write_register(*this, FWDGT_Regs::RLD, reload);
 
-    return false;
+    return true;
 }
 
 /**

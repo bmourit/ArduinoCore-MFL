@@ -81,21 +81,95 @@ private:
     FMC(const FMC&) = delete;
     FMC& operator=(const FMC&) = delete;
 
+    // Inlined methods
     template<typename T>
-    inline FMC_Error_Type program_word_to_bank(uint32_t address, uint32_t data,
-            uint32_t timeout, FMC_Regs control_reg, T program_bit);
+    inline FMC_Error_Type program_word_to_bank(
+        uint32_t address, uint32_t data,
+        uint32_t timeout, FMC_Regs control_reg, T program_bit)
+    {
+        auto wait_fn = [this, control_reg](uint32_t to) -> FMC_Error_Type {
+            return (control_reg == FMC_Regs::CTL0)
+                   ? this->ready_wait_bank0(to)
+                   : this->ready_wait_bank1(to);
+        };
+
+        FMC_Error_Type state = wait_fn(timeout);
+        if (state != FMC_Error_Type::READY) return state;
+
+        const uint32_t bit = static_cast<uint32_t>(program_bit);
+        write_bit(*this, control_reg, bit, true);
+        *reinterpret_cast<volatile uint32_t*>(address) = data;
+
+        state = wait_fn(timeout);
+        write_bit(*this, control_reg, bit, false);
+
+        return state;
+    }
 
     template<typename T>
-    inline FMC_Error_Type program_halfword_to_bank(uint32_t address, uint16_t data,
-            uint32_t timeout, FMC_Regs control_reg, T program_bit);
+    inline FMC_Error_Type program_halfword_to_bank(
+        uint32_t address, uint16_t data, uint32_t timeout,
+        FMC_Regs control_reg, T program_bit)
+    {
+        auto wait_fn = [this, control_reg](uint32_t to) -> FMC_Error_Type {
+            return (control_reg == FMC_Regs::CTL0)
+                ? this->ready_wait_bank0(to)
+                : this->ready_wait_bank1(to);
+        };
+
+        FMC_Error_Type state = wait_fn(timeout);
+        if (state != FMC_Error_Type::READY) return state;
+
+        const uint32_t bit = static_cast<uint32_t>(program_bit);
+        write_bit(*this, control_reg, bit, true);
+        *reinterpret_cast<volatile uint16_t*>(address) = data;
+
+        state = wait_fn(timeout);
+        write_bit(*this, control_reg, bit, false);
+
+        return state;
+    }
 
     template<typename T>
-    inline FMC_Error_Type erase_word_bank(uint32_t address, uint32_t timeout,
-                                          FMC_Regs control_reg, T erase_bit, T start_bit, FMC_Regs address_reg);
+    inline FMC_Error_Type erase_word_bank(
+        uint32_t address, uint32_t timeout,
+        FMC_Regs control_reg, T erase_bit, T start_bit,
+        FMC_Regs address_reg)
+    {
+        auto wait_fn = [this, control_reg](uint32_t to) -> FMC_Error_Type {
+            return (control_reg == FMC_Regs::CTL0)
+                ? this->ready_wait_bank0(to)
+                : this->ready_wait_bank1(to);
+        };
+
+        FMC_Error_Type state = wait_fn(timeout);
+        if (state != FMC_Error_Type::READY) return state;
+
+        const uint32_t e_bit = static_cast<uint32_t>(erase_bit);
+        const uint32_t s_bit = static_cast<uint32_t>(start_bit);
+
+        write_bit(*this, control_reg, e_bit, true);
+        write_register(*this, address_reg, address);
+
+        if (control_reg == FMC_Regs::CTL1 &&
+            read_bit(*this, FMC_Regs::OBSTAT, static_cast<uint32_t>(OBSTAT_Bits::SPC))) {
+            write_register(*this, FMC_Regs::ADDR0, address);
+        }
+
+        // Write the start bit
+        write_bit(*this, control_reg, s_bit, true);
+
+        // Wait again and clear the erase bit
+        state = wait_fn(timeout);
+        write_bit(*this, control_reg, e_bit, false);
+
+        return state;
+    }
 
     inline uint16_t get_fmc_size() {
         return *reinterpret_cast<const uint16_t*>(Flash_Size_Addess);
     }
 };
+
 
 } // namespace fmc

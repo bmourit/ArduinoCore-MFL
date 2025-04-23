@@ -41,7 +41,6 @@ public:
     void nvic_irq_enable(uint8_t irq);
     void nvic_irq_disable(uint8_t irq);
 
-
     inline bool get_systick_active_flag() {
         return ((SysTick->CTRL & SysTickCountFlagMask) == (SysTickCountFlagMask));
     }

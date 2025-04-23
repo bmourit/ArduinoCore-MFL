@@ -100,7 +100,7 @@ void EXMC::nor_sram_init() {
                      static_cast<uint32_t>(SNTCFGX_Bits::ASYNCMOD), static_cast<uint32_t>(nor_sram_config_.rw_timing->async_access));
     write_bit(*this, reg_offset, static_cast<uint32_t>(SNCTLX_Bits::NREN), (nor_sram_config_.type == Memory_Type::NOR));
 
-    if (nor_sram_config_.extended_mode == true) {
+    if (nor_sram_config_.extended_mode) {
         write_bit_ranges(*this, reg_offset,
                          static_cast<uint32_t>(SNWTCFGX_Bits::WASET), nor_sram_config_.write_timing->async_ast - 1,
                          static_cast<uint32_t>(SNWTCFGX_Bits::WAHLD), nor_sram_config_.write_timing->async_aht - 1,

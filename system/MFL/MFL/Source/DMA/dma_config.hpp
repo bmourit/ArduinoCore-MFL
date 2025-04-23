@@ -31,7 +31,7 @@ namespace dma {
 
 ///////////////////////////// BASE ADDRESS /////////////////////////////
 
-enum class DMA_Base : uint32_t {
+enum class DMA_Base : uint8_t {
     DMA0_BASE,
     DMA1_BASE,
     INVALID
@@ -45,7 +45,7 @@ static inline constexpr uintptr_t DMA_baseAddress[] = {
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
-enum class DMA_Regs : uint32_t {
+enum class DMA_Regs : uint8_t {
     INTF = 0x00U,
     INTC = 0x04U,
     // CHXCTL
@@ -84,7 +84,7 @@ enum class DMA_Regs : uint32_t {
     INVALID = 0x90U
 };
 
-enum class Channel_Regs : uint32_t {
+enum class Channel_Regs : uint8_t {
     CHXCTL,
     CHXCNT,
     CHXPADDR,
@@ -255,13 +255,13 @@ enum class DMA_Error_Type : uint8_t {
 ///////////////////////////// STRUCTURES /////////////////////////////
 
 struct DMA_Clock_Config {
-    rcu::RCU_PCLK clock_reg;
+    rcu::RCU_PCLK clock_reg : 6;
 };
 
 static inline constexpr std::array<DMA_Clock_Config, 2> DMA_pclk_index {{
-        {rcu::RCU_PCLK::PCLK_DMA0},
-        {rcu::RCU_PCLK::PCLK_DMA1}
-    }};
+    {rcu::RCU_PCLK::PCLK_DMA0},
+    {rcu::RCU_PCLK::PCLK_DMA1}
+}};
 
 struct DMA_Config {
     uint32_t count;

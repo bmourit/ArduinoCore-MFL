@@ -243,11 +243,10 @@ void PMU::set_deep_sleep_enable(Power_Driver driver, PMU_Commands cmd, bool enab
                         static_cast<uint32_t>(CTL_Bits::LDOLP), (driver == Power_Driver::LOW_DRIVER));
     // low drive mode config in deep-sleep mode
     if (enable) {
+        write_bit_range(*this, PMU_Regs::CTL, static_cast<uint32_t>(CTL_Bits::LDEN), 3U);
         if (driver == Power_Driver::NORMAL_DRIVER) {
-            write_bit_range(*this, PMU_Regs::CTL, static_cast<uint32_t>(CTL_Bits::LDEN), Set);
             write_bit(*this, PMU_Regs::CTL, static_cast<uint32_t>(CTL_Bits::LDNP), true);
         } else {
-            write_bit_ranges(*this, PMU_Regs::CTL, static_cast<uint32_t>(CTL_Bits::LDEN), Set);
             write_bit(*this, PMU_Regs::CTL, static_cast<uint32_t>(CTL_Bits::LDLP), true);
         }
     }

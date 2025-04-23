@@ -88,27 +88,23 @@ void SDIO::init(SDIO_Config config) {
     const bool use_div8 = (divider >= 256U) ? true : false;
     const uint32_t div = (divider >= 256U) ? (divider - 256U) : divider;
 
-    constexpr uint32_t all_bits_mask = (
-                                           1U << static_cast<uint32_t>(CLKCTL_Bits::DIV8)) |
+    constexpr uint32_t all_bits_mask = (1U << static_cast<uint32_t>(CLKCTL_Bits::DIV8)) |
                                        (DIV_Mask << DIV_Pos) |
                                        (1U << static_cast<uint32_t>(CLKCTL_Bits::CLKEDGE)) |
                                        (3U << BUSMODE_Pos) |
                                        (1U << static_cast<uint32_t>(CLKCTL_Bits::CLKBYP)) |
                                        (1U << static_cast<uint32_t>(CLKCTL_Bits::CLKPWRSAV)) |
-                                       (1U << static_cast<uint32_t>(CLKCTL_Bits::HWCLKEN)
-                                       );
+                                       (1U << static_cast<uint32_t>(CLKCTL_Bits::HWCLKEN));
 
     uint32_t clkctl_val = read_register<uint32_t>(*this, SDIO_Regs::CLKCTL) & ~all_bits_mask;
 
-    clkctl_val |= (
-                      (use_div8 ? Set : Clear) << static_cast<uint32_t>(CLKCTL_Bits::DIV8)) |
+    clkctl_val |= ((use_div8 ? Set : Clear) << static_cast<uint32_t>(CLKCTL_Bits::DIV8)) |
                   (static_cast<uint16_t>(div) << DIV_Pos) |
                   (static_cast<uint32_t>(config_.clock_edge) << static_cast<uint32_t>(CLKCTL_Bits::CLKEDGE)) |
                   (static_cast<uint32_t>(config_.width) << BUSMODE_Pos) |
                   ((config_.enable_bypass ? Set : Clear) << static_cast<uint32_t>(CLKCTL_Bits::CLKBYP)) |
                   ((config_.enable_powersave ? Set : Clear) << static_cast<uint32_t>(CLKCTL_Bits::CLKPWRSAV)) |
-                  ((config_.enable_hwclock ? Set : Clear) << static_cast<uint32_t>(CLKCTL_Bits::HWCLKEN)
-                  );
+                  ((config_.enable_hwclock ? Set : Clear) << static_cast<uint32_t>(CLKCTL_Bits::HWCLKEN));
 
     write_register(*this, SDIO_Regs::CLKCTL, clkctl_val);
 }
@@ -125,13 +121,11 @@ void SDIO::interface_clock_configure(Clock_Edge edge, bool bypass, bool low_powe
     const bool use_div8 = (divider >= 256) ? true : false;
     const uint32_t div = (divider >= 256) ? (divider - 256) : divider;
 
-    constexpr uint32_t all_bits_mask = (
-                                           (1U << static_cast<uint32_t>(CLKCTL_Bits::DIV8)) |
-                                           (DIV_Mask << DIV_Pos) |
-                                           (1U << static_cast<uint32_t>(CLKCTL_Bits::CLKEDGE)) |
-                                           (1U << static_cast<uint32_t>(CLKCTL_Bits::CLKBYP)) |
-                                           (1U << static_cast<uint32_t>(CLKCTL_Bits::CLKPWRSAV))
-                                       );
+    constexpr uint32_t all_bits_mask = ((1U << static_cast<uint32_t>(CLKCTL_Bits::DIV8)) |
+                                        (DIV_Mask << DIV_Pos) |
+                                        (1U << static_cast<uint32_t>(CLKCTL_Bits::CLKEDGE)) |
+                                        (1U << static_cast<uint32_t>(CLKCTL_Bits::CLKBYP)) |
+                                        (1U << static_cast<uint32_t>(CLKCTL_Bits::CLKPWRSAV)));
 
     uint32_t clkctl_val = read_register<uint32_t>(*this, SDIO_Regs::CLKCTL) & ~all_bits_mask;
 
@@ -160,7 +154,7 @@ void SDIO::interface_clock_configure(Clock_Edge edge, bool bypass, bool low_powe
  */
 uint32_t SDIO::get_clock_divider() {
     uint32_t divider = read_bit_range(*this, SDIO_Regs::CLKCTL, static_cast<uint32_t>(CLKCTL_Bits::DIV));
-    divider += (read_bit(*this, SDIO_Regs::CLKCTL, static_cast<uint32_t>(CLKCTL_Bits::DIV8)) ? 1U * 256U : 0U);
+    divider += read_bit(*this, SDIO_Regs::CLKCTL, static_cast<uint32_t>(CLKCTL_Bits::DIV8)) ? 1U * 256U : 0U;
     divider += 2U;
     return divider;
 }
@@ -372,20 +366,16 @@ void SDIO::set_data_state_machine_and_send(uint32_t timeout, uint32_t length, Bl
     write_register(*this, SDIO_Regs::DATATO, timeout);
     write_bit_range(*this, SDIO_Regs::DATALEN, static_cast<uint32_t>(DATALEN_Bits::DATALEN), length);
 
-    constexpr uint32_t all_bits_mask = (
-                                           (BLKSZ_Mask << BLKSZ_Pos) |
-                                           (1U << static_cast<uint32_t>(DATACTL_Bits::TRANSMOD)) |
-                                           (1U << static_cast<uint32_t>(DATACTL_Bits::DATADIR))
-                                       );
+    constexpr uint32_t all_bits_mask = (BLKSZ_Mask << BLKSZ_Pos) |
+                                       (1U << static_cast<uint32_t>(DATACTL_Bits::TRANSMOD)) |
+                                       (1U << static_cast<uint32_t>(DATACTL_Bits::DATADIR));
 
     uint32_t datactl_val = read_register<uint32_t>(*this, SDIO_Regs::DATACTL) & ~all_bits_mask;
 
-    datactl_val |= (
-                       (static_cast<uint32_t>(size) << BLKSZ_Pos) |
-                       (static_cast<uint32_t>(mode) << static_cast<uint32_t>(DATACTL_Bits::TRANSMOD)) |
-                       (static_cast<uint32_t>(direction) << static_cast<uint32_t>(DATACTL_Bits::DATADIR)) |
-                       ((enable ? Set : Clear) << static_cast<uint32_t>(DATACTL_Bits::DATAEN))
-                   );
+    datactl_val |= (static_cast<uint32_t>(size) << BLKSZ_Pos) |
+                   (static_cast<uint32_t>(mode) << static_cast<uint32_t>(DATACTL_Bits::TRANSMOD)) |
+                   (static_cast<uint32_t>(direction) << static_cast<uint32_t>(DATACTL_Bits::DATADIR)) |
+                   ((enable ? Set : Clear) << static_cast<uint32_t>(DATACTL_Bits::DATAEN));
 
     write_register(*this, SDIO_Regs::DATACTL, datactl_val);
 }
@@ -738,10 +728,10 @@ bool SDIO::wait_cmd_flags() {
 bool SDIO::check_scr_flags() {
     uint32_t reg_value = read_register<uint32_t>(*this, SDIO_Regs::STAT);
 
-    uint32_t mask = ((1U << static_cast<uint32_t>(Status_Flags::FLAG_RXORE)) |
-                     (1U << static_cast<uint32_t>(Status_Flags::FLAG_DTCRCERR)) |
-                     (1U << static_cast<uint32_t>(Status_Flags::FLAG_DTTMOUT)) |
-                     (1U << static_cast<uint32_t>(Status_Flags::FLAG_DTBLKEND)));
+    uint32_t mask = (1U << static_cast<uint32_t>(Status_Flags::FLAG_RXORE)) |
+                    (1U << static_cast<uint32_t>(Status_Flags::FLAG_DTCRCERR)) |
+                    (1U << static_cast<uint32_t>(Status_Flags::FLAG_DTTMOUT)) |
+                    (1U << static_cast<uint32_t>(Status_Flags::FLAG_DTBLKEND));
 
     return (reg_value & mask) != Clear;
 }

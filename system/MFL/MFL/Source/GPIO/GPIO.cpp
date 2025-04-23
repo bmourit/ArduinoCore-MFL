@@ -146,7 +146,7 @@ void GPIO::set_pin_mode(Pin_Number pin, Pin_Mode mode, Output_Speed speed) {
 /**
  * @brief Get the current pin mode for the given pin.
  *
- * @param[in] pin The pin number to query.
+ * @param pin The pin number to query.
  *
  * @return The current pin mode.
  */
@@ -177,7 +177,7 @@ Pin_Mode GPIO::get_pin_mode(Pin_Number pin) {
 /**
  * @brief Set the specified pin to a high state.
  *
- * @param[in] pin The pin number to set.
+ * @param pin The pin number to set.
  */
 void GPIO::set_pin_high(Pin_Number pin) {
     if (pin == Pin_Number::INVALID) {
@@ -189,7 +189,7 @@ void GPIO::set_pin_high(Pin_Number pin) {
 /**
  * @brief Set the specified pin to a low state.
  *
- * @param[in] pin The pin number to set.
+ * @param pin The pin number to set.
  */
 void GPIO::set_pin_low(Pin_Number pin) {
     if (pin == Pin_Number::INVALID) {
@@ -206,8 +206,8 @@ void GPIO::set_pin_low(Pin_Number pin) {
  * the specified state. If the pin is currently in an input mode, then the pin will be set
  * to the specified pull state.
  *
- * @param[in] pin The pin number to set.
- * @param[in] high If true, the pin is set to a high state. If false, the pin is set to a low state.
+ * @param pin The pin number to set.
+ * @param high If true, the pin is set to a high state. If false, the pin is set to a low state.
  */
 void GPIO::set_pin_level(Pin_Number pin, bool high) {
     if (pin == Pin_Number::INVALID) {
@@ -224,8 +224,8 @@ void GPIO::set_pin_level(Pin_Number pin, bool high) {
  * pin is set to a low state. The pin must be in an output mode for this function to have any
  * effect.
  *
- * @param[in] pin The pin number to write to.
- * @param[in] set If true, the pin is set to a high state. If false, the pin is set to a low state.
+ * @param pin The pin number to write to.
+ * @param set If true, the pin is set to a high state. If false, the pin is set to a low state.
  */
 void GPIO::write_pin(Pin_Number pin, bool set) {
     if (pin == Pin_Number::INVALID) {
@@ -242,7 +242,7 @@ void GPIO::write_pin(Pin_Number pin, bool set) {
  * currently in an input mode, then this function will return the current state of the pin
  * as determined by the external hardware.
  *
- * @param[in] pin The pin number to read from.
+ * @param pin The pin number to read from.
  * @return The state of the specified pin. If the pin is in an output mode, the state
  *         returned is the last state written to the pin. If the pin is in an input mode,
  *         the state returned is the current state of the pin as determined by the
@@ -258,7 +258,7 @@ bool GPIO::read_pin(Pin_Number pin) {
 /**
  * @brief Toggles the specified GPIO pin.
  *
- * @param pin  GPIO pin to toggle.
+ * @param pin GPIO pin to toggle.
  *
  * @note This function relies on the GPIO peripheral's semantics, where the BOP
  *       (bit set) and BC (bit clear) registers are used for atomic pin operations:
@@ -285,7 +285,7 @@ void GPIO::toggle_pin(Pin_Number pin) {
  * This function writes the specified 16-bit data to the port. The data is written to the
  * OCTL register, and the state of all pins on the port is modified accordingly.
  *
- * @param[in] data The 16-bit data to write to the port.
+ * @param data The 16-bit data to write to the port.
  */
 void GPIO::set_port(uint16_t data) {
     write_register(*this, GPIO_Regs::OCTL, static_cast<uint32_t>(data));
@@ -299,7 +299,7 @@ void GPIO::set_port(uint16_t data) {
  * pin. If the pin is in an input mode, the state returned is the current state of the pin as
  * determined by the external hardware.
  *
- * @param[in] pin The pin number to read.
+ * @param pin The pin number to read.
  * @return The current state of the pin. If the pin is in an output mode, the state returned is
  *         the last state written to the pin. If the pin is in an input mode, the state returned is
  *         the current state of the pin as determined by the external hardware.
@@ -318,7 +318,7 @@ bool GPIO::get_pin_input_state(Pin_Number pin) {
  * on the OCTL register. If the pin is in an output mode, the state returned is
  * the last state written to the pin. If the pin is invalid, it returns false.
  *
- * @param[in] pin The pin number to read from.
+ * @param pin The pin number to read from.
  * @return True if the pin is set to a high state, false otherwise.
  */
 bool GPIO::get_pin_output_state(Pin_Number pin) {
@@ -368,9 +368,12 @@ uint16_t GPIO::get_port_output_state() {
  * @param pin The pin number to lock.
  */
 void GPIO::lock_pin(Pin_Number pin) {
-    if (pin == Pin_Number::INVALID) { return; }
+    if (pin == Pin_Number::INVALID) {
+        return;
+    }
+
     uint32_t lock = LockValue;
-    lock |= (1U << static_cast<size_t>(pin));
+    lock |= (1U << static_cast<uint32_t>(pin));
 
     // lock the pin by write/read in this order
     // write lock -> write pin -> write lock -> read 1x -> read 2x

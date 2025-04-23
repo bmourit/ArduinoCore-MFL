@@ -180,7 +180,9 @@ System_Clock_Source RCU::get_system_source() {
  * @param[in] prescaler The AHB prescaler to be set.
  */
 void RCU::set_ahb_prescaler(AHB_Prescaler prescaler) {
-    if (prescaler == AHB_Prescaler::INVALID) { return; }
+    if (prescaler == AHB_Prescaler::INVALID) {
+        return;
+    }
     write_bit_range(*this, RCU_Regs::CFG0, static_cast<uint32_t>(CFG0_Bits::AHBPSC), static_cast<uint32_t>(prescaler));
 }
 
@@ -208,7 +210,9 @@ AHB_Prescaler RCU::get_ahb_prescaler() {
  * @param[in] prescaler The APB1 prescaler to be set.
  */
 void RCU::set_apb1_prescaler(APB_Prescaler prescaler) {
-    if (prescaler == APB_Prescaler::INVALID) { return; }
+    if (prescaler == APB_Prescaler::INVALID) {
+        return;
+    }
     write_bit_range(*this, RCU_Regs::CFG0, static_cast<uint32_t>(CFG0_Bits::APB1PSC), static_cast<uint32_t>(prescaler));
 }
 
@@ -236,7 +240,9 @@ APB_Prescaler RCU::get_apb1_prescaler() {
  * @param[in] prescaler The APB2 prescaler to be set.
  */
 void RCU::set_apb2_prescaler(APB_Prescaler prescaler) {
-    if (prescaler == APB_Prescaler::INVALID) { return; }
+    if (prescaler == APB_Prescaler::INVALID) {
+        return;
+    }
     write_bit_range(*this, RCU_Regs::CFG0, static_cast<uint32_t>(CFG0_Bits::APB2PSC), static_cast<uint32_t>(prescaler));
 }
 
@@ -278,7 +284,10 @@ void RCU::set_ckout0_source(CKOUT0_Source source) {
  * @param[in] multiplier The PLL multiplier to be set, represented by the PLLMF_Select enum.
  */
 void RCU::set_pll_config(PLL_Source source, PLLMF_Select multiplier) {
-    if (source == PLL_Source::PLLSRC_INVALID) { return; }
+    if (source == PLL_Source::PLLSRC_INVALID) {
+        return;
+    }
+
     // Set PLL source
     write_bit(*this, RCU_Regs::CFG0, static_cast<uint32_t>(CFG0_Bits::PLLSEL), (source == PLL_Source::PLLSRC_HXTAL_IRC48M));
     uint32_t bits = static_cast<uint32_t>(multiplier);
@@ -318,7 +327,9 @@ PLL_Source RCU::get_pll_source() {
  * @param[in] presel The PLL prescaler to be set, represented by the PLL_Presel enum.
  */
 void RCU::set_pll_presel(PLL_Presel presel) {
-    if (presel == PLL_Presel::PLLPRESRC_INVALID) { return; }
+    if (presel == PLL_Presel::PLLPRESRC_INVALID) {
+        return;
+    }
     write_bit(*this, RCU_Regs::CFG1, static_cast<uint32_t>(CFG1_Bits::PLLPRESEL), (presel == PLL_Presel::PLLPRESRC_IRC48M));
 }
 
@@ -374,6 +385,7 @@ void RCU::set_adc_prescaler(ADC_Prescaler prescaler) {
     if (prescaler == ADC_Prescaler::INVALID) {
         return;
     }
+
     // Reset prescaler
     write_bit_range(*this, RCU_Regs::CFG0, static_cast<uint32_t>(CFG0_Bits::ADCPSC), Clear);
     write_bit(*this, RCU_Regs::CFG0, static_cast<uint32_t>(CFG0_Bits::ADCPSC_2), false);
@@ -556,14 +568,13 @@ uint32_t RCU::get_clock_source_frequency(System_Clock_Source source) {
  *         cannot be determined, the function returns 0.
  */
 uint32_t RCU::calculate_pll_frequency() {
-    uint32_t osci_source = 0U;
-
     // Determine PLL source (HXTAL or IRC8M/IRC48M)
     PLL_Source pll_source = get_pll_source();
     if (pll_source == PLL_Source::PLLSRC_INVALID) {
         return 0U;
     }
 
+    uint32_t osci_source = 0U;
     if (pll_source == PLL_Source::PLLSRC_HXTAL_IRC48M) {
         PLL_Presel pll_presel = get_pll_presel();
         if (pll_presel == PLL_Presel::PLLPRESRC_INVALID) {
@@ -600,7 +611,7 @@ uint32_t RCU::get_pll_multiplier() {
         multiplier |= 0x20U;
     }
     // Adjust the multiplier based on the value
-    return (multiplier < 15U) ? (multiplier + 2U) : (multiplier <= 62U) ? (multiplier + 1U) : 63U;
+    return (multiplier < 15U) ? multiplier + 2U : (multiplier <= 62U) ? multiplier + 1U : 63U;
 }
 
 /**
@@ -649,9 +660,9 @@ uint32_t RCU::get_clock_frequency(Clock_Frequency clock) {
  * register offset and bit information associated with the oscillator source in the osci_select_index
  * array and uses the write_bit_range function to set the appropriate bits in the register.
  *
- * @param[in] osci The oscillator source to set the bypass mode for, represented by the OSCI_Select
+ * @param osci The oscillator source to set the bypass mode for, represented by the OSCI_Select
  *                 enumeration. Only HXTAL or LXTAL support this feature.
- * @param[in] enable A boolean value indicating whether the bypass mode should be enabled (true) or
+ * @param enable A boolean value indicating whether the bypass mode should be enabled (true) or
  *                   disabled (false).
  */
 void RCU::set_bypass_mode_enable(OSCI_Select osci, bool enable) {
@@ -672,7 +683,7 @@ void RCU::set_bypass_mode_enable(OSCI_Select osci, bool enable) {
  * IRC8M oscillator. The adjustment value ranges from 0 to 63, and it should be set to the value
  * recommended by the device datasheet.
  *
- * @param[in] value The IRC8M adjustment value (0 to 63)
+ * @param value The IRC8M adjustment value (0 to 63)
  */
 void RCU::set_irc8m_adjustment_value(uint32_t value) {
     write_bit_range(*this, RCU_Regs::CTL, static_cast<uint32_t>(CTL_Bits::IRC8MADJ), static_cast<uint32_t>(value));
@@ -685,7 +696,7 @@ void RCU::set_irc8m_adjustment_value(uint32_t value) {
  * HXTAL will be monitored and an interrupt will be generated if the HXTAL frequency is lower than the
  * threshold value set by the HXTALCFG register.
  *
- * @param[in] enable A boolean value indicating whether the HXTAL monitor should be enabled (true) or
+ * @param enable A boolean value indicating whether the HXTAL monitor should be enabled (true) or
  *                   disabled (false).
  */
 void RCU::set_hxtal_monitor_enable(bool enable) {
@@ -700,7 +711,7 @@ void RCU::set_hxtal_monitor_enable(bool enable) {
  * defined by the DeepSleep_Voltage enum and determines the voltage used during
  * deep sleep mode.
  *
- * @param[in] voltage The desired deep sleep voltage level, specified by the
+ * @param voltage The desired deep sleep voltage level, specified by the
  *                    DeepSleep_Voltage enum.
  */
 void RCU::set_deep_sleep_voltage(DeepSleep_Voltage voltage) {
@@ -754,7 +765,7 @@ bool RCU::get_interrupt_flag(Interrupt_Flags flag) {
  * The flag is cleared by writing a 1 to the corresponding bit in the register specified
  * by the clear_flag_index array.
  *
- * @param[in] flag The interrupt flag to clear, specified as a Clear_Flags enumeration value.
+ * @param flag The interrupt flag to clear, specified as a Clear_Flags enumeration value.
  */
 void RCU::clear_interrupt_flag(Clear_Flags flag) {
     const auto& config = clear_flag_index[static_cast<size_t>(flag)];
@@ -771,9 +782,9 @@ void RCU::clear_interrupt_flag(Clear_Flags flag) {
  * type in the interrupt_type_index array and uses the write_bit_range function
  * to set the appropriate bits in the register.
  *
- * @param[in] type The interrupt type to enable or disable, specified as an
+ * @param type The interrupt type to enable or disable, specified as an
  *                 Interrupt_Type enumeration value.
- * @param[in] enable A boolean value indicating whether the interrupt type should
+ * @param enable A boolean value indicating whether the interrupt type should
  *                   be enabled (true) or disabled (false).
  */
 void RCU::set_interrupt_enable(Interrupt_Type type, bool enable) {

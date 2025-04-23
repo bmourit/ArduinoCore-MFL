@@ -61,7 +61,7 @@ public:
     void lock_pin(Pin_Number pin);
 
     // Accessor methods
-    GPIO_Base get_base() { return base_; }
+    inline GPIO_Base get_base() { return base_; }
 
     // Register address
     inline volatile uint32_t* reg_address(GPIO_Regs reg) const {

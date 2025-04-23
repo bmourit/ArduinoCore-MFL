@@ -29,7 +29,7 @@ namespace bkp {
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
-enum class BKP_Regs : uint32_t {
+enum class BKP_Regs : uint8_t {
     DATA0 = 0x04,
     DATA1 = 0x08,
     DATA2 = 0x0C,

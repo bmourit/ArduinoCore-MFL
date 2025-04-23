@@ -72,12 +72,12 @@ public:
     void set_interrupt_enable(Interrupt_Type type, bool enable);
 
     // Accessor methods
-    DMA_Base get_base() { return base_; }
-    DMA_Channel get_channel() { return channel_; }
-    DMA_Config get_config() { return config_; }
+    inline DMA_Base get_base() { return base_; }
+    inline DMA_Channel get_channel() { return channel_; }
+    inline DMA_Config get_config() { return config_; }
 
     // Register address
-    volatile uint32_t* reg_address(DMA_Regs reg) const {
+    inline volatile uint32_t* reg_address(DMA_Regs reg) const {
         return reinterpret_cast<volatile uint32_t*>(base_address_ + static_cast<uint32_t>(reg));
     }
 
@@ -98,12 +98,81 @@ private:
         DMA_Regs maddr;
     } cached_offsets_;
 
-    inline INTF_Bits get_channel_bits_from_flag(Status_Flags flag);
-    inline DMA_Regs get_channel_offset_from_reg(Channel_Regs reg);
     void cache_register_offsets();
+
+    // Inlined methods
+    inline INTF_Bits get_channel_bits_from_flag(Status_Flags flag) {
+        // Get indices with bounds checking
+        const uint8_t flag_idx = static_cast<uint8_t>(flag);
+        const uint8_t channel_idx = static_cast<uint8_t>(channel_);
+    
+        // Early return for invalid inputs
+        if (flag_idx >= 4 || channel_idx >= 7) {    // 4 flag types, 7 channels (0-6)
+            return INTF_Bits::INVALID;
+        }
+
+        // Use a 2D table with direct indexing for better performance
+        // First dimension: flag index, Second dimension: channel number
+        static constexpr INTF_Bits flag_map[4][7] = {
+            {
+                INTF_Bits::GIF0, INTF_Bits::GIF1, INTF_Bits::GIF2,
+                INTF_Bits::GIF3, INTF_Bits::GIF4, INTF_Bits::GIF5,
+                INTF_Bits::GIF6
+            },
+            {
+                INTF_Bits::FTFIF0, INTF_Bits::FTFIF1, INTF_Bits::FTFIF2,
+                INTF_Bits::FTFIF3, INTF_Bits::FTFIF4, INTF_Bits::FTFIF5,
+                INTF_Bits::FTFIF6
+            },
+            {
+                INTF_Bits::HTFIF0, INTF_Bits::HTFIF1, INTF_Bits::HTFIF2,
+                INTF_Bits::HTFIF3, INTF_Bits::HTFIF4, INTF_Bits::HTFIF5,
+                INTF_Bits::HTFIF6
+            },
+            {
+                INTF_Bits::ERRIF0, INTF_Bits::ERRIF1, INTF_Bits::ERRIF2,
+                INTF_Bits::ERRIF3, INTF_Bits::ERRIF4, INTF_Bits::ERRIF5,
+                INTF_Bits::ERRIF6
+            }
+        };
+
+        // Direct array access with pre-validated indices
+        return flag_map[flag_idx][channel_idx];
+    }
+
+    inline DMA_Regs get_channel_offset_from_reg(Channel_Regs reg) {
+        // Early return for invalid inputs
+        if (reg == Channel_Regs::INVALID) {
+            return DMA_Regs::INVALID;
+        }
+
+        const uint8_t channel_idx = static_cast<uint8_t>(channel_);
+        if (channel_idx > 6) {  // 7 channels (0-6)
+            return DMA_Regs::INVALID;
+        }
+
+        uint8_t base_offset;
+        switch (reg) {
+            case Channel_Regs::CHXCTL: base_offset = 0x08U; break;
+            case Channel_Regs::CHXCNT: base_offset = 0x0CU; break;
+            case Channel_Regs::CHXPADDR: base_offset = 0x10U; break;
+            case Channel_Regs::CHXMADDR: base_offset = 0x14U; break;
+            case Channel_Regs::INVALID:
+            default: return DMA_Regs::INVALID;
+        }
+
+        // Each channel's registers are offset by 0x14 bytes from the previous channel
+        const uint8_t channel_offset = channel_idx * 0x14U;
+        // Calculate final register address
+        const uint8_t reg_address = base_offset + channel_offset;
+
+        // Convert to DMA_Regs enum value
+        return static_cast<DMA_Regs>(reg_address);
+    }
 
     template <DMA_Base Base, DMA_Channel Channel>
     friend DMA& get_instance_for_base();
 };
+
 
 } // namespace dma

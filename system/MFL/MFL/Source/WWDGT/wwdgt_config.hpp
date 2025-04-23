@@ -29,7 +29,7 @@ namespace wwdgt {
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
-enum class WWDGT_Regs : uint32_t {
+enum class WWDGT_Regs : uint8_t {
     CTL = 0x00U,
     CFG = 0x04U,
     STAT = 0x08U
@@ -49,7 +49,7 @@ enum class CFG_Bits : uint32_t {
     EWIE = 9
 };
 
-enum class STAT_Bits : uint32_t {
+enum class STAT_Bits : uint8_t {
     EWIF = 0
 };
 

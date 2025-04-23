@@ -128,29 +128,25 @@ void FMC::lock_bank1() {
  * @return The state of the FMC after the mass erase operation.
  */
 FMC_Error_Type FMC::mass_erase() {
-    uint32_t timeout = reinterpret_cast<uint32_t>(Timeout_Count);
-    FMC_Error_Type state = ready_wait_bank0(timeout);
+    FMC_Error_Type state = ready_wait_bank0(Timeout_Count);
 
     if (state == FMC_Error_Type::READY) {
         write_bits_sequence(*this, FMC_Regs::CTL0,
                             static_cast<uint32_t>(CTL0_Bits::MER), true,
                             static_cast<uint32_t>(CTL0_Bits::START), true);
         // Wait until ready
-        timeout = reinterpret_cast<uint32_t>(Timeout_Count);
-        state = ready_wait_bank0(timeout);
+        state = ready_wait_bank0(Timeout_Count);
         write_bit(*this, FMC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::MER), false);
     }
 
     if (get_fmc_size() > Bank0_Size) {
-        timeout = reinterpret_cast<uint32_t>(Timeout_Count);
-        state = ready_wait_bank1(timeout);
+        state = ready_wait_bank1(Timeout_Count);
         if (state == FMC_Error_Type::READY) {
             write_bits_sequence(*this, FMC_Regs::CTL1,
                                 static_cast<uint32_t>(CTL1_Bits::MER), true,
                                 static_cast<uint32_t>(CTL1_Bits::START), true);
             // Wait until ready
-            timeout = reinterpret_cast<uint32_t>(Timeout_Count);
-            state = ready_wait_bank1(timeout);
+            state = ready_wait_bank1(Timeout_Count);
             write_bit(*this, FMC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::MER), false);
         }
     }
@@ -171,21 +167,23 @@ FMC_Error_Type FMC::mass_erase() {
  * @return The state of the FMC after the erase operation.
  */
 FMC_Error_Type FMC::erase_page(uint32_t address) {
-    FMC_Error_Type state = FMC_Error_Type::READY;
-    uint32_t timeout = reinterpret_cast<uint32_t>(Timeout_Count);
-
-    // Determine which bank to use based on the address and FMC size
+    // Choose bank based on FMC size or address threshold
     bool is_bank0 = (get_fmc_size() <= Bank0_Size || address < Bank0_End_Address);
 
-    if (is_bank0) {
-        state = erase_word_bank(address, timeout, FMC_Regs::CTL0, CTL0_Bits::PER,
-                                CTL0_Bits::START, FMC_Regs::ADDR0);
-    } else {
-        state = erase_word_bank(address, timeout, FMC_Regs::CTL1, CTL1_Bits::PER,
-                                CTL1_Bits::START, FMC_Regs::ADDR1);
-    }
+    // Pick the correct CTL register
+    auto ctl_reg = is_bank0 ? FMC_Regs::CTL0 : FMC_Regs::CTL1;
+    // Unify PER bit to a uint32_t to avoid mixing enum classes
+    uint32_t per_bit = is_bank0
+        ? static_cast<uint32_t>(CTL0_Bits::PER)
+        : static_cast<uint32_t>(CTL1_Bits::PER);
+    // Unify START bit to a uint32_t to avoid mixing enum classes
+    uint32_t start_bit = is_bank0
+        ? static_cast<uint32_t>(CTL0_Bits::START)
+        : static_cast<uint32_t>(CTL1_Bits::START);
+    // Pick the correct ADDR register
+    auto addr_reg = is_bank0 ? FMC_Regs::ADDR0 : FMC_Regs::ADDR1;
 
-    return state;
+    return erase_word_bank(address, Timeout_Count, ctl_reg, per_bit, start_bit, addr_reg);
 }
 
 /**
@@ -198,19 +196,18 @@ FMC_Error_Type FMC::erase_page(uint32_t address) {
  * @return The state of the FMC after the erase operation.
  */
 FMC_Error_Type FMC::erase_bank0() {
-    FMC_Error_Type state = FMC_Error_Type::READY;
-    uint32_t timeout = reinterpret_cast<uint32_t>(Timeout_Count);
-
-    state = ready_wait_bank0(timeout);
-    if (state == FMC_Error_Type::READY) {
-        write_bits_sequence(*this, FMC_Regs::CTL0,
-                            static_cast<uint32_t>(CTL0_Bits::MER), true,
-                            static_cast<uint32_t>(CTL0_Bits::START), true);
-        // Wait until ready
-        timeout = reinterpret_cast<uint32_t>(Timeout_Count);
-        state = ready_wait_bank0(timeout);
-        write_bit(*this, FMC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::MER), false);
+    FMC_Error_Type state = ready_wait_bank0(Timeout_Count);
+    if (state != FMC_Error_Type::READY) {
+        return state;
     }
+
+    write_bits_sequence(*this, FMC_Regs::CTL0,
+                        static_cast<uint32_t>(CTL0_Bits::MER), true,
+                        static_cast<uint32_t>(CTL0_Bits::START), true);
+
+    // Wait until ready
+    state = ready_wait_bank0(Timeout_Count);
+    write_bit(*this, FMC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::MER), false);
 
     return state;
 }
@@ -225,19 +222,18 @@ FMC_Error_Type FMC::erase_bank0() {
  * @return The state of the FMC after the erase operation.
  */
 FMC_Error_Type FMC::erase_bank1() {
-    FMC_Error_Type state = FMC_Error_Type::READY;
-    uint32_t timeout = reinterpret_cast<uint32_t>(Timeout_Count);
-
-    state = ready_wait_bank1(timeout);
-    if (state == FMC_Error_Type::READY) {
-        write_bits_sequence(*this, FMC_Regs::CTL1,
-                            static_cast<uint32_t>(CTL1_Bits::MER), true,
-                            static_cast<uint32_t>(CTL1_Bits::START), true);
-        // Wait until ready
-        timeout = reinterpret_cast<uint32_t>(Timeout_Count);
-        state = ready_wait_bank1(timeout);
-        write_bit(*this, FMC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::MER), false);
+    FMC_Error_Type state = ready_wait_bank1(Timeout_Count);
+    if (state != FMC_Error_Type::READY) {
+        return state;
     }
+
+    write_bits_sequence(*this, FMC_Regs::CTL1,
+                        static_cast<uint32_t>(CTL1_Bits::MER), true,
+                        static_cast<uint32_t>(CTL1_Bits::START), true);
+
+    // Wait until ready
+    state = ready_wait_bank1(Timeout_Count);
+    write_bit(*this, FMC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::MER), false);
 
     return state;
 }
@@ -256,21 +252,17 @@ FMC_Error_Type FMC::erase_bank1() {
  * @return The state of the FMC after the program operation.
  */
 FMC_Error_Type FMC::program_word(uint32_t address, uint32_t data) {
-    FMC_Error_Type state = FMC_Error_Type::READY;
-    uint32_t timeout = reinterpret_cast<uint32_t>(Timeout_Count);
-
-    // Determine which bank to use based on the address and FMC size
+    // Choose bank based on FMC size or address threshold
     bool is_bank0 = (get_fmc_size() <= Bank0_Size || address < Bank0_End_Address);
 
-    if (is_bank0) {
-        state = program_word_to_bank(address, data, timeout,
-                                     FMC_Regs::CTL0, CTL0_Bits::PG);
-    } else {
-        state = program_word_to_bank(address, data, timeout,
-                                     FMC_Regs::CTL1, CTL1_Bits::PG);
-    }
+    // Pick the correct CTL register and PG bit
+    auto ctl_reg = is_bank0 ? FMC_Regs::CTL0 : FMC_Regs::CTL1;
+    // Unify PG bit to a uint32_t to avoid mixing enum classes
+    uint32_t pg_bit = is_bank0
+        ? static_cast<uint32_t>(CTL0_Bits::PG)
+        : static_cast<uint32_t>(CTL1_Bits::PG);
 
-    return state;
+    return program_word_to_bank(address, data, Timeout_Count, ctl_reg, pg_bit);
 }
 
 /**
@@ -287,21 +279,17 @@ FMC_Error_Type FMC::program_word(uint32_t address, uint32_t data) {
  * @return The state of the FMC after the program operation.
  */
 FMC_Error_Type FMC::program_halfword(uint32_t address, uint16_t data) {
-    FMC_Error_Type state = FMC_Error_Type::READY;
-    uint32_t timeout = reinterpret_cast<uint32_t>(Timeout_Count);
-
-    // Determine which bank to use based on the address and FMC size
+    // Choose bank based on FMC size or address threshold
     bool is_bank0 = (get_fmc_size() <= Bank0_Size || address < Bank0_End_Address);
 
-    if (is_bank0) {
-        state = program_halfword_to_bank(address, data, timeout,
-                                         FMC_Regs::CTL0, CTL0_Bits::PG);
-    } else {
-        state = program_halfword_to_bank(address, data, timeout,
-                                         FMC_Regs::CTL1, CTL1_Bits::PG);
-    }
+    // Pick the correct CTL register and PG bit
+    auto ctl_reg = is_bank0 ? FMC_Regs::CTL0 : FMC_Regs::CTL1;
+    // Unify PG bit to a uint32_t to avoid mixing enum classes
+    uint32_t pg_bit = is_bank0
+        ? static_cast<uint32_t>(CTL0_Bits::PG)
+        : static_cast<uint32_t>(CTL1_Bits::PG);
 
-    return state;
+    return program_halfword_to_bank(address, data, Timeout_Count, ctl_reg, pg_bit);
 }
 
 /**
@@ -318,23 +306,19 @@ FMC_Error_Type FMC::program_halfword(uint32_t address, uint16_t data) {
  * @return The state of the FMC after the reprogramming operation.
  */
 FMC_Error_Type FMC::reprogram_word(uint32_t address, uint32_t data) {
-    FMC_Error_Type state = FMC_Error_Type::READY;
-    uint32_t timeout = reinterpret_cast<uint32_t>(Timeout_Count);
-
-    // Determine which bank to use based on the address and FMC size
+    // Choose bank based on FMC size or address threshold
     bool is_bank0 = (get_fmc_size() <= Bank0_Size || address < Bank0_End_Address);
 
-    if (is_bank0) {
-        write_bit(*this, FMC_Regs::WSEN, static_cast<uint32_t>(WSEN_Bits::BPEN), true);
-        state = program_word_to_bank(address, data, timeout,
-                                     FMC_Regs::CTL0, CTL0_Bits::PG);
-    } else {
-        write_bit(*this, FMC_Regs::WSEN, static_cast<uint32_t>(WSEN_Bits::BPEN), true);
-        state = program_word_to_bank(address, data, timeout,
-                                     FMC_Regs::CTL1, CTL1_Bits::PG);
-    }
+    // Pick the correct CTL register and PG bit
+    auto ctl_reg = is_bank0 ? FMC_Regs::CTL0 : FMC_Regs::CTL1;
+    // Unify PG bit to a uint32_t to avoid mixing enum classes
+    uint32_t pg_bit = is_bank0
+        ? static_cast<uint32_t>(CTL0_Bits::PG)
+        : static_cast<uint32_t>(CTL1_Bits::PG);
 
-    return state;
+    write_bit(*this, FMC_Regs::WSEN, static_cast<uint32_t>(WSEN_Bits::BPEN), true);
+
+    return program_word_to_bank(address, data, Timeout_Count, ctl_reg, pg_bit);
 }
 
 /**
@@ -363,17 +347,15 @@ void FMC::set_wait_state(Wait_State wait) {
  * @return The state of Bank 0 of the FMC.
  */
 FMC_Error_Type FMC::get_bank0_state() {
-    FMC_Error_Type state = FMC_Error_Type::READY;
-
     if (read_bit(*this, FMC_Regs::STAT0, static_cast<uint32_t>(STAT0_Bits::BUSY))) {
-        state = FMC_Error_Type::BUSY;
+        return FMC_Error_Type::BUSY;
     } else if (read_bit(*this, FMC_Regs::STAT0, static_cast<uint32_t>(STAT0_Bits::WPERR))) {
-        state = FMC_Error_Type::WP_ERROR;
+        return FMC_Error_Type::WP_ERROR;
     } else if (read_bit(*this, FMC_Regs::STAT0, static_cast<uint32_t>(STAT0_Bits::PGERR))) {
-        state = FMC_Error_Type::PG_ERROR;
+        return FMC_Error_Type::PG_ERROR;
     }
 
-    return state;
+    return FMC_Error_Type::READY;
 }
 
 /**
@@ -389,17 +371,15 @@ FMC_Error_Type FMC::get_bank0_state() {
  * @return The state of Bank 1 of the FMC.
  */
 FMC_Error_Type FMC::get_bank1_state() {
-    FMC_Error_Type state = FMC_Error_Type::READY;
-
     if (read_bit(*this, FMC_Regs::STAT1, static_cast<uint32_t>(STAT1_Bits::BUSY))) {
-        state = FMC_Error_Type::BUSY;
+        return FMC_Error_Type::BUSY;
     } else if (read_bit(*this, FMC_Regs::STAT1, static_cast<uint32_t>(STAT1_Bits::WPERR))) {
-        state = FMC_Error_Type::WP_ERROR;
+        return FMC_Error_Type::WP_ERROR;
     } else if (read_bit(*this, FMC_Regs::STAT1, static_cast<uint32_t>(STAT1_Bits::PGERR))) {
-        state = FMC_Error_Type::PG_ERROR;
+        return FMC_Error_Type::PG_ERROR;
     }
 
-    return state;
+    return FMC_Error_Type::READY;
 }
 
 /**
@@ -413,15 +393,16 @@ FMC_Error_Type FMC::get_bank1_state() {
  * @return The state of Bank 0 of the FMC, either ready, timeout, or an error state.
  */
 FMC_Error_Type FMC::ready_wait_bank0(uint32_t timeout) {
-    FMC_Error_Type state = FMC_Error_Type::BUSY;
+    FMC_Error_Type state;
 
+    // Loop until either we get a non-BUSY state or timeout occurs
     do {
         state = get_bank0_state();
-        timeout = timeout - 1;
-    } while (state == FMC_Error_Type::BUSY && timeout != 0);
+    } while (state == FMC_Error_Type::BUSY && --timeout);
 
-    if (state == FMC_Error_Type::BUSY) {
-        state = FMC_Error_Type::TIMEOUT;
+    // If we exited because of timeout, update the state
+    if (timeout == 0 && state == FMC_Error_Type::BUSY) {
+        return FMC_Error_Type::TIMEOUT;
     }
 
     return state;
@@ -438,15 +419,16 @@ FMC_Error_Type FMC::ready_wait_bank0(uint32_t timeout) {
  * @return The state of Bank 1 of the FMC, either ready, timeout, or an error state.
  */
 FMC_Error_Type FMC::ready_wait_bank1(uint32_t timeout) {
-    FMC_Error_Type state = FMC_Error_Type::BUSY;
+    FMC_Error_Type state;
 
+    // Loop until either we get a non-BUSY state or timeout occurs
     do {
         state = get_bank1_state();
-        timeout = timeout - 1;
-    } while (state == FMC_Error_Type::BUSY && timeout != 0);
+    } while (state == FMC_Error_Type::BUSY && --timeout);
 
-    if (state == FMC_Error_Type::BUSY) {
-        state = FMC_Error_Type::TIMEOUT;
+    // If we exited because of timeout, update the state
+    if (timeout == 0 && state == FMC_Error_Type::BUSY) {
+        return FMC_Error_Type::TIMEOUT;
     }
 
     return state;
@@ -532,164 +514,6 @@ void FMC::clear_interrupt_flag(Interrupt_Flags flag) {
 void FMC::set_interrupt_enable(Interrupt_Types type, bool enable) {
     const auto& config = interrupt_type_index[static_cast<size_t>(type)];
     write_bit(*this, config.register_offset, static_cast<uint32_t>(config.bit_info), enable);
-}
-
-/**
- * @brief Programs a word to a specified address in either bank 0 or bank 1 of the
- * FMC. The function waits for the programming operation to complete and
- * returns the resulting state of the FMC.
- *
- * @param address The address in either bank 0 or bank 1 where the data will be
- *                written.
- * @param data The 32-bit data word to be written to the specified address.
- * @param timeout The timeout value in milliseconds to wait for the FMC to
- *                become ready after the programming operation is started.
- * @param control_reg The control register to be used for programming the
- *                    specified bank. Must be one of the FMC_Regs enumeration
- *                    values FMC_Regs::CTL0 or FMC_Regs::CTL1.
- * @param program_bit The bit position in the control register to be used to
- *                    control the programming operation. Must be one of the
- *                    FMC_Program_Bit enumeration values.
- *
- * @return The resulting state of the FMC after the programming operation has
- *         completed. Will be one of the FMC_Error_Type enumeration values.
- */
-template<typename T>
-FMC_Error_Type FMC::program_word_to_bank(uint32_t address, uint32_t data,
-        uint32_t timeout, FMC_Regs control_reg, T program_bit) {
-    FMC_Error_Type state = FMC_Error_Type::READY;
-
-    if (control_reg == FMC_Regs::CTL0) {
-        state = ready_wait_bank0(timeout);
-    } else {
-        state = ready_wait_bank1(timeout);
-    }
-
-    if (state == FMC_Error_Type::READY) {
-        // Set the programming bit
-        write_bit(*this, control_reg, static_cast<uint32_t>(program_bit), true);
-
-        // Write the data to the specified address
-        *reinterpret_cast<volatile uint32_t*>(address) = data;
-
-        // Wait until programming completes
-        if (control_reg == FMC_Regs::CTL0) {
-            state = ready_wait_bank0(timeout);
-        } else {
-            state = ready_wait_bank1(timeout);
-        }
-
-        // Clear the programming bit
-        write_bit(*this, control_reg, static_cast<uint32_t>(program_bit), false);
-    }
-
-    return state;
-}
-
-/**
- * @brief Programs a halfword to a specified address in either bank 0 or bank 1 of the
- * FMC. The function waits for the programming operation to complete and
- * returns the resulting state of the FMC.
- *
- * @param address The address in either bank 0 or bank 1 where the data will be
- *                written.
- * @param data The 16-bit data halfword to be written to the specified address.
- * @param timeout The timeout value in milliseconds to wait for the FMC to
- *                become ready after the programming operation is started.
- * @param control_reg The control register to be used for programming the
- *                    specified bank. Must be one of the FMC_Regs enumeration
- *                    values FMC_Regs::CTL0 or FMC_Regs::CTL1.
- * @param program_bit The bit position in the control register to be used to
- *                    control the programming operation. Must be one of the
- *                    FMC_Program_Bit enumeration values.
- *
- * @return The resulting state of the FMC after the programming operation has
- *         completed. Will be one of the FMC_Error_Type enumeration values.
- */
-template<typename T>
-FMC_Error_Type FMC::program_halfword_to_bank(uint32_t address, uint16_t data,
-        uint32_t timeout, FMC_Regs control_reg, T program_bit) {
-    FMC_Error_Type state = FMC_Error_Type::READY;
-
-    if (control_reg == FMC_Regs::CTL0) {
-        state = ready_wait_bank0(timeout);
-    } else {
-        state = ready_wait_bank1(timeout);
-    }
-
-    if (state == FMC_Error_Type::READY) {
-        // Set the programming bit
-        write_bit(*this, control_reg, static_cast<uint32_t>(program_bit), true);
-
-        // Write the data to the specified address
-        *reinterpret_cast<volatile uint16_t*>(address) = data;
-
-        // Wait until programming completes
-        if (control_reg == FMC_Regs::CTL0) {
-            state = ready_wait_bank0(timeout);
-        } else {
-            state = ready_wait_bank1(timeout);
-        }
-
-        // Clear the programming bit
-        write_bit(*this, control_reg, static_cast<uint32_t>(program_bit), false);
-    }
-
-    return state;
-}
-
-/**
- * @brief Erases a word at a specified address in either bank 0 or bank 1 of the
- * FMC. The function waits for the erase operation to complete and
- * returns the resulting state of the FMC.
- *
- * @param address The address in either bank 0 or bank 1 where the data will be
- *                erased.
- * @param timeout The timeout value in milliseconds to wait for the FMC to
- *                become ready after the erase operation is started.
- * @param control_reg The control register to be used for erasing the
- *                    specified bank. Must be one of the FMC_Regs enumeration
- *                    values FMC_Regs::CTL0 or FMC_Regs::CTL1.
- * @param erase_bit The bit position in the control register to be used to
- *                    control the erase operation. Must be one of the
- *                    FMC_Erase_Bit enumeration values.
- * @param start_bit The bit position in the control register to be used to
- *                    start the erase operation. Must be one of the
- *                    FMC_Start_Bit enumeration values.
- * @param address_reg The address register to be used for erasing the
- *                    specified bank. Must be one of the FMC_Regs enumeration
- *                    values FMC_Regs::ADDR0 or FMC_Regs::ADDR1.
- *
- * @return The resulting state of the FMC after the erase operation has
- *         completed. Will be one of the FMC_Error_Type enumeration values.
- */
-template<typename T>
-FMC_Error_Type FMC::erase_word_bank(uint32_t address, uint32_t timeout,
-                                    FMC_Regs control_reg, T erase_bit, T start_bit, FMC_Regs address_reg) {
-    FMC_Error_Type state = FMC_Error_Type::READY;
-
-    state = (control_reg == FMC_Regs::CTL0) ? ready_wait_bank0(timeout) : ready_wait_bank1(timeout);
-
-    if (state == FMC_Error_Type::READY) {
-        // Set the programming bit
-        write_bit(*this, control_reg, static_cast<uint32_t>(erase_bit), true);
-        write_register(*this, address_reg, address);
-        if (control_reg == FMC_Regs::CTL1) {
-            if (read_bit(*this, FMC_Regs::OBSTAT, static_cast<uint32_t>(OBSTAT_Bits::SPC))) {
-                write_register(*this, FMC_Regs::ADDR0, address);
-            }
-        }
-        // Write the start bit
-        write_bit(*this, control_reg, static_cast<uint32_t>(start_bit), true);
-
-        // Wait until erase completes
-        state = (control_reg == FMC_Regs::CTL0) ? ready_wait_bank0(timeout) : ready_wait_bank1(timeout);
-
-        // Clear the erase bit
-        write_bit(*this, control_reg, static_cast<uint32_t>(erase_bit), false);
-    }
-
-    return state;
 }
 
 

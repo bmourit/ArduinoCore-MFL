@@ -72,8 +72,8 @@ public:
     void set_interrupt_enable(Interrupt_Type type, bool enabled);
 
     // Accessor methods
-    SPI_Base get_base() { return base_; }
-    SPI_Config& get_config() { return config_; }
+    inline SPI_Base get_base() { return base_; }
+    inline SPI_Config& get_config() { return config_; }
 
     inline volatile uint32_t* reg_address(SPI_Regs reg) const {
         return reinterpret_cast<volatile uint32_t*>(base_address_ + static_cast<uint32_t>(reg));

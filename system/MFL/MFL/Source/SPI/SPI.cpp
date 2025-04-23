@@ -421,7 +421,7 @@ void SPI::set_quad_io23_output_enable(bool enabled) {
  * its status. If the flag is not applicable to the SPI peripheral, this
  * function returns false.
  *
- * @param[in] flag The status flag to retrieve. Must be a value from the
+ * @param flag The status flag to retrieve. Must be a value from the
  *                 Status_Flags enumeration.
  * @return true if the flag is set, false otherwise.
  */
@@ -458,9 +458,9 @@ bool SPI::get_interrupt_flag(Interrupt_Flags flag) {
  * interrupt type. The function sets the appropriate bit in the control register
  * to enable or disable the interrupt type.
  *
- * @param[in] type The interrupt type to enable or disable, specified as an
+ * @param type The interrupt type to enable or disable, specified as an
  *                 Interrupt_Type enumeration value.
- * @param[in] enabled A boolean value indicating whether to enable (true) or
+ * @param enabled A boolean value indicating whether to enable (true) or
  *                    disable (false) the interrupt type.
  */
 void SPI::set_interrupt_enable(Interrupt_Type type, bool enabled) {

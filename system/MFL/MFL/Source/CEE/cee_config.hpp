@@ -29,7 +29,7 @@ namespace cee {
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
-enum class CEE_Regs : uint32_t {
+enum class CEE_Regs : uint8_t {
     CEE = 0x00U
 };
 

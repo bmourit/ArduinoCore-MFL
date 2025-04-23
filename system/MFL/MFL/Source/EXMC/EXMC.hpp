@@ -90,6 +90,7 @@ private:
             default: return EXMC_Regs::SNCTL0;
         }
     }
+
     inline EXMC_Regs get_sntcfg_offset(Block_Number block) {
         switch (block) {
             case Block_Number::BLOCK0: return EXMC_Regs::SNTCFG0;
@@ -112,65 +113,46 @@ private:
 
     inline EXMC_Regs get_npctl_offset(NPC_Block block) {
         switch (block) {
-            case NPC_Block::NAND_BLOCK1:
-                return EXMC_Regs::NPCTL1;
-            case NPC_Block::NAND_BLOCK2:
-                return EXMC_Regs::NPCTL2;
-            case NPC_Block::PCCARD_BLOCK3:
-                return EXMC_Regs::NPCTL3;
-            default:
-                return EXMC_Regs::NPCTL1;
+            case NPC_Block::NAND_BLOCK1: return EXMC_Regs::NPCTL1;
+            case NPC_Block::NAND_BLOCK2: return EXMC_Regs::NPCTL2;
+            case NPC_Block::PCCARD_BLOCK3: return EXMC_Regs::NPCTL3;
+            default: return EXMC_Regs::NPCTL1;
         }
     }
 
     inline EXMC_Regs get_npinten_offset(NPC_Block block) {
         switch (block) {
-            case NPC_Block::NAND_BLOCK1:
-                return EXMC_Regs::NPINTEN1;
-            case NPC_Block::NAND_BLOCK2:
-                return EXMC_Regs::NPINTEN2;
-            case NPC_Block::PCCARD_BLOCK3:
-                return EXMC_Regs::NPINTEN3;
-            default:
-                return EXMC_Regs::NPINTEN1;
+            case NPC_Block::NAND_BLOCK1: return EXMC_Regs::NPINTEN1;
+            case NPC_Block::NAND_BLOCK2: return EXMC_Regs::NPINTEN2;
+            case NPC_Block::PCCARD_BLOCK3: return EXMC_Regs::NPINTEN3;
+            default: return EXMC_Regs::NPINTEN1;
         }
     }
 
     inline EXMC_Regs get_npctcfg_offset(NPC_Block block) {
         switch (block) {
-            case NPC_Block::NAND_BLOCK1:
-                return EXMC_Regs::NPCTCFG1;
-            case NPC_Block::NAND_BLOCK2:
-                return EXMC_Regs::NPCTCFG2;
-            case NPC_Block::PCCARD_BLOCK3:
-                return EXMC_Regs::NPCTCFG3;
-            default:
-                return EXMC_Regs::NPCTCFG1;
+            case NPC_Block::NAND_BLOCK1: return EXMC_Regs::NPCTCFG1;
+            case NPC_Block::NAND_BLOCK2: return EXMC_Regs::NPCTCFG2;
+            case NPC_Block::PCCARD_BLOCK3: return EXMC_Regs::NPCTCFG3;
+            default: return EXMC_Regs::NPCTCFG1;
         }
     }
 
     inline EXMC_Regs get_npatcfg_offset(NPC_Block block) {
         switch (block) {
-            case NPC_Block::NAND_BLOCK1:
-                return EXMC_Regs::NPATCFG1;
-            case NPC_Block::NAND_BLOCK2:
-                return EXMC_Regs::NPATCFG2;
-            case NPC_Block::PCCARD_BLOCK3:
-                return EXMC_Regs::NPATCFG3;
-            default:
-                return EXMC_Regs::NPATCFG1;
+            case NPC_Block::NAND_BLOCK1: return EXMC_Regs::NPATCFG1;
+            case NPC_Block::NAND_BLOCK2: return EXMC_Regs::NPATCFG2;
+            case NPC_Block::PCCARD_BLOCK3: return EXMC_Regs::NPATCFG3;
+            default: return EXMC_Regs::NPATCFG1;
         }
     }
 
     inline EXMC_Regs get_necc_offset(NPC_Block npc_block) {
         switch (npc_block) {
-            case NPC_Block::NAND_BLOCK1:
-                return EXMC_Regs::NECC1;
-            case NPC_Block::NAND_BLOCK2:
-                return EXMC_Regs::NECC2;
+            case NPC_Block::NAND_BLOCK1: return EXMC_Regs::NECC1;
+            case NPC_Block::NAND_BLOCK2: return EXMC_Regs::NECC2;
             case NPC_Block::PCCARD_BLOCK3:
-            default:
-                return EXMC_Regs::NECC1;
+            default: return EXMC_Regs::NECC1;
         }
     }
 };

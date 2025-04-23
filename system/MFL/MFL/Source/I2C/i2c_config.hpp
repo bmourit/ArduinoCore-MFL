@@ -31,7 +31,7 @@ namespace i2c {
 
 ///////////////////////////// BASE ADDRESS /////////////////////////////
 
-enum class I2C_Base : uint32_t {
+enum class I2C_Base : uint8_t {
     I2C0_BASE,
     I2C1_BASE,
     INVALID
@@ -45,7 +45,7 @@ static inline constexpr uintptr_t I2C_baseAddress[] = {
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
-enum class I2C_Regs : uint32_t {
+enum class I2C_Regs : uint8_t {
     CTL0 = 0x00U,
     CTL1 = 0x04U,
     SADDR0 = 0x08U,
@@ -102,7 +102,7 @@ enum class DATA_Bits : uint32_t {
     TRB = REG_BIT_DEF(0, 7)
 };
 
-enum class STAT0_Bits : uint32_t {
+enum class STAT0_Bits : uint8_t {
     SBSEND = 0,
     ADDSEND = 1,
     BTC = 2,
@@ -140,7 +140,7 @@ enum class RT_Bits : uint32_t {
     RISETIME = REG_BIT_DEF(0, 6)
 };
 
-enum class FMPCFG_Bits : uint32_t {
+enum class FMPCFG_Bits : uint8_t {
     FMPEN = 0
 };
 
@@ -172,33 +172,33 @@ enum class Status_Flags : uint8_t {
 };
 
 struct index_to_bits {
-    I2C_Regs register_offset;
-    uint8_t bit_info;
+    I2C_Regs register_offset : 8;
+    uint8_t bit_info : 4;
 };
 
 static inline constexpr std::array<index_to_bits, 21> status_flag_index {{
-        {I2C_Regs::STAT0, 0},
-        {I2C_Regs::STAT0, 1},
-        {I2C_Regs::STAT0, 2},
-        {I2C_Regs::STAT0, 3},
-        {I2C_Regs::STAT0, 4},
-        {I2C_Regs::STAT0, 6},
-        {I2C_Regs::STAT0, 7},
-        {I2C_Regs::STAT0, 8},
-        {I2C_Regs::STAT0, 9},
-        {I2C_Regs::STAT0, 10},
-        {I2C_Regs::STAT0, 11},
-        {I2C_Regs::STAT0, 12},
-        {I2C_Regs::STAT0, 14},
-        {I2C_Regs::STAT0, 15},
-        {I2C_Regs::STAT1, 0},
-        {I2C_Regs::STAT1, 1},
-        {I2C_Regs::STAT1, 2},
-        {I2C_Regs::STAT1, 4},
-        {I2C_Regs::STAT1, 5},
-        {I2C_Regs::STAT1, 6},
-        {I2C_Regs::STAT1, 7}
-    }};
+    {I2C_Regs::STAT0, 0},
+    {I2C_Regs::STAT0, 1},
+    {I2C_Regs::STAT0, 2},
+    {I2C_Regs::STAT0, 3},
+    {I2C_Regs::STAT0, 4},
+    {I2C_Regs::STAT0, 6},
+    {I2C_Regs::STAT0, 7},
+    {I2C_Regs::STAT0, 8},
+    {I2C_Regs::STAT0, 9},
+    {I2C_Regs::STAT0, 10},
+    {I2C_Regs::STAT0, 11},
+    {I2C_Regs::STAT0, 12},
+    {I2C_Regs::STAT0, 14},
+    {I2C_Regs::STAT0, 15},
+    {I2C_Regs::STAT1, 0},
+    {I2C_Regs::STAT1, 1},
+    {I2C_Regs::STAT1, 2},
+    {I2C_Regs::STAT1, 4},
+    {I2C_Regs::STAT1, 5},
+    {I2C_Regs::STAT1, 6},
+    {I2C_Regs::STAT1, 7}
+}};
 
 enum class Clear_Flags : uint8_t {
     FLAG_SBSEND,
@@ -213,16 +213,16 @@ enum class Clear_Flags : uint8_t {
 };
 
 static inline constexpr std::array<index_to_bits, 9> clear_flag_index {{
-        {I2C_Regs::STAT0, 0},
-        {I2C_Regs::STAT0, 1},
-        {I2C_Regs::STAT0, 8},
-        {I2C_Regs::STAT0, 9},
-        {I2C_Regs::STAT0, 10},
-        {I2C_Regs::STAT0, 11},
-        {I2C_Regs::STAT0, 12},
-        {I2C_Regs::STAT0, 14},
-        {I2C_Regs::STAT0, 15}
-    }};
+    {I2C_Regs::STAT0, 0},
+    {I2C_Regs::STAT0, 1},
+    {I2C_Regs::STAT0, 8},
+    {I2C_Regs::STAT0, 9},
+    {I2C_Regs::STAT0, 10},
+    {I2C_Regs::STAT0, 11},
+    {I2C_Regs::STAT0, 12},
+    {I2C_Regs::STAT0, 14},
+    {I2C_Regs::STAT0, 15}
+}};
 
 enum class Interrupt_Flags : uint8_t {
     INTR_FLAG_SBSEND,
@@ -242,28 +242,28 @@ enum class Interrupt_Flags : uint8_t {
 };
 
 struct double_index_to_bits {
-    I2C_Regs register0_offset;
-    uint8_t bit_info0;
-    I2C_Regs register1_offset;
-    uint8_t bit_info1;
+    I2C_Regs register0_offset : 8;
+    uint8_t bit_info0 : 4;
+    I2C_Regs register1_offset : 8;
+    uint8_t bit_info1 : 4;
 };
 
 static inline constexpr std::array<double_index_to_bits, 14> interrupt_flag_index {{
-        {I2C_Regs::CTL1, 9, I2C_Regs::STAT0, 0},
-        {I2C_Regs::CTL1, 9, I2C_Regs::STAT0, 1},
-        {I2C_Regs::CTL1, 9, I2C_Regs::STAT0, 2},
-        {I2C_Regs::CTL1, 9, I2C_Regs::STAT0, 3},
-        {I2C_Regs::CTL1, 9, I2C_Regs::STAT0, 4},
-        {I2C_Regs::CTL1, 9, I2C_Regs::STAT0, 6},
-        {I2C_Regs::CTL1, 9, I2C_Regs::STAT0, 7},
-        {I2C_Regs::CTL1, 8, I2C_Regs::STAT0, 8},
-        {I2C_Regs::CTL1, 8, I2C_Regs::STAT0, 9},
-        {I2C_Regs::CTL1, 8, I2C_Regs::STAT0, 10},
-        {I2C_Regs::CTL1, 8, I2C_Regs::STAT0, 11},
-        {I2C_Regs::CTL1, 8, I2C_Regs::STAT0, 12},
-        {I2C_Regs::CTL1, 8, I2C_Regs::STAT0, 14},
-        {I2C_Regs::CTL1, 8, I2C_Regs::STAT0, 15}
-    }};
+    {I2C_Regs::CTL1, 9, I2C_Regs::STAT0, 0},
+    {I2C_Regs::CTL1, 9, I2C_Regs::STAT0, 1},
+    {I2C_Regs::CTL1, 9, I2C_Regs::STAT0, 2},
+    {I2C_Regs::CTL1, 9, I2C_Regs::STAT0, 3},
+    {I2C_Regs::CTL1, 9, I2C_Regs::STAT0, 4},
+    {I2C_Regs::CTL1, 9, I2C_Regs::STAT0, 6},
+    {I2C_Regs::CTL1, 9, I2C_Regs::STAT0, 7},
+    {I2C_Regs::CTL1, 8, I2C_Regs::STAT0, 8},
+    {I2C_Regs::CTL1, 8, I2C_Regs::STAT0, 9},
+    {I2C_Regs::CTL1, 8, I2C_Regs::STAT0, 10},
+    {I2C_Regs::CTL1, 8, I2C_Regs::STAT0, 11},
+    {I2C_Regs::CTL1, 8, I2C_Regs::STAT0, 12},
+    {I2C_Regs::CTL1, 8, I2C_Regs::STAT0, 14},
+    {I2C_Regs::CTL1, 8, I2C_Regs::STAT0, 15}
+}};
 
 enum class Interrupt_Type : uint8_t {
     INTR_ERR,
@@ -272,10 +272,10 @@ enum class Interrupt_Type : uint8_t {
 };
 
 static inline constexpr std::array<index_to_bits, 3> interrupt_type_index {{
-        {I2C_Regs::CTL1, 8},
-        {I2C_Regs::CTL1, 9},
-        {I2C_Regs::CTL1, 10}
-    }};
+    {I2C_Regs::CTL1, 8},
+    {I2C_Regs::CTL1, 9},
+    {I2C_Regs::CTL1, 10}
+}};
 
 enum class Bus_Mode : uint8_t {
     I2C,
@@ -330,14 +330,14 @@ enum class I2C_Error_Type : uint8_t {
 ///////////////////////////// STRUCTURES /////////////////////////////
 
 struct I2C_Clock_Config {
-    rcu::RCU_PCLK clock_reg;
-    rcu::RCU_PCLK_Reset reset_reg;
+    rcu::RCU_PCLK clock_reg : 6;
+    rcu::RCU_PCLK_Reset reset_reg : 6;
 };
 
 static inline constexpr std::array<I2C_Clock_Config, 2> I2C_pclk_index {{
-        {rcu::RCU_PCLK::PCLK_I2C0, rcu::RCU_PCLK_Reset::PCLK_I2C0RST},
-        {rcu::RCU_PCLK::PCLK_I2C1, rcu::RCU_PCLK_Reset::PCLK_I2C1RST}
-    }};
+    {rcu::RCU_PCLK::PCLK_I2C0, rcu::RCU_PCLK_Reset::PCLK_I2C0RST},
+    {rcu::RCU_PCLK::PCLK_I2C1, rcu::RCU_PCLK_Reset::PCLK_I2C1RST}
+}};
 
 
 ///////////////////////////// CONSTANTS /////////////////////////////

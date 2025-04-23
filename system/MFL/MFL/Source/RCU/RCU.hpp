@@ -96,7 +96,7 @@ public:
     void set_interrupt_enable(Interrupt_Type type, bool enable);
 
     // System clock handling
-    uint32_t get_system_clock() { return SystemCoreClock; }
+    inline uint32_t get_system_clock() { return SystemCoreClock; }
     void update_system_clock();
 
     static inline constexpr uintptr_t RCU_baseAddress = 0x40021000U;

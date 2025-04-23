@@ -29,7 +29,7 @@ namespace fwdgt {
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
-enum class FWDGT_Regs : uint32_t {
+enum class FWDGT_Regs : uint8_t {
     CTL = 0x00U,
     PSC = 0x04U,
     RLD = 0x08U,

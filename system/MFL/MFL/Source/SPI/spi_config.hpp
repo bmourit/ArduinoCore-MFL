@@ -31,7 +31,7 @@ namespace spi {
 
 ///////////////////////////// BASE ADDRESS /////////////////////////////
 
-enum class SPI_Base : uint32_t {
+enum class SPI_Base : uint8_t {
     SPI0_BASE,
     SPI1_BASE,
     SPI2_BASE,
@@ -47,7 +47,7 @@ static inline constexpr uintptr_t SPI_baseAddress[] = {
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
-enum class SPI_Regs : uint32_t {
+enum class SPI_Regs : uint8_t {
     CTL0 = 0x00,
     CTL1 = 0x04,
     STAT = 0x08,
@@ -243,32 +243,32 @@ enum class SPI_Error_Type : uint8_t {
 ///////////////////////////// STRUCTURES /////////////////////////////
 
 struct Interrupt_Flags_Config {
-    SPI_Regs stat_reg;
-    SPI_Regs ctl_reg;
-    uint8_t stat_bit;
-    uint8_t ctl_bit;
+    SPI_Regs stat_reg : 8;
+    SPI_Regs ctl_reg : 8;
+    uint8_t stat_bit : 4;
+    uint8_t ctl_bit : 3;
 };
 
 static inline constexpr std::array<Interrupt_Flags_Config, 7> interrupt_flags_config {{
-        {SPI_Regs::STAT, SPI_Regs::CTL1, 1, 7},
-        {SPI_Regs::STAT, SPI_Regs::CTL1, 0, 6},
-        {SPI_Regs::STAT, SPI_Regs::CTL1, 6, 5},
-        {SPI_Regs::STAT, SPI_Regs::CTL1, 5, 5},
-        {SPI_Regs::STAT, SPI_Regs::CTL1, 4, 5},
-        {SPI_Regs::STAT, SPI_Regs::CTL1, 3, 5},
-        {SPI_Regs::STAT, SPI_Regs::CTL1, 8, 5}
-    }};
+    {SPI_Regs::STAT, SPI_Regs::CTL1, 1, 7},
+    {SPI_Regs::STAT, SPI_Regs::CTL1, 0, 6},
+    {SPI_Regs::STAT, SPI_Regs::CTL1, 6, 5},
+    {SPI_Regs::STAT, SPI_Regs::CTL1, 5, 5},
+    {SPI_Regs::STAT, SPI_Regs::CTL1, 4, 5},
+    {SPI_Regs::STAT, SPI_Regs::CTL1, 3, 5},
+    {SPI_Regs::STAT, SPI_Regs::CTL1, 8, 5}
+}};
 
 struct SPI_Clock_Config {
-    rcu::RCU_PCLK clock_reg;
-    rcu::RCU_PCLK_Reset reset_reg;
+    rcu::RCU_PCLK clock_reg : 6;
+    rcu::RCU_PCLK_Reset reset_reg : 6;
 };
 
 static inline constexpr std::array<SPI_Clock_Config, 3> SPI_pclk_index {{
-        {rcu::RCU_PCLK::PCLK_SPI0, rcu::RCU_PCLK_Reset::PCLK_SPI0RST},
-        {rcu::RCU_PCLK::PCLK_SPI1, rcu::RCU_PCLK_Reset::PCLK_SPI1RST},
-        {rcu::RCU_PCLK::PCLK_SPI2, rcu::RCU_PCLK_Reset::PCLK_SPI2RST}
-    }};
+    {rcu::RCU_PCLK::PCLK_SPI0, rcu::RCU_PCLK_Reset::PCLK_SPI0RST},
+    {rcu::RCU_PCLK::PCLK_SPI1, rcu::RCU_PCLK_Reset::PCLK_SPI1RST},
+    {rcu::RCU_PCLK::PCLK_SPI2, rcu::RCU_PCLK_Reset::PCLK_SPI2RST}
+}};
 
 struct SPI_Config {
     Operational_Mode operational_mode;
