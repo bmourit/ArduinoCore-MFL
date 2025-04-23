@@ -81,6 +81,6 @@ enum class Status_Flags : uint8_t {
 static inline constexpr uint32_t EnableValue = 0x0000CCCCU;
 static inline constexpr uint32_t WriteEnable = 0x00005555U;
 static inline constexpr uint32_t ReloadValue = 0x0000AAAAU;
-
+static inline constexpr uint32_t TimeoutCycles = 1000000U;
 
 } // namespace fwdgt
