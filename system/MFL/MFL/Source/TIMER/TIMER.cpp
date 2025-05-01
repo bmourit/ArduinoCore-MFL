@@ -668,7 +668,7 @@ void TIMER::output_compare_init(Timer_Channel channel, TIMER_Output_Compare comp
         return;
     }
 
-    struct ChannelBits {
+    struct OCChannelBits {
         uint32_t ms;
         uint32_t en;
         uint32_t p;
@@ -678,7 +678,7 @@ void TIMER::output_compare_init(Timer_Channel channel, TIMER_Output_Compare comp
         uint32_t iso_n;
     };
 
-    static constexpr std::array<ChannelBits, 4> CH_BITS[] {{
+    static constexpr std::array<OCChannelBits, 4> OCCH_BITS {{
         { ch_bit(CHCTL0_Bits::CH0MS), ch_bit(CHCTL2_Bits::CH0EN), ch_bit(CHCTL2_Bits::CH0P), ch_bit(CHCTL2_Bits::CH0NEN), ch_bit(CHCTL2_Bits::CH0NP), ch_bit(CTL1_Bits::ISO0), ch_bit(CTL1_Bits::ISO0N) },
         { ch_bit(CHCTL0_Bits::CH1MS), ch_bit(CHCTL2_Bits::CH1EN), ch_bit(CHCTL2_Bits::CH1P), ch_bit(CHCTL2_Bits::CH1NEN), ch_bit(CHCTL2_Bits::CH1NP), ch_bit(CTL1_Bits::ISO1), ch_bit(CTL1_Bits::ISO1N) },
         { ch_bit(CHCTL1_Bits::CH2MS), ch_bit(CHCTL2_Bits::CH2EN), ch_bit(CHCTL2_Bits::CH2P), ch_bit(CHCTL2_Bits::CH2NEN), ch_bit(CHCTL2_Bits::CH2NP), ch_bit(CTL1_Bits::ISO2), ch_bit(CTL1_Bits::ISO2N) },
@@ -686,7 +686,7 @@ void TIMER::output_compare_init(Timer_Channel channel, TIMER_Output_Compare comp
     }};
 
     const auto idx = static_cast<size_t>(channel);
-    const auto& bits = CH_BITS[idx];
+    const auto& bits = OCCH_BITS[idx];
 
     // Clear mode bits
     const TIMER_Regs ctl_reg = (channel <= Timer_Channel::CH1) ? TIMER_Regs::CHCTL0 : TIMER_Regs::CHCTL1;
@@ -992,7 +992,7 @@ void TIMER::input_capture_init(Timer_Channel channel, TIMER_Input_Capture captur
         return;
     }
 
-    struct ChannelBits {
+    struct ICChannelBits {
         uint32_t ms;
         uint32_t en;
         uint32_t p;
@@ -1002,7 +1002,7 @@ void TIMER::input_capture_init(Timer_Channel channel, TIMER_Input_Capture captur
         uint32_t cappsc;
     };
 
-    static constexpr std::array<ChannelBits, 4> CH_BITS {{
+    static constexpr std::array<ICChannelBits, 4> ICCH_BITS {{
         { ch_bit(CHCTL0_Bits::CH0MS), ch_bit(CHCTL2_Bits::CH0EN), ch_bit(CHCTL2_Bits::CH0P), ch_bit(CHCTL2_Bits::CH0NEN), ch_bit(CHCTL2_Bits::CH0NP), ch_bit(CHCTL0_Bits::CH0CAPFLT), ch_bit(CHCTL0_Bits::CH0CAPPSC) },
         { ch_bit(CHCTL0_Bits::CH1MS), ch_bit(CHCTL2_Bits::CH1EN), ch_bit(CHCTL2_Bits::CH1P), ch_bit(CHCTL2_Bits::CH1NEN), ch_bit(CHCTL2_Bits::CH1NP), ch_bit(CHCTL0_Bits::CH1CAPFLT), ch_bit(CHCTL0_Bits::CH1CAPPSC) },
         { ch_bit(CHCTL1_Bits::CH2MS), ch_bit(CHCTL2_Bits::CH2EN), ch_bit(CHCTL2_Bits::CH2P), ch_bit(CHCTL2_Bits::CH2NEN), ch_bit(CHCTL2_Bits::CH2NP), ch_bit(CHCTL1_Bits::CH2CAPFLT), ch_bit(CHCTL1_Bits::CH2CAPPSC) },
@@ -1010,7 +1010,7 @@ void TIMER::input_capture_init(Timer_Channel channel, TIMER_Input_Capture captur
     }};
 
     const auto idx = static_cast<size_t>(channel);
-    const auto& bits = CH_BITS[idx];
+    const auto& bits = ICCH_BITS[idx];
     const TIMER_Regs reg = (channel <= Timer_Channel::CH1) ? TIMER_Regs::CHCTL0 : TIMER_Regs::CHCTL1;
 
     // Disable companion channel if it exists
