@@ -20,7 +20,9 @@ std::array<exti_to_irq, maxExtiLines_> ExtiManager::irq_index {{
 
 ExtiManager::ExtiManager() :
     exti_(exti::EXTI::get_instance()),
-    callbacks_{nullptr} {}
+    callbacks_{nullptr}
+{
+}
 
 /**
  * @brief Enables an EXTI interrupt on the specified pin.

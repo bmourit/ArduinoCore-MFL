@@ -40,7 +40,7 @@ private:
     ExtiManager();
 
     exti::EXTI& exti_;
-    EXTICallback callbacks_[maxExtiLines_];
+    std::array<EXTICallback, maxExtiLines_> callbacks_;
 
     inline auto extiToIrq(uint8_t extiIndex) -> IRQn_Type {
         if (extiIndex < maxExtiLines_) {

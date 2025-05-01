@@ -17,6 +17,7 @@
 */
 
 #include <utility>
+#include <array>
 
 #include "Arduino.h"
 #include "ExtiManager.h"
@@ -26,8 +27,8 @@ struct CallbackWrapper {
     void* param;
 };
 
-static CallbackWrapper callbackStorage[maxExtiLines_];
-static bool usedSlots[maxExtiLines_] = {false};
+static std::array<CallbackWrapper, maxExtiLines_> callbackStorage;
+static std::array<bool, maxExtiLines_> usedSlots = {false};
 static uint8_t currentSlot = 0U;
 
 /**
@@ -105,7 +106,7 @@ void attachInterruptParam(pin_size_t pin, voidFuncPtrParam callback, PinStatus m
             break;
     }
 
-    callbackStorage[slotIndex] = CallbackWrapper{.callback=callback, .param=param};
+    callbackStorage[slotIndex] = CallbackWrapper{.callback = callback, .param = param};
     usedSlots[slotIndex] = true;
     currentSlot = static_cast<uint8_t>(slotIndex);
 
@@ -140,7 +141,7 @@ void detachInterrupt(pin_size_t pin) {
     ExtiManager::get_instance().disablePinExtiInterrupt(pin);
 
     // Free the used slot
-    for (bool & usedSlot : usedSlots) {
+    for (auto& usedSlot : usedSlots) {
         if (usedSlot) {
             usedSlot = false;
             break;

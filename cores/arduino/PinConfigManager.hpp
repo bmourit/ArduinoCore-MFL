@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Arduino.h"
+#include <array>
 
 inline constexpr uint8_t Max_Ports = 4U;
 
@@ -12,7 +13,7 @@ public:
     void setPinConfigured(pin_size_t pin);
     void resetPinConfigured(pin_size_t pin);
 
-    uint16_t pinIsConfig[Max_Ports] = {0U};
+    std::array<uint16_t, Max_Ports> pinIsConfig = {0U};
 };
 
 extern PinConfigManager pinConfigManager;
