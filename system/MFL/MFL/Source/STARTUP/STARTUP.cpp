@@ -26,6 +26,7 @@
 #include "RCU.hpp"
 #include "CONFIG.hpp"
 #include "CEE.hpp"
+#include "AFIO.hpp"
 
 namespace startup {
 
@@ -131,6 +132,13 @@ void STARTUP::startup_init() {
     // Set CEE enahnced mode
     cee::CEE::get_instance().set_enhanced_mode_enable(true);
 #endif
+
+    if constexpr (std::is_same_v<mcu::ChipSeries, mcu::F303R>) {
+        // Enable the gpio compensation cell
+        gpio::AFIO::get_instance().set_compensation(true);
+        while (!gpio::AFIO::get_instance().get_compensation()) {
+        }
+    }
 
     // Set the global variable
     rcu::RCU::get_instance().update_system_clock();
