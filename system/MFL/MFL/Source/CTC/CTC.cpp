@@ -22,12 +22,14 @@
 
 namespace ctc {
 
-CTC& CTC::get_instance() {
+auto CTC::get_instance() -> CTC& {
     static CTC instance;
     return instance;
 }
 
-CTC::CTC() : is_clock_enabled_(false) {
+CTC::CTC() :
+    is_clock_enabled_(false)
+{
     if (!is_clock_enabled_) {
         RCU_I.set_pclk_enable(rcu::RCU_PCLK::PCLK_CTC, true);
         RCU_I.set_pclk_reset_enable(rcu::RCU_PCLK_Reset::PCLK_CTCRST, true);
@@ -184,7 +186,7 @@ void CTC::set_trim_counter_reload(uint16_t reload) {
  *
  * @return The current capture value of the trim counter.
  */
-uint16_t CTC::get_trim_counter_capture() {
+auto CTC::get_trim_counter_capture() -> uint16_t {
     return static_cast<uint16_t>(read_bit_range(*this, CTC_Regs::STAT, static_cast<uint32_t>(STAT_Bits::REFCAP)));
 }
 
@@ -197,7 +199,7 @@ uint16_t CTC::get_trim_counter_capture() {
  *
  * @return true if the trim counter direction is up, false if it is down.
  */
-bool CTC::get_trim_counter_direction() {
+auto CTC::get_trim_counter_direction() -> bool {
     return read_bit(*this, CTC_Regs::STAT, static_cast<uint32_t>(STAT_Bits::REFDIR));
 }
 
@@ -209,7 +211,7 @@ bool CTC::get_trim_counter_direction() {
  *
  * @return The current trim counter reload value.
  */
-uint16_t CTC::get_trim_counter_reload() {
+auto CTC::get_trim_counter_reload() -> uint16_t {
     return static_cast<uint16_t>(read_bit_range(*this, CTC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::RLVALUE)));
 }
 
@@ -221,7 +223,7 @@ uint16_t CTC::get_trim_counter_reload() {
  *
  * @return The current trim value of the IRC48M oscillator.
  */
-uint8_t CTC::get_trim_irc48m() {
+auto CTC::get_trim_irc48m() -> uint8_t {
     return static_cast<uint8_t>(read_bit_range(*this, CTC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::TRIMVALUE)));
 }
 
@@ -236,7 +238,7 @@ uint8_t CTC::get_trim_irc48m() {
  *             Status_Flags enumeration.
  * @return true if the flag is set, false otherwise.
  */
-bool CTC::get_flag(Status_Flags flag) {
+auto CTC::get_flag(Status_Flags flag) -> bool {
     return read_bit(*this, CTC_Regs::STAT, static_cast<uint32_t>(flag));
 }
 
@@ -264,7 +266,7 @@ void CTC::clear_flag(Clear_Flags flag) {
  * @param flag The interrupt flag to check, specified as an Interrupt_Flags enumeration value.
  * @return true if the specified interrupt flag is set and enabled, false otherwise.
  */
-bool CTC::get_interrupt_flag(Interrupt_Flags flag) {
+auto CTC::get_interrupt_flag(Interrupt_Flags flag) -> bool {
     bool enabled = false;
 
     if (((1U << static_cast<uint32_t>(flag)) & INTR_ERRIC_FLAG_MASK)) {
@@ -304,6 +306,5 @@ void CTC::clear_interrupt_flag(Clear_Flags flag) {
 void CTC::set_interrupt_enable(Interrupt_Type type, bool enable) {
     write_bit(*this, CTC_Regs::CTL0, static_cast<uint32_t>(type), enable);
 }
-
 
 } // namespace ctc

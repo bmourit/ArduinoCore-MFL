@@ -19,9 +19,18 @@
 
 #pragma once
 
-#include <stdlib.h>
+#include <cstdlib>
 
 #include "mcu_common.hpp"
+
+// MFL Version Information
+inline constexpr uint8_t MFL_VERSION_MAJOR = 1;
+inline constexpr uint8_t MFL_VERSION_MINOR = 0;
+inline constexpr uint8_t MFL_VERSION_PATCH = 0;
+inline constexpr uint32_t MFL_VERSION = ((MFL_VERSION_MAJOR << 16) | (MFL_VERSION_MINOR << 8) | MFL_VERSION_PATCH);
+
+// Version string (optional)
+inline constexpr const char* MFL_VERSION_STRING = "1.0.0";
 
 /**
  * @brief Encodes register bit definitions.
@@ -32,7 +41,7 @@
  * @param end The ending bit position.
  * @return uint32_t Encoded bit definition.
  */
-inline constexpr uint32_t REG_BIT_DEF(uint32_t start, uint32_t end) {
+inline constexpr auto REG_BIT_DEF(uint32_t start, uint32_t end) -> uint32_t {
     return (start << 16U) | (end - start + 1U);
 }
 

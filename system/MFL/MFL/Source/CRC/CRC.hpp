@@ -19,36 +19,55 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
+#include <array>
 
 #include "crc_config.hpp"
 #include "RegRW.hpp"
 
 namespace crc {
 
-class RCU;
-
 class CRC {
 public:
-    static CRC& get_instance();
+    static auto get_instance() -> CRC&;
 
     // Reset
     void reset();
+
     // Data
     void reset_data();
-    uint32_t get_data();
+    auto get_data() -> uint32_t;
+
     // Free data
-    uint8_t get_free_data();
+    auto get_free_data() -> uint8_t;
     void set_free_data(uint8_t data);
+
     // Calculate
-    uint32_t calculate_data(uint32_t data);
-    uint32_t calculate_mulitple_data(const uint32_t* array, uint32_t size);
+    auto calculate_data(uint32_t data) -> uint32_t;
+
+    // Calculate array
+    template <size_t N>
+    inline auto calculate_multiple_data(const std::array<uint32_t, N>&data) -> uint32_t {
+        for (size_t i = 0; i < N; ++i) {
+            write_register(*this, CRC_Regs::DATA, data[i]);
+        }
+        return read_register<uint32_t>(*this, CRC_Regs::DATA);
+    }
+
+    // Using c-style array
+    template <size_t N>
+    inline auto calculate_multiple_data(const uint32_t (&data)[N]) -> uint32_t {
+        for (size_t i = 0; i < N; ++i) {
+            write_register(*this, CRC_Regs::DATA, data[i]);
+        }
+        return read_register<uint32_t>(*this, CRC_Regs::DATA);
+    }
 
     // Base address
-    static inline constexpr uintptr_t CRC_baseAddress = 0x40023000U;
+    static inline constexpr uintptr_t CRC_baseAddress = 0x4002'3000U;
 
     // Register address
-    inline volatile uint32_t* reg_address(CRC_Regs reg) const {
+    [[nodiscard]] inline auto reg_address(CRC_Regs reg) const -> volatile uint32_t* {
         return reinterpret_cast<volatile uint32_t*>(CRC_baseAddress + static_cast<uint32_t>(reg));
     }
 
@@ -57,7 +76,7 @@ private:
 
     // Prevent copying or assigning
     CRC(const CRC&) = delete;
-    CRC& operator=(const CRC&) = delete;
+    auto operator=(const CRC&) -> CRC& = delete;
 
     mutable bool is_clock_enabled_;
 };

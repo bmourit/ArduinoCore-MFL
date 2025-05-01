@@ -19,14 +19,13 @@
 
 #pragma once
 
-#include <stdlib.h>
-#include <stdint.h>
+#include <cstdlib>
+#include <cstdint>
 
 #include "CONFIG.hpp"
 #include "rcu_config.hpp"
 
 namespace ctc {
-
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
@@ -36,7 +35,6 @@ enum class CTC_Regs : uint8_t {
     STAT = 0x08U,
     INTC = 0x0CU
 };
-
 
 ///////////////////////////// REGISTER BITS /////////////////////////////
 
@@ -72,12 +70,11 @@ enum class STAT_Bits : uint32_t {
 };
 
 enum class INTC_Bits : uint8_t {
-    CKOKIC = 0U,
-    CKWARNIC = 1U,
-    ERRIC = 2U,
-    EREFIC = 3U
+    CKOKIC,
+    CKWARNIC,
+    ERRIC,
+    EREFIC
 };
-
 
 ///////////////////////////// ENUMS /////////////////////////////
 
@@ -113,10 +110,10 @@ enum class Status_Flags : uint8_t {
 };
 
 enum class Clear_Flags : uint8_t {
-    INTC_CKOKIC = 0U,
-    INTC_CKWARNIC = 1U,
-    INTC_ERRIC = 2U,
-    INTC_EREFIC = 3U
+    INTC_CKOKIC,
+    INTC_CKWARNIC,
+    INTC_ERRIC,
+    INTC_EREFIC
 };
 
 enum class Interrupt_Flags : uint32_t {
@@ -130,12 +127,12 @@ enum class Interrupt_Flags : uint32_t {
 };
 
 enum class Interrupt_Type : uint8_t {
-    INTR_CKOK = 0U,
-    INTR_CKWARN = 1U,
-    INTR_ERR = 2U,
-    INTR_EREF = 3U
+    INTR_CKOK,
+    INTR_CKWARN,
+    INTR_ERR,
+    INTR_EREF
 };
 
-inline constexpr uint32_t INTR_ERRIC_FLAG_MASK = 0x00000700U;
+inline constexpr uint32_t INTR_ERRIC_FLAG_MASK = 0x0000'0700U;
 
 } // namespace ctc

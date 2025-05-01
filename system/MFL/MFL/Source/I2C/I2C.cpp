@@ -24,12 +24,12 @@
 namespace i2c {
 
 template <I2C_Base Base>
-I2C& get_instance_for_base() {
+auto get_instance_for_base() -> I2C& {
     static I2C instance(Base);
     return instance;
 }
 
-Result<I2C, I2C_Error_Type> I2C::get_instance(I2C_Base Base) {
+auto I2C::get_instance(I2C_Base Base) -> Result<I2C, I2C_Error_Type> {
     switch (Base) {
         case I2C_Base::I2C0_BASE:
             return get_enum_instance<I2C_Base, I2C, I2C_Error_Type>(
@@ -48,15 +48,16 @@ Result<I2C, I2C_Error_Type> I2C::get_instance(I2C_Base Base) {
 std::array<bool, static_cast<size_t>(I2C_Base::INVALID)> I2C::clock_enabled_ = {false};
 
 I2C::I2C(I2C_Base Base) :
-    base_(Base),
-    I2C_pclk_info_(I2C_pclk_index[static_cast<size_t>(Base)]),
-    base_address_(I2C_baseAddress[static_cast<size_t>(Base)])
+    base_(Base)
 {
-    if (!clock_enabled_[static_cast<size_t>(Base)]) {
+    const auto idx = static_cast<size_t>(Base);
+    I2C_pclk_info_ = I2C_pclk_index[idx];
+
+    if (!clock_enabled_[idx]) {
         RCU_I.set_pclk_enable(I2C_pclk_info_.clock_reg, true);
         RCU_I.set_pclk_reset_enable(I2C_pclk_info_.reset_reg, true);
         RCU_I.set_pclk_reset_enable(I2C_pclk_info_.reset_reg, false);
-        clock_enabled_[static_cast<size_t>(Base)] = true;
+        clock_enabled_[idx] = true;
     }
 }
 
@@ -86,7 +87,7 @@ void I2C::reset() {
  *       result in an error. Additionally, the I2C peripheral will be disabled if the clock speed
  *       is set to 0.
  */
-I2C_Error_Type I2C::set_clock_speed_duty(uint32_t speed, Duty_Cycle duty) {
+auto I2C::set_clock_speed_duty(uint32_t speed, Duty_Cycle duty) -> I2C_Error_Type {
     if (!speed) return I2C_Error_Type::INVALID_CLOCK_FREQUENCY;
 
     const uint32_t apb1_clock = RCU_I.get_clock_frequency(rcu::Clock_Frequency::CK_APB1);
@@ -265,7 +266,7 @@ void I2C::generate_start_condition() {
  *
  * @return The current state of the START bit, either Set (true) or Clear (false)
  */
-uint32_t I2C::get_start_condition() {
+auto I2C::get_start_condition() -> uint32_t {
     return (read_bit(*this, I2C_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::START)) == true ? Set : Clear);
 }
 
@@ -289,7 +290,7 @@ void I2C::generate_stop_condition() {
  *
  * @return The current state of the STOP bit, either Set (true) or Clear (false).
  */
-uint32_t I2C::get_stop_condition() {
+auto I2C::get_stop_condition() -> uint32_t {
     return (read_bit(*this, I2C_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::STOP)) == true ? Set : Clear);
 }
 
@@ -313,7 +314,7 @@ void I2C::transmit_data(uint8_t data) {
  *
  * @return The 8-bit data received from the I2C peripheral.
  */
-uint8_t I2C::receive_data() {
+auto I2C::receive_data() -> uint8_t {
     return read_bit8_range(*this, I2C_Regs::DATA, static_cast<uint32_t>(DATA_Bits::TRB));
 }
 
@@ -425,7 +426,7 @@ void I2C::set_pec_transfer_enable(bool enable) {
  *
  * @return The current value of the PEC for the last data transfer.
  */
-uint8_t I2C::get_pec() {
+auto I2C::get_pec() -> uint8_t {
     return read_bit8_range(*this, I2C_Regs::STAT1, static_cast<uint32_t>(STAT1_Bits::PECV));
 }
 
@@ -469,7 +470,7 @@ void I2C::set_smbus_arp_enable(bool enable) {
  *             Status_Flags enumeration.
  * @return true if the flag is set, false otherwise.
  */
-bool I2C::get_flag(Status_Flags flag) {
+auto I2C::get_flag(Status_Flags flag) -> bool {
     const auto& config = status_flag_index[static_cast<size_t>(flag)];
     return read_bit(*this, config.register_offset, static_cast<uint32_t>(config.bit_info));
 }
@@ -505,7 +506,7 @@ void I2C::clear_flag(Clear_Flags flag) {
  *             Interrupt_Flags enumeration.
  * @return true if the flag is set, false otherwise.
  */
-bool I2C::get_interrupt_flag(Interrupt_Flags flag) {
+auto I2C::get_interrupt_flag(Interrupt_Flags flag) -> bool {
     const auto& config = interrupt_flag_index[static_cast<size_t>(flag)];
     bool flag_value = read_bit(*this, config.register0_offset, static_cast<uint32_t>(config.bit_info0));
     bool is_enabled = read_bit(*this, config.register1_offset, static_cast<uint32_t>(config.bit_info1));
@@ -556,6 +557,5 @@ void I2C::set_interrupt_enable(Interrupt_Type type, bool enable) {
     const auto& config = interrupt_type_index[static_cast<size_t>(type)];
     write_bit(*this, config.register_offset, static_cast<uint32_t>(config.bit_info), enable);
 }
-
 
 } // namespace i2c

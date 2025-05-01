@@ -22,12 +22,12 @@
 
 namespace armdbg {
 
-ARMDBG& ARMDBG::get_instance() {
+auto ARMDBG::get_instance() -> ARMDBG& {
     static ARMDBG instance;
     return instance;
 }
 
-ARMDBG::ARMDBG() {}
+ARMDBG::ARMDBG() = default;
 
 /**
  * @brief Resets the DBG peripheral.
@@ -47,7 +47,7 @@ void ARMDBG::reset() {
  *
  * @return The debug ID of the DBG peripheral as a uint32_t.
  */
-uint32_t ARMDBG::get_debug_id() {
+auto ARMDBG::get_debug_id() -> uint32_t {
     return read_register<uint32_t>(*this, DBG_Regs::ID);
 }
 
@@ -93,6 +93,5 @@ void ARMDBG::set_peripheral_debug_enable(Debug_Peripheral peripheral, bool enabl
 void ARMDBG::set_debug_low_power_enable(Low_Power_Debug type, bool enable) {
     write_bit(*this, DBG_Regs::CTL0, static_cast<uint32_t>(type), enable);
 }
-
 
 } // namespace armdbg

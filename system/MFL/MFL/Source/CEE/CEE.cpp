@@ -21,12 +21,12 @@
 
 namespace cee {
 
-CEE& CEE::get_instance() {
+auto CEE::get_instance() -> CEE& {
     static CEE instance;
     return instance;
 }
 
-CEE::CEE() {}
+CEE::CEE() = default;
 
 /**
  * @brief Enables or disables the code execution enhancement bit.

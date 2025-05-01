@@ -23,12 +23,12 @@
 namespace spi {
 
 template <SPI_Base Base>
-SPI& get_instance_for_base() {
+auto get_instance_for_base() -> SPI& {
     static SPI instance(Base);
     return instance;
 }
 
-Result<SPI, SPI_Error_Type> SPI::get_instance(SPI_Base Base) {
+auto SPI::get_instance(SPI_Base Base) -> Result<SPI, SPI_Error_Type> {
     switch (Base) {
         case SPI_Base::SPI0_BASE:
             return get_enum_instance<SPI_Base, SPI, SPI_Error_Type>(
@@ -51,18 +51,19 @@ Result<SPI, SPI_Error_Type> SPI::get_instance(SPI_Base Base) {
 std::array<bool, static_cast<size_t>(SPI_Base::INVALID)> SPI::clock_enabled_ = {false};
 
 SPI::SPI(SPI_Base Base) :
-    base_(Base),
-    SPI_pclk_info_(SPI_pclk_index[static_cast<uint8_t>(Base)]),
-    base_address_(SPI_baseAddress[static_cast<uint8_t>(Base)]),
-    config_(default_config)
+    base_(Base)
 {
-    if (!clock_enabled_[static_cast<uint8_t>(Base)]) {
+    const auto idx = static_cast<size_t>(Base);
+    SPI_pclk_info_ = SPI_pclk_index[idx];
+    config_ = default_config;
+
+    if (!clock_enabled_[idx]) {
         RCU_I.set_pclk_enable(SPI_pclk_info_.clock_reg, true);
         RCU_I.set_pclk_reset_enable(SPI_pclk_info_.reset_reg, true);
         RCU_I.set_pclk_reset_enable(SPI_pclk_info_.reset_reg, false);
-        clock_enabled_[static_cast<uint8_t>(Base)] = true;
+        clock_enabled_[idx] = true;
     }
-    // Initialize default values
+
     init();
 }
 
@@ -247,7 +248,7 @@ void SPI::data_transmit(uint16_t data) {
  *
  * @return The 16-bit data value received from the SPI peripheral.
  */
-uint16_t SPI::data_receive() {
+auto SPI::data_receive() -> uint16_t {
     return static_cast<uint16_t>(read_register<uint32_t>(*this, SPI_Regs::DATA));
 }
 
@@ -295,7 +296,7 @@ void SPI::set_crc_polynomial(uint16_t crc_poly) {
  *
  * @return The current 16-bit CRC polynomial value.
  */
-uint16_t SPI::get_crc_polynomial() {
+auto SPI::get_crc_polynomial() -> uint16_t {
     return static_cast<uint16_t>(read_register<uint32_t>(*this, SPI_Regs::CRCPOLY));
 }
 
@@ -332,7 +333,7 @@ void SPI::set_crc_next() {
  *            CRC_Direction::CRC_TX or CRC_Direction::CRC_RX.
  * @return The 16-bit CRC value corresponding to the specified direction.
  */
-uint16_t SPI::get_crc(CRC_Direction crc) {
+auto SPI::get_crc(CRC_Direction crc) -> uint16_t {
     const SPI_Regs crc_reg = (crc == CRC_Direction::CRC_TX) ? SPI_Regs::TCRC : SPI_Regs::RCRC;
     return static_cast<uint16_t>(read_register<uint32_t>(*this, crc_reg));
 }
@@ -425,7 +426,7 @@ void SPI::set_quad_io23_output_enable(bool enabled) {
  *                 Status_Flags enumeration.
  * @return true if the flag is set, false otherwise.
  */
-bool SPI::get_flag(Status_Flags flag) {
+auto SPI::get_flag(Status_Flags flag) -> bool {
     return read_bit(*this, SPI_Regs::STAT, static_cast<uint32_t>(flag));
 }
 
@@ -442,7 +443,7 @@ bool SPI::get_flag(Status_Flags flag) {
  * @param flag The interrupt flag to check, specified as an Interrupt_Flags enumeration value.
  * @return true if the specified interrupt flag is set and enabled, false otherwise.
  */
-bool SPI::get_interrupt_flag(Interrupt_Flags flag) {
+auto SPI::get_interrupt_flag(Interrupt_Flags flag) -> bool {
     const auto& config = interrupt_flags_config[static_cast<size_t>(flag)];
     const bool stat_bit = read_bit(*this, config.stat_reg, static_cast<uint32_t>(config.stat_bit));
     const bool ctl_bit = read_bit(*this, config.ctl_reg, static_cast<uint32_t>(config.ctl_bit));
@@ -466,6 +467,5 @@ bool SPI::get_interrupt_flag(Interrupt_Flags flag) {
 void SPI::set_interrupt_enable(Interrupt_Type type, bool enabled) {
     write_bit(*this, SPI_Regs::CTL1, static_cast<uint32_t>(type), enabled);
 }
-
 
 } // namespace spi

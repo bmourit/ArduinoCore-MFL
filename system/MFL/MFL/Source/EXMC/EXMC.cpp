@@ -22,12 +22,13 @@
 
 namespace exmc {
 
-EXMC& EXMC::get_instance() {
+auto EXMC::get_instance() -> EXMC& {
     static EXMC instance;
     return instance;
 }
 
-EXMC::EXMC() : nor_sram_config_(nor_sram_default_config),
+EXMC::EXMC() :
+    nor_sram_config_(nor_sram_default_config),
     nand_config_(nand_default_config),
     pccard_config_(pccard_default_config),
     is_clock_enabled_(false)
@@ -304,7 +305,7 @@ void EXMC::set_nand_ecc_enable(NPC_Block npc_block, bool enable) {
  * @param npc_block The NAND Flash block for which to read the ECC.
  * @returns The ECC value stored in the NECC register.
  */
-uint32_t EXMC::get_ecc(NPC_Block npc_block) {
+auto EXMC::get_ecc(NPC_Block npc_block) -> uint32_t {
     EXMC_Regs necc_offset = get_necc_offset(npc_block);
     return read_register<uint32_t>(*this, necc_offset);
 }
@@ -319,7 +320,7 @@ uint32_t EXMC::get_ecc(NPC_Block npc_block) {
  * @param flag The specific status flag to be checked.
  * @return True if the flag is set, otherwise false.
  */
-bool EXMC::get_flag(NPC_Block npc_block, Status_Flags flag) {
+auto EXMC::get_flag(NPC_Block npc_block, Status_Flags flag) -> bool {
     EXMC_Regs npinten_offset = get_npinten_offset(npc_block);
     return read_bit(*this, npinten_offset, static_cast<uint32_t>(flag));
 }
@@ -349,7 +350,7 @@ void EXMC::clear_flag(NPC_Block npc_block, Status_Flags flag) {
  * @param flag The specific interrupt flag to be checked.
  * @return True if the flag is set and the interrupt is enabled, otherwise false.
  */
-bool EXMC::get_interrupt_flag(NPC_Block npc_block, Interrupt_Flags flag) {
+auto EXMC::get_interrupt_flag(NPC_Block npc_block, Interrupt_Flags flag) -> bool {
     EXMC_Regs npinten_offset = get_npinten_offset(npc_block);
 
     bool intr_status = false;
@@ -403,6 +404,5 @@ void EXMC::set_interrupt_enable(NPC_Block npc_block, Interrupt_Type type, bool e
     EXMC_Regs npinten_offset = get_npinten_offset(npc_block);
     write_bit(*this, npinten_offset, static_cast<uint32_t>(type), enable);
 }
-
 
 } // namespace exmc

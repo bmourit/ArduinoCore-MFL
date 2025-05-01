@@ -26,12 +26,12 @@
 namespace gpio {
 
 template <GPIO_Base Base>
-GPIO& get_instance_for_base() {
+auto get_instance_for_base() -> GPIO& {
     static GPIO instance(Base);
     return instance;
 }
 
-Result<GPIO, GPIO_Error_Type> GPIO::get_instance(GPIO_Base Base) {
+auto GPIO::get_instance(GPIO_Base Base) -> Result<GPIO, GPIO_Error_Type> {
     switch (Base) {
         case GPIO_Base::GPIOA_BASE:
             return get_enum_instance<GPIO_Base, GPIO, GPIO_Error_Type>(
@@ -58,15 +58,16 @@ Result<GPIO, GPIO_Error_Type> GPIO::get_instance(GPIO_Base Base) {
 std::array<bool, static_cast<size_t>(GPIO_Base::INVALID)> GPIO::clock_enabled_ = {false};
 
 GPIO::GPIO(GPIO_Base Base) :
-    base_(Base),
-    GPIO_pclk_info_(GPIO_pclk_index[static_cast<size_t>(Base)]),
-    base_address_(GPIO_baseAddress[static_cast<uint8_t>(Base)])
+    base_(Base)
 {
-    if (!clock_enabled_[static_cast<size_t>(Base)]) {
+    const auto idx = static_cast<size_t>(Base);
+    GPIO_pclk_info_ = GPIO_pclk_index[idx];
+
+    if (!clock_enabled_[idx]) {
         RCU_I.set_pclk_enable(GPIO_pclk_info_.clock_reg, true);
         RCU_I.set_pclk_reset_enable(GPIO_pclk_info_.reset_reg, true);
         RCU_I.set_pclk_reset_enable(GPIO_pclk_info_.reset_reg, false);
-        clock_enabled_[static_cast<size_t>(Base)] = true;
+        clock_enabled_[idx] = true;
     }
 }
 
@@ -95,21 +96,25 @@ void GPIO::reset() {
 void GPIO::set_pin_mode(Pin_Number pin, Pin_Mode mode, Output_Speed speed) {
     if (pin == Pin_Number::INVALID || mode == Pin_Mode::INVALID) return;
 
-    const uint32_t shift = (static_cast<uint32_t>(pin) & 0x7U) << 2U;
-    const GPIO_Regs reg = (static_cast<uint32_t>(pin) >= 8U) ? GPIO_Regs::CTL1 : GPIO_Regs::CTL0;
-    uint32_t ctl = read_register<uint32_t>(*this, reg) & ~(0xFU << shift);
-    bool compensation = false;
+    // Cache the pin index for repeated use
+    const auto pin_idx = static_cast<uint32_t>(pin);
 
+    const uint32_t shift = (pin_idx & 0x7U) << 2;
+    const GPIO_Regs reg = (pin_idx >= 8U) ? GPIO_Regs::CTL1 : GPIO_Regs::CTL0;
+    uint32_t ctl = read_register<uint32_t>(*this, reg) & ~(0xFU << shift);
+
+    bool max_speed = false;
     uint32_t cfg = 0U;
+
     if (mode <= Pin_Mode::INPUT_PULLDOWN) {
         // Handle input modes
         cfg = (mode == Pin_Mode::INPUT_FLOATING) ? 0x4U :
               (mode == Pin_Mode::ANALOG) ? 0x0U : 0x8U;
 
         if (mode == Pin_Mode::INPUT_PULLUP)
-            atomic_write_bit(*this, GPIO_Regs::BOP, static_cast<uint32_t>(pin), true);
+            atomic_write_bit(*this, GPIO_Regs::BOP, pin_idx, true);
         else if (mode == Pin_Mode::INPUT_PULLDOWN)
-            atomic_write_bit(*this, GPIO_Regs::BC, static_cast<uint32_t>(pin), true);
+            atomic_write_bit(*this, GPIO_Regs::BC, pin_idx, true);
     } else {
         // Handle output modes
         const bool is_open_drain = (mode == Pin_Mode::OUTPUT_OPENDRAIN || mode == Pin_Mode::ALT_OPENDRAIN);
@@ -120,7 +125,7 @@ void GPIO::set_pin_mode(Pin_Number pin, Pin_Mode mode, Output_Speed speed) {
         if constexpr (std::is_same_v<mcu::ChipSeries, mcu::F303R>) {
             if (speed == Output_Speed::SPEED_MAX) {
                 cfg |= 0x3U;
-                compensation = true;
+                max_speed = true;
             } else {
                 cfg |= (speed == Output_Speed::INVALID) ?
                    static_cast<uint32_t>(Output_Speed::SPEED_50MHZ) :
@@ -133,14 +138,11 @@ void GPIO::set_pin_mode(Pin_Number pin, Pin_Mode mode, Output_Speed speed) {
         }
     }
 
-    write_register(*this, reg, ctl | (cfg << shift));
-
-    if (compensation) {
-        write_bit(*this, GPIO_Regs::SPD, static_cast<uint32_t>(pin), true);
-        AFIO_I.set_compensation(true);
-        while (!AFIO_I.get_compensation()) {
-        }
+    if (max_speed) {
+        write_bit(*this, GPIO_Regs::SPD, pin_idx, true);
     }
+
+    write_register(*this, reg, ctl | (cfg << shift));
 }
 
 /**
@@ -150,14 +152,17 @@ void GPIO::set_pin_mode(Pin_Number pin, Pin_Mode mode, Output_Speed speed) {
  *
  * @return The current pin mode.
  */
-Pin_Mode GPIO::get_pin_mode(Pin_Number pin) {
+auto GPIO::get_pin_mode(Pin_Number pin) -> Pin_Mode {
     if (pin == Pin_Number::INVALID) {
         return Pin_Mode::INVALID;
     }
 
+    // Cache the pin index for repeated use
+    const auto pin_idx = static_cast<uint32_t>(pin);
+
     // Determine the correct register and bit position for the pin configuration
-    const uint32_t shift = (static_cast<uint32_t>(pin) & 0x7U) << 2U;
-    const GPIO_Regs reg = (static_cast<uint32_t>(pin) >= 8U) ? GPIO_Regs::CTL1 : GPIO_Regs::CTL0;
+    const uint32_t shift = (pin_idx & 0x7U) << 2;
+    const GPIO_Regs reg = (pin_idx >= 8U) ? GPIO_Regs::CTL1 : GPIO_Regs::CTL0;
 
     // Read the current register value
     const uint32_t mode_bits = (read_register<uint32_t>(*this, reg) & (0xFU << shift)) >> shift;
@@ -248,7 +253,7 @@ void GPIO::write_pin(Pin_Number pin, bool set) {
  *         the state returned is the current state of the pin as determined by the
  *         external hardware.
  */
-bool GPIO::read_pin(Pin_Number pin) {
+auto GPIO::read_pin(Pin_Number pin) -> bool {
     if (pin == Pin_Number::INVALID) {
         return false;
     }
@@ -275,8 +280,12 @@ void GPIO::toggle_pin(Pin_Number pin) {
     if (pin == Pin_Number::INVALID) {
         return;
     }
-    bool is_set = read_bit(*this, GPIO_Regs::OCTL, static_cast<uint32_t>(pin));
-    atomic_write_bit(*this, is_set ? GPIO_Regs::BC : GPIO_Regs::BOP, static_cast<uint32_t>(pin), true);
+
+    // Cache the pin index for repeated use
+    const auto pin_idx = static_cast<uint32_t>(pin);
+
+    bool is_set = read_bit(*this, GPIO_Regs::OCTL, pin_idx);
+    atomic_write_bit(*this, is_set ? GPIO_Regs::BC : GPIO_Regs::BOP, pin_idx, true);
 }
 
 /**
@@ -304,7 +313,7 @@ void GPIO::set_port(uint16_t data) {
  *         the last state written to the pin. If the pin is in an input mode, the state returned is
  *         the current state of the pin as determined by the external hardware.
  */
-bool GPIO::get_pin_input_state(Pin_Number pin) {
+auto GPIO::get_pin_input_state(Pin_Number pin) -> bool {
     if (pin == Pin_Number::INVALID) {
         return false;
     }
@@ -321,7 +330,7 @@ bool GPIO::get_pin_input_state(Pin_Number pin) {
  * @param pin The pin number to read from.
  * @return True if the pin is set to a high state, false otherwise.
  */
-bool GPIO::get_pin_output_state(Pin_Number pin) {
+auto GPIO::get_pin_output_state(Pin_Number pin) -> bool {
     if (pin == Pin_Number::INVALID) {
         return false;
     }
@@ -338,7 +347,7 @@ bool GPIO::get_pin_output_state(Pin_Number pin) {
  *
  * @return The current state of the port.
  */
-uint16_t GPIO::get_port_input_state() {
+auto GPIO::get_port_input_state() -> uint16_t {
     return read_register<uint16_t>(*this, GPIO_Regs::ISTAT);
 }
 
@@ -353,7 +362,7 @@ uint16_t GPIO::get_port_input_state() {
  *
  * @return The current state of the port.
  */
-uint16_t GPIO::get_port_output_state() {
+auto GPIO::get_port_output_state() -> uint16_t {
     return read_register<uint16_t>(*this, GPIO_Regs::OCTL);
 }
 
@@ -373,16 +382,17 @@ void GPIO::lock_pin(Pin_Number pin) {
     }
 
     uint32_t lock = LockValue;
-    lock |= (1U << static_cast<uint32_t>(pin));
+    // Cache the pin index for repeated use
+    const auto pin_idx = static_cast<uint32_t>(pin);
+    lock |= (1U << pin_idx);
 
     // lock the pin by write/read in this order
     // write lock -> write pin -> write lock -> read 1x -> read 2x
     write_register(*this, GPIO_Regs::LOCK, lock);
-    write_bit(*this, GPIO_Regs::LOCK, static_cast<uint32_t>(pin), true);
+    write_bit(*this, GPIO_Regs::LOCK, pin_idx, true);
     write_register(*this, GPIO_Regs::LOCK, lock);
     lock = read_register<uint32_t>(*this, GPIO_Regs::LOCK);
     lock = read_register<uint32_t>(*this, GPIO_Regs::LOCK);
 }
-
 
 } // namespace gpio

@@ -19,13 +19,12 @@
 
 #pragma once
 
-#include <stdlib.h>
-#include <stdint.h>
+#include <cstdlib>
+#include <cstdint>
 
 #include "CONFIG.hpp"
 
 namespace exmc {
-
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
@@ -118,13 +117,13 @@ enum class NPCTLX_Bits : uint32_t {
 };
 
 enum class NPINTENX_Bits : uint8_t {
-    INTRS = 0U,
-    INTHS = 1U,
-    INTFS = 2U,
-    INTREN = 3U,
-    INTHEN = 4U,
-    INTFEN = 5U,
-    FFEPT = 6U
+    INTRS,
+    INTHS,
+    INTFS,
+    INTREN,
+    INTHEN,
+    INTFEN,
+    FFEPT
 };
 
 enum class NPCTCFGX_Bits : uint32_t {
@@ -151,7 +150,6 @@ enum class PIOTCFG3_Bits : uint32_t {
 enum class NECCX_Bits : uint32_t {
     ECC = REG_BIT_DEF(0, 31)
 };
-
 
 ///////////////////////////// ENUMS /////////////////////////////
 
@@ -283,9 +281,9 @@ enum class Status_Flags : uint32_t {
 };
 
 enum class Interrupt_Flags : uint8_t {
-    INTR_FLAG_RISING = 0U,
-    INTR_FLAG_LEVEL = 1U,
-    INTR_FLAG_FALLING = 2U
+    INTR_FLAG_RISING,
+    INTR_FLAG_LEVEL,
+    INTR_FLAG_FALLING
 };
 
 enum class Interrupt_Type : uint8_t {
@@ -294,35 +292,34 @@ enum class Interrupt_Type : uint8_t {
     INTR_FALLING_EN = 5U
 };
 
-
 ///////////////////////////// STRUCTURES /////////////////////////////
 
 struct NOR_SRAM_Timing {
     uint32_t bus_latency;
-    uint32_t async_dst;     // Data setup time
-    uint32_t async_aht;     // Address hold time
-    uint32_t async_ast;     // Address setup time
-    Async_Mode async_access;
-    Data_Latency sync_latency;
-    Sync_Divider divider;
+    uint32_t async_dst;             // Data setup time
+    uint32_t async_aht;             // Address hold time
+    uint32_t async_ast;             // Address setup time
+    Async_Mode async_access : 2;
+    Data_Latency sync_latency : 4;
+    Sync_Divider divider : 4;
 };
 
 struct NOR_SRAM_Config {
     const NOR_SRAM_Timing* rw_timing;
     const NOR_SRAM_Timing* write_timing;
-    Bus_Width width;
-    Block_Number block;
-    Write_Mode mode;
-    NWAIT_Active nwait_active;
-    Signal_Polarity polarity;
-    Memory_Type type;
-    bool async_wait;
-    bool extended_mode;
-    bool nwait_signal;
-    bool memory_write;
-    bool wrap;
-    bool burst;
-    bool address_mux;
+    Bus_Width width : 1;
+    Block_Number block : 2;
+    Write_Mode mode : 1;
+    NWAIT_Active nwait_active : 1;
+    Signal_Polarity polarity : 1;
+    Memory_Type type : 2;
+    bool async_wait : 1;
+    bool extended_mode : 1;
+    bool nwait_signal : 1;
+    bool memory_write : 1;
+    bool wrap : 1;
+    bool burst : 1;
+    bool address_mux : 1;
 };
 
 struct NPC_Timing {
@@ -335,113 +332,111 @@ struct NPC_Timing {
 struct NAND_Config {
     const NPC_Timing* common_timing;
     const NPC_Timing* attribute_timing;
-    Bus_Width databus_width;
-    NPC_Block npc_block;
-    ECC_Size ecc_size;
-    HCLK_Delay ctr_latency;
-    HCLK_Delay atr_latency;
-    bool ecc;
-    bool wait;
+    Bus_Width databus_width : 1;
+    NPC_Block npc_block : 2;
+    ECC_Size ecc_size : 3;
+    HCLK_Delay ctr_latency : 4;
+    HCLK_Delay atr_latency : 4;
+    bool ecc : 1;
+    bool wait : 1;
 };
 
 struct PCCARD_Config {
     const NPC_Timing* common_timing;
     const NPC_Timing* attribute_timing;
     const NPC_Timing* io_timing;
-    HCLK_Delay ctr_latency;
-    HCLK_Delay atr_latency;
-    bool wait;
+    HCLK_Delay ctr_latency : 4;
+    HCLK_Delay atr_latency : 4;
+    bool wait : 1;
 };
-
 
 ///////////////////////////// CONSTANTS /////////////////////////////
 
-static inline constexpr uint32_t NSRAM_Block_Offset = 0x08U;
-static inline constexpr uint32_t NPC_Block_Offset = 0x20U;
+inline constexpr uint32_t NSRAM_Block_Offset = 0x08U;
+inline constexpr uint32_t NPC_Block_Offset = 0x20U;
 
-static inline constexpr uint32_t SNCTL_Block0_Reset = 0x000030DBU;
-static inline constexpr uint32_t SNCTL_Block1_2_3_Reset = 0x000030D2U;
-static inline constexpr uint32_t Common_Reset = 0x0FFFFFFFU;
-static inline constexpr uint32_t NPCTL_Block1_2_Reset = 0x00000018U;
-static inline constexpr uint32_t NPINTEN_Block1_2_Reset = 0x00000042U;
-static inline constexpr uint32_t NPCTL_Block3_Reset = 0x00000018U;
-static inline constexpr uint32_t NPINTEN_Block3_Reset = 0x00000043U;
-static inline constexpr uint32_t Common_Block3_Reset = 0xFCFCFCFCU;
-
+inline constexpr uint32_t SNCTL_Block0_Reset = 0x0000'30DBU;
+inline constexpr uint32_t SNCTL_Block1_2_3_Reset = 0x0000'30D2U;
+inline constexpr uint32_t Common_Reset = 0x0FFF'FFFFU;
+inline constexpr uint32_t NPCTL_Block1_2_Reset = 0x0000'0018U;
+inline constexpr uint32_t NPINTEN_Block1_2_Reset = 0x0000'0042U;
+inline constexpr uint32_t NPCTL_Block3_Reset = 0x0000'0018U;
+inline constexpr uint32_t NPINTEN_Block3_Reset = 0x0000'0043U;
+inline constexpr uint32_t Common_Block3_Reset = 0xFCFC'FCFCU;
 
 ///////////////////////////// INITIALIZATION DEFAULTS /////////////////////////////
 
-static inline const NOR_SRAM_Timing rw_timing_default = {
-    0xFU,
-    0xFFU,
-    0xFU,
-    0xFU,
-    Async_Mode::MODE_A,
-    Data_Latency::LATENCY_17_CLK,
-    Sync_Divider::DIV16
+inline constexpr NOR_SRAM_Timing rw_timing_default = {
+    .bus_latency = 0xFU,
+    .async_dst = 0xFFU,
+    .async_aht = 0xFU,
+    .async_ast = 0xFU,
+    .async_access = Async_Mode::MODE_A,
+    .sync_latency = Data_Latency::LATENCY_17_CLK,
+    .divider = Sync_Divider::DIV16
 };
 
-static inline const NOR_SRAM_Timing write_timing_default = {
-    0xFU,
-    0xFFU,
-    0xFU,
-    0xFU,
-    Async_Mode::MODE_A,
-    Data_Latency::LATENCY_2_CLK,
-    Sync_Divider::NONE
+inline constexpr NOR_SRAM_Timing write_timing_default = {
+    .bus_latency = 0xFU,
+    .async_dst = 0xFFU,
+    .async_aht = 0xFU,
+    .async_ast = 0xFU,
+    .async_access = Async_Mode::MODE_A,
+    .sync_latency = Data_Latency::LATENCY_2_CLK,
+    .divider = Sync_Divider::NONE
 };
 
-static inline const NOR_SRAM_Config nor_sram_default_config = {
-    &rw_timing_default,
-    &write_timing_default,
-    Bus_Width::WIDTH_8BITS,
-    Block_Number::BLOCK0,
-    Write_Mode::ASYNC,
-    NWAIT_Active::BEFORE,
-    Signal_Polarity::LOW,
-    Memory_Type::SRAM,
-    false,
-    false,
-    true,
-    true,
-    false,
-    false,
-    true
+inline constexpr NOR_SRAM_Config nor_sram_default_config = {
+    .rw_timing = &rw_timing_default,
+    .write_timing = &write_timing_default,
+    .width = Bus_Width::WIDTH_8BITS,
+    .block = Block_Number::BLOCK0,
+    .mode = Write_Mode::ASYNC,
+    .nwait_active = NWAIT_Active::BEFORE,
+    .polarity = Signal_Polarity::LOW,
+    .type = Memory_Type::SRAM,
+    .async_wait = false,
+    .extended_mode = false,
+    .nwait_signal = true,
+    .memory_write = true,
+    .wrap = false,
+    .burst = false,
+    .address_mux = true
 };
 
-static inline const NPC_Timing common_timing_default = {
-    0xFCU,
-    0xFCU,
-    0xFCU,
-    0xFCU
+inline constexpr NPC_Timing common_timing_default = {
+    .dbhzt = 0xFCU,
+    .ht = 0xFCU,
+    .wt = 0xFCU,
+    .st = 0xFCU
 };
 
-static inline const NAND_Config nand_default_config = {
-    &common_timing_default,
-    &common_timing_default,
-    Bus_Width::WIDTH_8BITS,
-    NPC_Block::NAND_BLOCK1,
-    ECC_Size::BYTES_256,
-    HCLK_Delay::DELAY_1_HCLK,
-    HCLK_Delay::DELAY_1_HCLK,
-    false,
-    false
+inline constexpr NAND_Config nand_default_config = {
+    .common_timing = &common_timing_default,
+    .attribute_timing = &common_timing_default,
+    .databus_width = Bus_Width::WIDTH_8BITS,
+    .npc_block = NPC_Block::NAND_BLOCK1,
+    .ecc_size = ECC_Size::BYTES_256,
+    .ctr_latency = HCLK_Delay::DELAY_1_HCLK,
+    .atr_latency = HCLK_Delay::DELAY_1_HCLK,
+    .ecc = false,
+    .wait = false
 };
 
-static inline const NPC_Timing io_timing_default = {
-    0xFCU,
-    0xFCU,
-    0xFCU,
-    0xFCU
+inline constexpr NPC_Timing io_timing_default = {
+    .dbhzt = 0xFCU,
+    .ht = 0xFCU,
+    .wt = 0xFCU,
+    .st = 0xFCU
 };
 
-static inline const PCCARD_Config pccard_default_config = {
-    &common_timing_default,
-    &common_timing_default,
-    &io_timing_default,
-    HCLK_Delay::DELAY_1_HCLK,
-    HCLK_Delay::DELAY_1_HCLK,
-    false
+inline constexpr PCCARD_Config pccard_default_config = {
+    .common_timing = &common_timing_default,
+    .attribute_timing = &common_timing_default,
+    .io_timing = &io_timing_default,
+    .ctr_latency = HCLK_Delay::DELAY_1_HCLK,
+    .atr_latency = HCLK_Delay::DELAY_1_HCLK,
+    .wait = false
 };
 
 } // namespace exmc

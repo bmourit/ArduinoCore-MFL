@@ -19,13 +19,12 @@
 
 #pragma once
 
-#include <stdlib.h>
-#include <stdint.h>
+#include <cstdlib>
+#include <cstdint>
 
 #include "CONFIG.hpp"
 
 namespace fwdgt {
-
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
@@ -35,7 +34,6 @@ enum class FWDGT_Regs : uint8_t {
     RLD = 0x08U,
     STAT = 0x0CU
 };
-
 
 ///////////////////////////// REGISTER BITS /////////////////////////////
 
@@ -52,10 +50,9 @@ enum class RLD_Bits : uint32_t {
 };
 
 enum class STAT_Bits : uint8_t {
-    PUD = 0,
-    RUD = 1
+    PUD,
+    RUD
 };
-
 
 ///////////////////////////// ENUMS /////////////////////////////
 
@@ -71,16 +68,15 @@ enum class Prescaler_Value : uint8_t {
 };
 
 enum class Status_Flags : uint8_t {
-    FLAG_PUD = 0,
-    FLAG_RUD = 1
+    FLAG_PUD,
+    FLAG_RUD
 };
-
 
 ///////////////////////////// CONSTANTS /////////////////////////////
 
-static inline constexpr uint32_t EnableValue = 0x0000CCCCU;
-static inline constexpr uint32_t WriteEnable = 0x00005555U;
-static inline constexpr uint32_t ReloadValue = 0x0000AAAAU;
-static inline constexpr uint32_t TimeoutCycles = 1000000U;
+inline constexpr uint32_t EnableValue = 0x0000'CCCCU;
+inline constexpr uint32_t WriteEnable = 0x0000'5555U;
+inline constexpr uint32_t ReloadValue = 0x0000'AAAAU;
+inline constexpr uint32_t TimeoutCycles = 1'000'000U;
 
 } // namespace fwdgt

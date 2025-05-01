@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 #include <array>
 
 #include "i2c_config.hpp"
@@ -29,52 +29,78 @@
 
 namespace i2c {
 
-class RCU;
-class GPIO;
-
 class I2C {
 public:
-    static Result<I2C, I2C_Error_Type> get_instance(I2C_Base Base);
+    static auto get_instance(I2C_Base Base) -> Result<I2C, I2C_Error_Type>;
 
+    // Reset
     void reset();
-    I2C_Error_Type set_clock_speed_duty(uint32_t speed, Duty_Cycle duty);
-    void set_address_format(uint32_t address, Address_Format format, Bus_Mode mode);
-    void set_smbus_type(Bus_Type type);
+
+    // Enable
+    void set_enable(bool enable);
+
+    // Clock
+    auto set_clock_speed_duty(uint32_t speed, Duty_Cycle duty) -> I2C_Error_Type;
+
+    // ACK
     void set_ack_enable(bool enable);
     void set_ack_position(ACK_Select position);
+
+    // Address
+    void set_address_format(uint32_t address, Address_Format format, Bus_Mode mode);
     void set_direction_address(Transfer_Direction direction, uint32_t address);
     void set_dual_address_enable(uint32_t address, bool enable);
-    void set_enable(bool enable);
+
+    // Start/stop condition
     void generate_start_condition();
-    uint32_t get_start_condition();
+    auto get_start_condition() -> uint32_t;
     void generate_stop_condition();
-    uint32_t get_stop_condition();
+    auto get_stop_condition() -> uint32_t;
+
+    // Transmition/reception
     void transmit_data(uint8_t data);
-    uint8_t receive_data();
+    auto receive_data() -> uint8_t;
+
+    // DMA
     void set_dma_enable(bool enable);
     void set_dma_transfer_end(bool is_end);
+
+    // Stretch
     void set_stretch_low(Stretch_Low stretch);
+
+    // General call
     void set_general_call_respond(bool respond);
+
+    // Software reset
     void set_software_reset_enable(bool reset);
+
+    // PEC
     void set_pec_calculate(bool enable);
     void set_pec_transfer_enable(bool enable);
-    uint8_t get_pec();
+    auto get_pec() -> uint8_t;
+
+    // SMBUS
+    void set_smbus_type(Bus_Type type);
     void set_smbus_alert_enable(bool enable);
     void set_smbus_arp_enable(bool enable);
+
     // Flags
-    bool get_flag(Status_Flags flag);
+    auto get_flag(Status_Flags flag) -> bool;
     void clear_flag(Clear_Flags flag);
+
     // Interrupt flags
-    bool get_interrupt_flag(Interrupt_Flags flag);
+    auto get_interrupt_flag(Interrupt_Flags flag) -> bool;
     void clear_interrupt_flag(Clear_Flags flag);
-    // Interrupt enable/disable
+
+    // Interrupts
     void set_interrupt_enable(Interrupt_Type type, bool enable);
 
     // Accessor methods
-    inline I2C_Base get_base() { return base_; }
+    inline auto get_base() -> I2C_Base { return base_; }
 
-    inline volatile uint32_t* reg_address(I2C_Regs reg) const {
-        return reinterpret_cast<volatile uint32_t*>(base_address_ + static_cast<uint32_t>(reg));
+    [[nodiscard]] inline auto reg_address(I2C_Regs reg) const -> volatile uint32_t* {
+        const auto idx = static_cast<uint32_t>(base_);
+        return reinterpret_cast<volatile uint32_t*>(I2C_baseAddress[idx] + static_cast<uint32_t>(reg));
     }
 
 private:
@@ -83,10 +109,9 @@ private:
 
     I2C_Base base_;
     I2C_Clock_Config I2C_pclk_info_;
-    uint32_t base_address_;
 
     template <I2C_Base Base>
-    friend I2C& get_instance_for_base();
+    friend auto get_instance_for_base() -> I2C&;
 };
 
 } // namespace i2c

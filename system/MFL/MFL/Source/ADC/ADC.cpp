@@ -24,12 +24,12 @@
 namespace adc {
 
 template <ADC_Base Base>
-ADC& get_instance_for_base() {
+auto get_instance_for_base() -> ADC& {
     static ADC instance(Base);
     return instance;
 }
 
-Result<ADC, ADC_Error_Type> ADC::get_instance(ADC_Base Base) {
+auto ADC::get_instance(ADC_Base Base) -> Result<ADC, ADC_Error_Type> {
     switch (Base) {
         case ADC_Base::ADC0_BASE:
             return get_enum_instance<ADC_Base, ADC, ADC_Error_Type>(
@@ -52,16 +52,17 @@ Result<ADC, ADC_Error_Type> ADC::get_instance(ADC_Base Base) {
 std::array<bool, static_cast<size_t>(ADC_Base::INVALID)> ADC::clock_enabled_ = {false};
 
 ADC::ADC(ADC_Base Base) :
-    base_(Base),
-    ADC_pclk_info_(ADC_pclk_index[static_cast<size_t>(Base)]),
-    base_address_(ADC_baseAddress[static_cast<size_t>(Base)]),
-    prescaler_(get_prescaler_value())
+    base_(Base)
 {
-    if (!clock_enabled_[static_cast<size_t>(Base)]) {
+    const auto idx = static_cast<size_t>(Base);
+    ADC_pclk_info_ = ADC_pclk_index[idx];
+    prescaler_ = get_prescaler_value();
+
+    if (!clock_enabled_[idx]) {
         RCU_I.set_pclk_enable(ADC_pclk_info_.clock_reg, true);
         RCU_I.set_pclk_reset_enable(ADC_pclk_info_.reset_reg, true);
         RCU_I.set_pclk_reset_enable(ADC_pclk_info_.reset_reg, false);
-        clock_enabled_[static_cast<size_t>(Base)] = true;
+        clock_enabled_[idx] = true;
     }
 }
 
@@ -83,8 +84,9 @@ void ADC::reset() {
  * If it is not enabled, it sets the ADCON bit to true to enable the ADC.
  */
 void ADC::enable() {
-    if (!read_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::ADCON))) {
-        write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::ADCON), true);
+    const auto adcon_bit = static_cast<uint32_t>(CTL1_Bits::ADCON);
+    if (!read_bit(*this, ADC_Regs::CTL1, adcon_bit)) {
+        write_bit(*this, ADC_Regs::CTL1, adcon_bit, true);
     }
 }
 
@@ -106,12 +108,13 @@ void ADC::disable() {
  * @param enable Set to true to enable the ADC, false to disable it.
  */
 void ADC::set_enable(bool enable) {
+    const auto adcon_bit = static_cast<uint32_t>(CTL1_Bits::ADCON);
     if (enable) {
-        if (!read_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::ADCON))) {
-            write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::ADCON), true);
+        if (!read_bit(*this, ADC_Regs::CTL1, adcon_bit)) {
+            write_bit(*this, ADC_Regs::CTL1, adcon_bit, true);
         }
     } else {
-        write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::ADCON), false);
+        write_bit(*this, ADC_Regs::CTL1, adcon_bit, false);
     }
 }
 
@@ -122,7 +125,7 @@ void ADC::set_enable(bool enable) {
  *
  * @return true if the ADC is enabled, false if it is not.
  */
-bool ADC::is_enabled() {
+auto ADC::is_enabled() -> bool {
     return read_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::ADCON));
 }
 
@@ -133,12 +136,15 @@ bool ADC::is_enabled() {
  * calibration. It will block until the calibration is complete.
  */
 void ADC::calibration_enable() {
-    write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::RSTCLB), true);
-    while (read_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::RSTCLB))) {
+    const auto rstclb_bit = static_cast<uint32_t>(CTL1_Bits::RSTCLB);
+    write_bit(*this, ADC_Regs::CTL1, rstclb_bit, true);
+    while (read_bit(*this, ADC_Regs::CTL1, rstclb_bit)) {
     }
+
     // Start the calibration
-    write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::CLB), true);
-    while (read_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::CLB))) {
+    const auto clb_bit = static_cast<uint32_t>(CTL1_Bits::CLB);
+    write_bit(*this, ADC_Regs::CTL1, clb_bit, true);
+    while (read_bit(*this, ADC_Regs::CTL1, clb_bit)) {
     }
 }
 
@@ -199,23 +205,23 @@ void ADC::set_resolution(ADC_Resolution resolution) {
  *               Only applicable for the regular channel group.
  */
 void ADC::set_group_channel_discontinuous_mode(Channel_Group_Type channel_group, uint8_t length) {
-    write_bits_sequence(*this, ADC_Regs::CTL0,
-                        static_cast<uint32_t>(CTL0_Bits::DISIC), false,
-                        static_cast<uint32_t>(CTL0_Bits::DISRC), false);
+    if (channel_group == Channel_Group_Type::CHANNEL_DISCON_DISABLE ||
+        channel_group == Channel_Group_Type::REGULAR_INSERTED_CHANNEL) {
+        return;
+    }
 
-    switch (channel_group) {
-        case Channel_Group_Type::REGULAR_CHANNEL:
-            write_bit_range(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::DISNUM), static_cast<uint32_t>(length - 1U));
-            write_bit(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::DISRC), true);
-            break;
-        case Channel_Group_Type::INSERTED_CHANNEL:
-            write_bit(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::DISIC), true);
-            break;
-        case Channel_Group_Type::CHANNEL_DISCON_DISABLE:
-            break;
-        case Channel_Group_Type::REGULAR_INSERTED_CHANNEL:
-        default:
-            break;
+    const auto disic_bit = static_cast<uint32_t>(CTL0_Bits::DISIC);
+    const auto disrc_bit = static_cast<uint32_t>(CTL0_Bits::DISRC);
+
+    write_bits_sequence(*this, ADC_Regs::CTL0, disic_bit, false, disrc_bit, false);
+
+    if (channel_group == Channel_Group_Type::REGULAR_CHANNEL) {
+        write_bit_range(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::DISNUM), static_cast<uint32_t>(length - 1U));
+        write_bit(*this, ADC_Regs::CTL0, disrc_bit, true);
+    }
+
+    if (channel_group == Channel_Group_Type::INSERTED_CHANNEL) {
+        write_bit(*this, ADC_Regs::CTL0, disic_bit, true);
     }
 }
 
@@ -248,34 +254,34 @@ void ADC::set_mode(Sync_Mode mode) {
  *               false to disable it.
  */
 void ADC::set_functional_mode(Functional_Mode function, bool enable) {
+    const auto sm_bit = static_cast<uint32_t>(CTL0_Bits::SM);
+    const auto ica_bit = static_cast<uint32_t>(CTL0_Bits::ICA);
+    const auto cnt_bit = static_cast<uint32_t>(CTL1_Bits::CTN);
+
     switch (function) {
         case Functional_Mode::SCAN_MODE:
-            write_bit(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::SM), enable);
+            write_bit(*this, ADC_Regs::CTL0, sm_bit, enable);
             break;
         case Functional_Mode::INSERTED_CH_MODE:
-            write_bit(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::ICA), enable);
+            write_bit(*this, ADC_Regs::CTL0, ica_bit, enable);
             break;
         case Functional_Mode::CONTINUOUS_MODE:
-            write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::CTN), enable);
+            write_bit(*this, ADC_Regs::CTL1, cnt_bit, enable);
             break;
         case Functional_Mode::SCAN_INSERTED:
-            write_bits_sequence(*this, ADC_Regs::CTL0,
-                                static_cast<uint32_t>(CTL0_Bits::SM), enable,
-                                static_cast<uint32_t>(CTL0_Bits::ICA), enable);
+            write_bits_sequence(*this, ADC_Regs::CTL0, sm_bit, enable, ica_bit, enable);
             break;
         case Functional_Mode::SCAN_CONTINUOUS:
-            write_bit(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::SM), enable);
-            write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::CTN), enable);
+            write_bit(*this, ADC_Regs::CTL0, sm_bit, enable);
+            write_bit(*this, ADC_Regs::CTL1, cnt_bit, enable);
             break;
         case Functional_Mode::SCAN_INSERTED_CONTINUOUS:
-            write_bits_sequence(*this, ADC_Regs::CTL0,
-                                static_cast<uint32_t>(CTL0_Bits::SM), enable,
-                                static_cast<uint32_t>(CTL0_Bits::ICA), enable);
-            write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::CTN), enable);
+            write_bits_sequence(*this, ADC_Regs::CTL0, sm_bit, enable, ica_bit, enable);
+            write_bit(*this, ADC_Regs::CTL1, cnt_bit, enable);
             break;
         case Functional_Mode::INSERTED_CONTINUOUS:
-            write_bit(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::ICA), enable);
-            write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::CTN), enable);
+            write_bit(*this, ADC_Regs::CTL0, ica_bit, enable);
+            write_bit(*this, ADC_Regs::CTL1, cnt_bit, enable);
             break;
         default:
             break;
@@ -303,15 +309,17 @@ void ADC::set_data_alignment(Data_Alignment align) {
  *               This should be the number of conversions minus one.
  */
 void ADC::set_channel_length(Channel_Group_Type type, uint32_t length) {
-    switch (type) {
-        case Channel_Group_Type::REGULAR_CHANNEL:
-            write_bit_range(*this, ADC_Regs::RSQ0, static_cast<uint32_t>(RSQX_Bits::RL), length - 1U);
-            break;
-        case Channel_Group_Type::INSERTED_CHANNEL:
-            write_bit_range(*this, ADC_Regs::ISQ, static_cast<uint32_t>(ISQ_Bits::IL), length - 1U);
-            break;
-        default:
-            break;
+    if (type != Channel_Group_Type::REGULAR_CHANNEL ||
+        type != Channel_Group_Type::INSERTED_CHANNEL) {
+        return;
+    }
+
+    if (type == Channel_Group_Type::REGULAR_CHANNEL) {
+        write_bit_range(*this, ADC_Regs::RSQ0, static_cast<uint32_t>(RSQX_Bits::RL), length - 1U);
+    }
+
+    if (type == Channel_Group_Type::INSERTED_CHANNEL) {
+        write_bit_range(*this, ADC_Regs::ISQ, static_cast<uint32_t>(ISQ_Bits::IL), length - 1U);
     }
 }
 
@@ -335,13 +343,13 @@ void ADC::set_regular_channel_sequence(uint8_t rank, ADC_Channel channel, ADC_Sa
                          (rank < 12U) ? ADC_Regs::RSQ1 :
                          ADC_Regs::RSQ0;
 
-    const uint8_t adjusted_rank = (rank < 6U) ? rank :
-                                  (rank < 12U) ? (rank - 6U) :
-                                  (rank - 12U);
+    const uint8_t adjusted_rank = (rank < 6U) ? rank * 5U :
+                                  (rank < 12U) ? (rank - 6U) * 5U :
+                                  (rank - 12U) * 5U;
 
     uint32_t reg_value = read_register<uint32_t>(*this, reg);
-    reg_value &= ~(static_cast<uint32_t>(0x1FU) << (adjusted_rank * 5U));
-    reg_value |= (static_cast<uint32_t>(channel) << (adjusted_rank * 5U));
+    reg_value &= ~(static_cast<uint32_t>(0x1FU) << adjusted_rank);
+    reg_value |= (static_cast<uint32_t>(channel) << adjusted_rank);
     write_register(*this, reg, reg_value);
 
     set_sampling_time(channel, sample_time);
@@ -366,8 +374,12 @@ void ADC::set_inserted_channel_sequence(uint8_t rank, ADC_Channel channel, ADC_S
 
     uint32_t inserted_length = read_bit_range(*this, ADC_Regs::ISQ, static_cast<uint32_t>(ISQ_Bits::IL));
     uint32_t reg = read_register<uint32_t>(*this, ADC_Regs::ISQ);
-    reg &= ~(static_cast<uint32_t>(0x1FU) << (((rank + 3U) - inserted_length) * 5U));
-    reg |= static_cast<uint8_t>(channel) << (((rank + 3U) - inserted_length) * 5U);
+
+    const uint32_t shift_val = ((rank + 3U) - inserted_length) * 5U;
+
+    reg &= ~(0x1FU << shift_val);
+    reg |= static_cast<uint8_t>(channel) << shift_val;
+
     write_register(*this, ADC_Regs::ISQ, reg);
 
     set_sampling_time(channel, sample_time);
@@ -408,16 +420,23 @@ void ADC::set_inserted_channel_offset(Inserted_Channel inserted_channel, uint16_
  * @param enable True to enable the external trigger, false to disable it.
  */
 void ADC::set_external_trigger_enable(Channel_Group_Type channel_group, bool enable) {
+    if (channel_group == Channel_Group_Type::CHANNEL_DISCON_DISABLE) {
+        return;
+    }
+
+    const auto eterc_bit = static_cast<uint32_t>(CTL1_Bits::ETERC);
+    const auto eteic_bit = static_cast<uint32_t>(CTL1_Bits::ETEIC);
+
     if (channel_group == Channel_Group_Type::REGULAR_CHANNEL) {
-        write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::ETERC), enable);
+        write_bits_sequence(*this, ADC_Regs::CTL1, eteic_bit, false, eterc_bit, enable);
     }
+
     if (channel_group == Channel_Group_Type::INSERTED_CHANNEL) {
-        write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::ETEIC), enable);
+        write_bits_sequence(*this, ADC_Regs::CTL1, eterc_bit, false, eteic_bit, enable);
     }
+
     if (channel_group == Channel_Group_Type::REGULAR_INSERTED_CHANNEL) {
-        write_bits_sequence(*this, ADC_Regs::CTL1,
-                            static_cast<uint32_t>(CTL1_Bits::ETERC), enable,
-                            static_cast<uint32_t>(CTL1_Bits::ETEIC), enable);
+        write_bits_sequence(*this, ADC_Regs::CTL1, eterc_bit, enable, eteic_bit, enable);
     }
 }
 
@@ -426,19 +445,26 @@ void ADC::set_external_trigger_enable(Channel_Group_Type channel_group, bool ena
  *
  * This function sets the external trigger source for the specified channel
  * group. The external trigger source is an external event that triggers the ADC
- * conversion. The channel group can be either the regular channel group, the
- * inserted channel group, or both.
+ * conversion. The channel group can be either the regular channel group or the
+ * inserted channel group.
+ * 
+ * NOTE: Both groups can be set by calling this function once for each type.
  *
  * @param channel_group The channel group to set the external trigger source for.
  * @param source The external trigger source to set for the specified channel
  *               group.
  */
 void ADC::set_external_group_source(Channel_Group_Type channel_group, External_Trigger_Source source) {
-    const uint32_t ctl1_bits = (channel_group == Channel_Group_Type::REGULAR_CHANNEL) ?
-                               static_cast<uint32_t>(CTL1_Bits::ETSRC) :
-                               static_cast<uint32_t>(CTL1_Bits::ETSIC);
+    if (channel_group == Channel_Group_Type::REGULAR_INSERTED_CHANNEL ||
+        channel_group == Channel_Group_Type::CHANNEL_DISCON_DISABLE) {
+        return;
+    }
 
-    write_bit_ranges(*this, ADC_Regs::CTL1, ctl1_bits, Clear, ctl1_bits, static_cast<uint32_t>(source));
+    const uint32_t reg_bits = (channel_group == Channel_Group_Type::REGULAR_CHANNEL) ?
+                              static_cast<uint32_t>(CTL1_Bits::ETSRC) :
+                              static_cast<uint32_t>(CTL1_Bits::ETSIC);
+
+    write_bit_range(*this, ADC_Regs::CTL1, reg_bits, static_cast<uint32_t>(source));
 }
 
 /**
@@ -455,12 +481,20 @@ void ADC::set_external_group_source(Channel_Group_Type channel_group, External_T
  *                      CHANNEL_DISCON_DISABLE, no trigger is executed.
  */
 void ADC::set_software_trigger_group(Channel_Group_Type channel_group) {
-    uint32_t bits = (channel_group == Channel_Group_Type::REGULAR_CHANNEL) ?
-                    (1U << static_cast<uint32_t>(CTL1_Bits::SWRCST)) :
-                    (channel_group == Channel_Group_Type::INSERTED_CHANNEL) ?
-                    (1U << static_cast<uint32_t>(CTL1_Bits::SWICST)) :
-                    ((1U << static_cast<uint32_t>(CTL1_Bits::SWRCST)) |
-                     (1U << static_cast<uint32_t>(CTL1_Bits::SWICST)));
+    if (channel_group == Channel_Group_Type::CHANNEL_DISCON_DISABLE) {
+        return;
+    }
+
+    const auto swrcst = 1U << static_cast<uint32_t>(CTL1_Bits::SWRCST);
+    const auto swicst = 1U << static_cast<uint32_t>(CTL1_Bits::SWICST);
+
+    const uint32_t bits =
+        (channel_group == Channel_Group_Type::REGULAR_CHANNEL) ?
+        swrcst :
+        (channel_group == Channel_Group_Type::INSERTED_CHANNEL) ?
+        swicst :
+        swrcst |
+        swicst;
 
     write_bits(*this, ADC_Regs::CTL1, bits, true);
 }
@@ -474,7 +508,7 @@ void ADC::set_software_trigger_group(Channel_Group_Type channel_group) {
  *
  * @return The 32-bit result of the regular channel group ADC conversion.
  */
-uint32_t ADC::get_regular_data() {
+auto ADC::get_regular_data() -> uint32_t {
     return read_bit_range(*this, ADC_Regs::RDATA, static_cast<uint32_t>(RDATA_Bits::RDATA));
 }
 
@@ -488,13 +522,15 @@ uint32_t ADC::get_regular_data() {
  * @param inserted_channel The inserted channel to retrieve data from.
  * @return The 32-bit result of the ADC conversion for the specified inserted channel.
  */
-uint32_t ADC::get_inserted_data(Inserted_Channel inserted_channel) {
-    static const ADC_Regs inserted_data_regs[] = {
+auto ADC::get_inserted_data(Inserted_Channel inserted_channel) -> uint32_t {
+    constexpr ADC_Regs inserted_data_regs[] = {
         ADC_Regs::IDATA0, ADC_Regs::IDATA1, ADC_Regs::IDATA2, ADC_Regs::IDATA3
     };
+
     if (static_cast<uint32_t>(inserted_channel) >= sizeof(inserted_data_regs) / sizeof(inserted_data_regs[0])) {
         return 0U;
     }
+
     return read_bit_range(*this, inserted_data_regs[static_cast<size_t>(inserted_channel)], static_cast<uint32_t>(IDATAX_Bits::IDATAN));
 }
 
@@ -507,7 +543,7 @@ uint32_t ADC::get_inserted_data(Inserted_Channel inserted_channel) {
  *
  * @return The 32-bit result of the ADC conversion in synchronization mode.
  */
-uint32_t ADC::get_sync_mode_data() {
+auto ADC::get_sync_mode_data() -> uint32_t {
     return read_register<uint32_t>(*this, ADC_Regs::RDATA);
 }
 
@@ -525,16 +561,18 @@ void ADC::single_channel_watchdog_enable(ADC_Channel channel) {
     if (channel == ADC_Channel::INVALID) {
         return;
     }
-    write_bits_sequence(*this, ADC_Regs::CTL0,
-                        static_cast<uint32_t>(CTL0_Bits::RWDEN), false,
-                        static_cast<uint32_t>(CTL0_Bits::IWDEN), false,
-                        static_cast<uint32_t>(CTL0_Bits::WDSC), false);
+
+    const auto rwden_bit = static_cast<uint32_t>(CTL0_Bits::RWDEN);
+    const auto iwden_bit = static_cast<uint32_t>(CTL0_Bits::IWDEN);
+    const auto wdsc_bit = static_cast<uint32_t>(CTL0_Bits::WDSC);
+
+    write_bits_sequence(*this, ADC_Regs::CTL0, rwden_bit, false, iwden_bit, false, wdsc_bit, false);
+
     write_bit_range(*this, ADC_Regs::CTL0,
-                    static_cast<uint32_t>(CTL0_Bits::WDCHSEL), static_cast<uint32_t>(channel));
-    write_bits_sequence(*this, ADC_Regs::CTL0,
-                        static_cast<uint32_t>(CTL0_Bits::RWDEN), true,
-                        static_cast<uint32_t>(CTL0_Bits::IWDEN), true,
-                        static_cast<uint32_t>(CTL0_Bits::WDSC), true);
+                    static_cast<uint32_t>(CTL0_Bits::WDCHSEL),
+                    static_cast<uint32_t>(channel));
+
+    write_bits_sequence(*this, ADC_Regs::CTL0, rwden_bit, true, iwden_bit, true, wdsc_bit, true);
 }
 
 /**
@@ -549,26 +587,26 @@ void ADC::single_channel_watchdog_enable(ADC_Channel channel) {
  *                      not be Channel_Group_Type::CHANNEL_DISCON_DISABLE.
  */
 void ADC::group_channel_watchdog_enable(Channel_Group_Type channel_group) {
-    write_bits_sequence(*this, ADC_Regs::CTL0,
-                        static_cast<uint32_t>(CTL0_Bits::RWDEN), false,
-                        static_cast<uint32_t>(CTL0_Bits::IWDEN), false,
-                        static_cast<uint32_t>(CTL0_Bits::WDSC), false);
+    if (channel_group == Channel_Group_Type::CHANNEL_DISCON_DISABLE) {
+        return;
+    }
 
-    switch (channel_group) {
-        case Channel_Group_Type::REGULAR_CHANNEL:
-            write_bit(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::RWDEN), true);
-            break;
-        case Channel_Group_Type::INSERTED_CHANNEL:
-            write_bit(*this, ADC_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::IWDEN), true);
-            break;
-        case Channel_Group_Type::REGULAR_INSERTED_CHANNEL:
-            write_bits_sequence(*this, ADC_Regs::CTL0,
-                                static_cast<uint32_t>(CTL0_Bits::RWDEN), true,
-                                static_cast<uint32_t>(CTL0_Bits::IWDEN), true);
-            break;
-        case Channel_Group_Type::CHANNEL_DISCON_DISABLE:
-        default:
-            break;
+    const auto rwden_bit = static_cast<uint32_t>(CTL0_Bits::RWDEN);
+    const auto iwden_bit = static_cast<uint32_t>(CTL0_Bits::IWDEN);
+    const auto wdsc_bit = static_cast<uint32_t>(CTL0_Bits::WDSC);
+
+    write_bits_sequence(*this, ADC_Regs::CTL0, rwden_bit, false, iwden_bit, false, wdsc_bit, false);
+
+    if (channel_group == Channel_Group_Type::REGULAR_CHANNEL) {
+        write_bit(*this, ADC_Regs::CTL0, rwden_bit, true);
+    }
+
+    if (channel_group == Channel_Group_Type::INSERTED_CHANNEL) {
+        write_bit(*this, ADC_Regs::CTL0, iwden_bit, true);
+    }
+
+    if (channel_group == Channel_Group_Type::REGULAR_INSERTED_CHANNEL) {
+        write_bits_sequence(*this, ADC_Regs::CTL0, rwden_bit, true, iwden_bit, true);
     }
 }
 
@@ -656,7 +694,7 @@ void ADC::set_oversampling_enable(bool enable) {
  *             enumeration values.
  * @return true if the specified flag is set, false otherwise.
  */
-bool ADC::get_flag(Status_Flags flag) {
+auto ADC::get_flag(Status_Flags flag) -> bool {
     return read_bit(*this, ADC_Regs::STAT, static_cast<uint32_t>(flag));
 }
 
@@ -683,7 +721,7 @@ void ADC::clear_flag(Status_Flags flag) {
  *             enumeration values.
  * @return true if the specified interrupt flag is set and enabled, false otherwise.
  */
-bool ADC::get_interrupt_flag(Interrupt_Flags flag) {
+auto ADC::get_interrupt_flag(Interrupt_Flags flag) -> bool {
     auto check_flag = [this](CTL0_Bits control_bit, Interrupt_Flags flag) -> bool {
         bool flag_status = read_bit(*this, ADC_Regs::STAT, static_cast<uint32_t>(flag));
         return flag_status && read_bit(*this, ADC_Regs::CTL0, static_cast<uint32_t>(control_bit));
@@ -742,13 +780,15 @@ void ADC::set_interrupt_enable(Interrupt_Type type, bool enable) {
  * @param calibrate If true, wait for the calibration to finish before starting the conversion
  * @return The converted data
  */
-uint32_t ADC::start_regular_single_conversion(ADC_Channel channel, ADC_Sample_Time sample, ADC_Resolution resolution, bool calibrate) {
+auto ADC::start_regular_single_conversion(ADC_Channel channel, ADC_Sample_Time sample, ADC_Resolution resolution, bool calibrate) -> uint32_t {
+    const auto adcon_bit = static_cast<uint32_t>(CTL1_Bits::ADCON);
+
     // Disable to avoid accidentally triggering conversion
-    write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::ADCON), false);
-    while (read_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::ADCON))) {
+    write_bit(*this, ADC_Regs::CTL1, adcon_bit, false);
+    while (read_bit(*this, ADC_Regs::CTL1, adcon_bit)) {
     }
 
-    // Setup the ADC
+    // Set to regular conversion
     setup_regular_conversion();
     // Set the channel
     write_bit_range(*this, ADC_Regs::RSQ2, static_cast<uint32_t>(RSQX_Bits::RSQ_0_6_12), static_cast<uint32_t>(channel));
@@ -774,8 +814,8 @@ uint32_t ADC::start_regular_single_conversion(ADC_Channel channel, ADC_Sample_Ti
     write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::DAL), false);
 
     // Enable ADC
-    write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::ADCON), true);
-    while (!read_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::ADCON))) {
+    write_bit(*this, ADC_Regs::CTL1, adcon_bit, true);
+    while (!read_bit(*this, ADC_Regs::CTL1, adcon_bit)) {
     }
 
     // If calibration is enabled, wait for the calibration to finish
@@ -802,10 +842,9 @@ uint32_t ADC::start_regular_single_conversion(ADC_Channel channel, ADC_Sample_Ti
     // Cleanup
     cleanup_regular_conversion();
     // Disable to avoid excess noise
-    write_bit(*this, ADC_Regs::CTL1, static_cast<uint32_t>(CTL1_Bits::ADCON), false);
+    write_bit(*this, ADC_Regs::CTL1, adcon_bit, false);
 
     return converted_data;
 }
-
 
 }  // namespace adc

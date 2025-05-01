@@ -32,7 +32,7 @@
  * @return T The value read from the register.
  */
 template<typename T, typename RegType, typename Instance>
-inline T read_register(const Instance& instance, RegType reg) {
+inline auto read_register(const Instance& instance, RegType reg) -> T {
     return *reinterpret_cast<volatile T*>(instance.reg_address(reg));
 }
 

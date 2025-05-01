@@ -19,13 +19,12 @@
 
 #pragma once
 
-#include <stdlib.h>
-#include <stdint.h>
+#include <cstdlib>
+#include <cstdint>
 
 #include "CONFIG.hpp"
 
 namespace crc {
-
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
@@ -35,7 +34,6 @@ enum class CRC_Regs : uint8_t {
     CTL = 0x08U
 };
 
-
 ///////////////////////////// REGISTER BITS /////////////////////////////
 
 enum class FDATA_Bits : uint32_t {
@@ -43,14 +41,12 @@ enum class FDATA_Bits : uint32_t {
 };
 
 enum class CTL_Bits : uint8_t {
-    RST = 0
+    RST
 };
-
 
 ///////////////////////////// CONSTANTS /////////////////////////////
 
-inline constexpr uint32_t DataResetValue = 0xFFFFFFFFU;
+inline constexpr uint32_t DataResetValue = 0xFFFF'FFFFU;
 inline constexpr uint8_t FreeDataResetValue = 0U;
-
 
 } // namespace crc

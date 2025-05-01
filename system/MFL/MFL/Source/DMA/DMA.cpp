@@ -23,12 +23,12 @@
 namespace dma {
 
 template <DMA_Base Base, DMA_Channel Channel>
-DMA& get_instance_for_base() {
+auto get_instance_for_base() -> DMA& {
     static DMA instance(Base, Channel);
     return instance;
 }
 
-Result<DMA, DMA_Error_Type> DMA::get_instance(DMA_Base Base, DMA_Channel Channel) {
+auto DMA::get_instance(DMA_Base Base, DMA_Channel Channel) -> Result<DMA, DMA_Error_Type> {
     if (Base == DMA_Base::DMA0_BASE) {
         switch (Channel) {
             case DMA_Channel::CHANNEL0:
@@ -97,18 +97,20 @@ std::array<bool, static_cast<size_t>(DMA_Base::INVALID)> DMA::clock_enabled_ = {
 
 DMA::DMA(DMA_Base Base, DMA_Channel Channel) :
     base_(Base),
-    channel_(Channel),
-    DMA_pclk_info_(DMA_pclk_index[static_cast<size_t>(Base)]),
-    base_address_(DMA_baseAddress[static_cast<size_t>(Base)]),
-    config_(default_config)
+    channel_(Channel)
 {
-    if (!clock_enabled_[static_cast<size_t>(Base)]) {
+    const auto idx = static_cast<size_t>(Base);
+    DMA_pclk_info_ = DMA_pclk_index[idx];
+    config_ = default_config;
+
+    if (!clock_enabled_[idx]) {
         RCU_I.set_pclk_enable(DMA_pclk_info_.clock_reg, true);
-        clock_enabled_[static_cast<size_t>(Base)] = true;
+        clock_enabled_[idx] = true;
     }
+
     // Cache register offsets for faster access
     cache_register_offsets();
-    // Initialize with default values
+
     init();
 }
 
@@ -128,6 +130,7 @@ void DMA::init(DMA_Config config) {
 
     // Disable DMA channel
     write_bit(*this, cached_offsets_.ctl, static_cast<uint32_t>(CHXCTL_Bits::CHEN), false);
+
     // Set parameters
     write_bit_ranges(*this, cached_offsets_.ctl,
                      static_cast<uint32_t>(CHXCTL_Bits::PRIO), static_cast<uint32_t>(config_.channel_priority),
@@ -141,10 +144,13 @@ void DMA::init(DMA_Config config) {
     // Addresses
     write_register(*this, cached_offsets_.maddr, config_.memory_address);
     write_register(*this, cached_offsets_.paddr, config_.peripheral_address);
+
     // Count
     write_register(*this, cached_offsets_.cnt, config_.count & Lower16BitMask);
+
     // Circulation mode
     write_bit(*this, cached_offsets_.ctl, static_cast<uint32_t>(CHXCTL_Bits::CMEN), config_.circular_mode);
+
     // Memory to memory mode
     write_bit(*this, cached_offsets_.ctl, static_cast<uint32_t>(CHXCTL_Bits::M2M), config_.memory_to_memory);
 }
@@ -160,7 +166,8 @@ void DMA::init(DMA_Config config) {
 void DMA::reset() {
     // Disable DMA channel
     write_bit(*this, cached_offsets_.ctl, static_cast<uint32_t>(CHXCTL_Bits::CHEN), false);
-    // Set register to default reset value
+
+    // Set registers to default reset values
     write_register(*this, cached_offsets_.cnt, Clear);
     write_register(*this, cached_offsets_.paddr, Clear);
     write_register(*this, cached_offsets_.maddr, Clear);
@@ -222,7 +229,9 @@ void DMA::set_channel_enable(bool enable) {
  */
 void DMA::set_data_address(Data_Type type, uint32_t address) {
     DMA_Regs offset = (type == Data_Type::PERIPHERAL_ADDRESS) ?
-                      cached_offsets_.paddr : cached_offsets_.maddr;
+                      cached_offsets_.paddr :
+                      cached_offsets_.maddr;
+
     write_register(*this, offset, address);
 }
 
@@ -241,6 +250,7 @@ void DMA::set_transfer_count(uint32_t count) {
     if (count > 0xFFFFU) {
         count = 0xFFFFU;
     }
+
     write_register(*this, cached_offsets_.cnt, count);
 }
 
@@ -253,7 +263,7 @@ void DMA::set_transfer_count(uint32_t count) {
  *
  * @return The current transfer count for the DMA channel.
  */
-uint32_t DMA::get_transfer_count() {
+auto DMA::get_transfer_count() -> uint32_t {
     return read_register<uint32_t>(*this, cached_offsets_.cnt);
 }
 
@@ -286,8 +296,10 @@ void DMA::set_channel_priority(Channel_Priority priority) {
  *              enumeration.
  */
 void DMA::set_bit_width(Data_Type type, Bit_Width width) {
-    write_bit_range(*this, cached_offsets_.ctl, (type == Data_Type::PERIPHERAL_ADDRESS) ?
-                    static_cast<uint32_t>(CHXCTL_Bits::PWIDTH) : static_cast<uint32_t>(CHXCTL_Bits::MWIDTH),
+    write_bit_range(*this, cached_offsets_.ctl,
+                   (type == Data_Type::PERIPHERAL_ADDRESS) ?
+                    static_cast<uint32_t>(CHXCTL_Bits::PWIDTH) :
+                    static_cast<uint32_t>(CHXCTL_Bits::MWIDTH),
                     static_cast<uint32_t>(width));
 }
 
@@ -304,7 +316,8 @@ void DMA::set_bit_width(Data_Type type, Bit_Width width) {
  * @param enable True to enable increase mode, false to disable it.
  */
 void DMA::set_increase_mode_enable(Data_Type type, bool enable) {
-    write_bit(*this, cached_offsets_.ctl, (type == Data_Type::PERIPHERAL_ADDRESS) ?
+    write_bit(*this, cached_offsets_.ctl,
+             (type == Data_Type::PERIPHERAL_ADDRESS) ?
               static_cast<uint32_t>(CHXCTL_Bits::PNAGA) :
               static_cast<uint32_t>(CHXCTL_Bits::MNAGA),
               enable);
@@ -341,8 +354,10 @@ void DMA::set_transfer_abandon() {
                         static_cast<uint32_t>(Interrupt_Type::INTR_HTFIE), false,
                         static_cast<uint32_t>(Interrupt_Type::INTR_ERRIE), false,
                         static_cast<uint32_t>(CHXCTL_Bits::CHEN), false);
+
     // Disable channel
     write_bit(*this, cached_offsets_.ctl, static_cast<uint32_t>(CHXCTL_Bits::CHEN), false);
+
     // Clear all flags
     write_register(*this, DMA_Regs::INTC, 0x0FFFFFFF);
 }
@@ -369,11 +384,12 @@ void DMA::clear_channel() {
  *             Status_Flags enumeration.
  * @return true if the flag is set, false otherwise.
  */
-bool DMA::get_flag(Status_Flags flag) {
+auto DMA::get_flag(Status_Flags flag) -> bool {
     INTF_Bits bits = get_channel_bits_from_flag(flag);
     if (bits == INTF_Bits::INVALID) {
         return false;
     }
+
     return read_bit(*this, DMA_Regs::INTF, static_cast<uint32_t>(bits));
 }
 
@@ -391,6 +407,7 @@ void DMA::clear_flag(Status_Flags flag) {
     if (bits == INTF_Bits::INVALID) {
         return;
     }
+
     write_register(*this, DMA_Regs::INTC, (1U << static_cast<uint32_t>(bits)));
 }
 
@@ -419,7 +436,7 @@ void DMA::clear_flags(uint32_t flags) {
  *             Interrupt_Flags enumeration.
  * @return true if the flag is set, false otherwise.
  */
-bool DMA::get_interrupt_flag(Interrupt_Flags flag) {
+auto DMA::get_interrupt_flag(Interrupt_Flags flag) -> bool {
     INTF_Bits bits = INTF_Bits::INVALID;
 
     switch (flag) {
@@ -436,7 +453,8 @@ bool DMA::get_interrupt_flag(Interrupt_Flags flag) {
 
     bool intr_flag = read_bit(*this, DMA_Regs::INTF, static_cast<uint32_t>(bits));
     bool intr_enable = (flag != Interrupt_Flags::INTR_FLAG_GIF) ?
-                       read_bit(*this, cached_offsets_.ctl, static_cast<uint32_t>(flag)) : false;
+                       read_bit(*this, cached_offsets_.ctl, static_cast<uint32_t>(flag)) :
+                       false;
 
     return (intr_flag && intr_enable);
 }
@@ -459,6 +477,10 @@ void DMA::clear_interrupt_flag(Interrupt_Flags flag) {
         case Interrupt_Flags::INTR_FLAG_HTFIF: status_flag = Status_Flags::FLAG_HTFIF; break;
         case Interrupt_Flags::INTR_FLAG_ERRIF: status_flag = Status_Flags::FLAG_ERRIF; break;
         default: break;
+    }
+
+    if (status_flag == Status_Flags::INVALID) {
+        return;
     }
 
     INTF_Bits bits = get_channel_bits_from_flag(status_flag);

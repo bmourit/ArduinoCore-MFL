@@ -19,14 +19,13 @@
 
 #pragma once
 
-#include <stdlib.h>
-#include <stdint.h>
+#include <cstdlib>
+#include <cstdint>
 #include <array>
 
 #include "CONFIG.hpp"
 
 namespace fmc {
-
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
@@ -57,7 +56,6 @@ enum class OB_Regs : uint8_t {
     WP2 = 0x0CU,
     WP3 = 0x0EU
 };
-
 
 ///////////////////////////// REGISTER BITS /////////////////////////////
 
@@ -130,7 +128,6 @@ enum class WPX_Bits : uint32_t {
     WP2 = REG_BIT_DEF(16, 23),
     WP3 = REG_BIT_DEF(24, 31)
 };
-
 
 ///////////////////////////// ENUMS /////////////////////////////
 
@@ -280,7 +277,6 @@ enum class FMC_Error_Type : uint8_t {
     TIMEOUT
 };
 
-
 ///////////////////////////// CONSTANTS /////////////////////////////
 
 static inline constexpr uint32_t Unlock_Key0 = 0x45670123U;
@@ -290,6 +286,5 @@ static inline constexpr uint32_t Timeout_Count = 0x0FFF0000U;
 static inline constexpr uint32_t Bank0_End_Address = 0x0807FFFFU;
 static inline constexpr uint32_t Bank0_Size = 0x00000200U;
 static inline constexpr uintptr_t Flash_Size_Addess = 0x1FFFF7E0U;
-
 
 } // namespace fmc

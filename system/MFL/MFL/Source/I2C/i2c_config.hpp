@@ -19,15 +19,14 @@
 
 #pragma once
 
-#include <stdlib.h>
-#include <stdint.h>
+#include <cstdlib>
+#include <cstdint>
 #include <array>
 
 #include "CONFIG.hpp"
 #include "rcu_config.hpp"
 
 namespace i2c {
-
 
 ///////////////////////////// BASE ADDRESS /////////////////////////////
 
@@ -37,11 +36,10 @@ enum class I2C_Base : uint8_t {
     INVALID
 };
 
-static inline constexpr uintptr_t I2C_baseAddress[] = {
-    0x40005400U, // I2C0
-    0x40005800U  // I2C1
+static inline constexpr std::array<uintptr_t, 2> I2C_baseAddress = {
+    0x4000'5400U, // I2C0
+    0x4000'5800U  // I2C1
 };
-
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
@@ -57,7 +55,6 @@ enum class I2C_Regs : uint8_t {
     RT = 0x20U,
     FMPCFG = 0x90U
 };
-
 
 ///////////////////////////// REGISTER BITS /////////////////////////////
 
@@ -144,7 +141,6 @@ enum class FMPCFG_Bits : uint8_t {
     FMPEN = 0
 };
 
-
 ///////////////////////////// ENUMS /////////////////////////////
 
 enum class Status_Flags : uint8_t {
@@ -176,7 +172,7 @@ struct index_to_bits {
     uint8_t bit_info : 4;
 };
 
-static inline constexpr std::array<index_to_bits, 21> status_flag_index {{
+inline constexpr std::array<index_to_bits, 21> status_flag_index {{
     {I2C_Regs::STAT0, 0},
     {I2C_Regs::STAT0, 1},
     {I2C_Regs::STAT0, 2},
@@ -212,7 +208,7 @@ enum class Clear_Flags : uint8_t {
     FLAG_SMBALT
 };
 
-static inline constexpr std::array<index_to_bits, 9> clear_flag_index {{
+inline constexpr std::array<index_to_bits, 9> clear_flag_index {{
     {I2C_Regs::STAT0, 0},
     {I2C_Regs::STAT0, 1},
     {I2C_Regs::STAT0, 8},
@@ -248,7 +244,7 @@ struct double_index_to_bits {
     uint8_t bit_info1 : 4;
 };
 
-static inline constexpr std::array<double_index_to_bits, 14> interrupt_flag_index {{
+inline constexpr std::array<double_index_to_bits, 14> interrupt_flag_index {{
     {I2C_Regs::CTL1, 9, I2C_Regs::STAT0, 0},
     {I2C_Regs::CTL1, 9, I2C_Regs::STAT0, 1},
     {I2C_Regs::CTL1, 9, I2C_Regs::STAT0, 2},
@@ -271,7 +267,7 @@ enum class Interrupt_Type : uint8_t {
     INTR_BUF
 };
 
-static inline constexpr std::array<index_to_bits, 3> interrupt_type_index {{
+inline constexpr std::array<index_to_bits, 3> interrupt_type_index {{
     {I2C_Regs::CTL1, 8},
     {I2C_Regs::CTL1, 9},
     {I2C_Regs::CTL1, 10}
@@ -326,7 +322,6 @@ enum class I2C_Error_Type : uint8_t {
     INVALID_CLOCK_FREQUENCY
 };
 
-
 ///////////////////////////// STRUCTURES /////////////////////////////
 
 struct I2C_Clock_Config {
@@ -334,18 +329,16 @@ struct I2C_Clock_Config {
     rcu::RCU_PCLK_Reset reset_reg : 6;
 };
 
-static inline constexpr std::array<I2C_Clock_Config, 2> I2C_pclk_index {{
+inline constexpr std::array<I2C_Clock_Config, 2> I2C_pclk_index {{
     {rcu::RCU_PCLK::PCLK_I2C0, rcu::RCU_PCLK_Reset::PCLK_I2C0RST},
     {rcu::RCU_PCLK::PCLK_I2C1, rcu::RCU_PCLK_Reset::PCLK_I2C1RST}
 }};
 
-
 ///////////////////////////// CONSTANTS /////////////////////////////
 
-static inline constexpr uint32_t MaximumClockSpeed = 60U;
-static inline constexpr uint32_t MinimumClockSpeed = 2U;
-static inline constexpr uint32_t AddressMask = 0x000003FFU;
-static inline constexpr uint32_t Address2Mask = 0x000000FEU;
-
+inline constexpr uint32_t MaximumClockSpeed = 60U;
+inline constexpr uint32_t MinimumClockSpeed = 2U;
+inline constexpr uint32_t AddressMask = 1'023U;
+inline constexpr uint32_t Address2Mask = 254U;
 
 } // namespace i2c

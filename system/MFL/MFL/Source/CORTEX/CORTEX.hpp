@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 
 #include "cortex_config.hpp"
 
@@ -27,22 +27,27 @@ namespace cortex {
 
 class CORTEX {
 public:
-    static CORTEX& get_instance();
+    static auto get_instance() -> CORTEX&;
 
+    // Low power mode
     void set_low_power_mode_enable(Low_Power_Mode mode, bool enable);
+
     // SysTick
     void set_systick_source(Systick_Source source);
+
     // Vector table
     void set_nvic_vector_table(Vector_Table base, uint32_t offset);
+
     // Priority
     void set_nvic_priority_group(Priority_Group group);
     void set_nvic_priority(uint8_t irq, uint8_t preemption_priority, uint8_t sub_priority);
+
     // Interrupts
     void nvic_irq_enable(uint8_t irq);
     void nvic_irq_disable(uint8_t irq);
 
-    inline bool get_systick_active_flag() {
-        return ((SysTick->CTRL & SysTickCountFlagMask) == (SysTickCountFlagMask));
+    inline auto get_systick_active_flag() -> bool {
+        return (SysTick->CTRL & SysTickCountFlagMask) == SysTickCountFlagMask;
     }
 
 private:
@@ -50,9 +55,8 @@ private:
 
     // Prevent copying or assigning
     CORTEX(const CORTEX&) = delete;
-    CORTEX& operator=(const CORTEX&) = delete;
+    auto operator=(const CORTEX&) -> CORTEX& = delete;
 };
-
 
 } // namespace cortex
 

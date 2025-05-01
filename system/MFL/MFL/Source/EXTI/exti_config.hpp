@@ -19,13 +19,12 @@
 
 #pragma once
 
-#include <stdlib.h>
-#include <stdint.h>
+#include <cstdlib>
+#include <cstdint>
 
 #include "CONFIG.hpp"
 
 namespace exti {
-
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
@@ -37,7 +36,6 @@ enum class EXTI_Regs : uint8_t {
     SWIEV = 0x10U,
     PD = 0x14U
 };
-
 
 ///////////////////////////// REGISTER BITS /////////////////////////////
 
@@ -137,7 +135,6 @@ enum class Interrupt_Type : uint8_t {
     INVALID = 20
 };
 
-
 ///////////////////////////// ENUMS /////////////////////////////
 
 enum class EXTI_Mode : uint8_t {
@@ -151,7 +148,6 @@ enum class EXTI_Trigger : uint8_t {
     TRIG_BOTH,
     TRIG_NONE
 };
-
 
 ///////////////////////////// UNUSED DOCUMENTATION ONLY /////////////////////////////
 
@@ -294,6 +290,5 @@ enum class PD_Bits : uint32_t {
     PD19 = REG_BIT_DEF(19, 19)
 };
 */
-
 
 } // namespace exti

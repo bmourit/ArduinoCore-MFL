@@ -19,35 +19,46 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 
 #include "wwdgt_config.hpp"
 #include "RegRW.hpp"
 
 namespace wwdgt {
 
-class RCU;
-
 class WWDGT {
 public:
-    static WWDGT& get_instance();
+    static auto get_instance() -> WWDGT&;
 
+    // Reset
     void reset();
+
+    // Enable
     void enable();
+
+    // Counter
     void update_counter(uint16_t value);
+
+    // Configuration
     void setup(uint16_t value, uint16_t window, Prescaler_Values prescaler);
-    bool get_flag();
+
+    // Interrupts and flags
+    auto get_flag() -> bool;
     void clear_flag();
     void set_interrupt_enable(bool enable);
 
-    static inline constexpr uintptr_t WWDGT_baseAddress = 0x40002C00U;
+    static inline constexpr uintptr_t WWDGT_baseAddress = 0x4000'2C00U;
 
-    inline volatile uint32_t* reg_address(WWDGT_Regs reg) const {
+    [[nodiscard]] inline auto reg_address(WWDGT_Regs reg) const -> volatile uint32_t* {
         return reinterpret_cast<volatile uint32_t*>(WWDGT_baseAddress + static_cast<uint32_t>(reg));
     }
 
 private:
     WWDGT();
+
+    // Prevent copying or assigning
+    WWDGT(const WWDGT&) = delete;
+    auto operator=(const WWDGT&) -> WWDGT& = delete;
 
     mutable bool is_clock_enabled_;
 };

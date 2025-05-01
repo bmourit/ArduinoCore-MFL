@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 #include <array>
 
 #include "spi_config.hpp"
@@ -28,55 +28,64 @@
 
 namespace spi {
 
-class RCU;
-
 class SPI {
 public:
-    static Result<SPI, SPI_Error_Type> get_instance(SPI_Base Base);
+    static auto get_instance(SPI_Base Base) -> Result<SPI, SPI_Error_Type>;
 
     // Initialize
     void init(SPI_Config config = default_config);
+
     // Reset
     void reset();
+
     // Enable or disable
     void set_enable(bool enable);
+
     // NSS
     void set_nss_output_enable(bool enabled);
     void nss_internal_high();
     void nss_internal_low();
+
     // DMA
     void set_dma_enable(DMA_Direction dma, bool enabled);
+
     // Configuration
     void data_frame_format_config(Frame_Format frame_format);
     void bidirectional_transfer_config(Direction_Mode transfer_direction);
+
     // Data
     void data_transmit(uint16_t data);
-    uint16_t data_receive();
+    auto data_receive() -> uint16_t;
+
     // CRC
     void set_crc_enable(bool enabled);
     void set_crc_next();
-    uint16_t get_crc(CRC_Direction crc);
+    auto get_crc(CRC_Direction crc) -> uint16_t;
     void clear_crc_error();
     void set_crc_polynomial(uint16_t crc_poly);
-    uint16_t get_crc_polynomial();
+    auto get_crc_polynomial() -> uint16_t;
+
     // NSSP
     void set_nssp_mode_enable(bool enabled);
-    // QUAD
+
+    // Quad mode
     void set_quad_mode_enable(bool enabled);
     void quad_write_enable();
     void quad_read_enable();
     void set_quad_io23_output_enable(bool enabled);
+
     // Interrupts and flags
-    bool get_flag(Status_Flags flag);
-    bool get_interrupt_flag(Interrupt_Flags flag);
+    auto get_flag(Status_Flags flag) -> bool;
+    auto get_interrupt_flag(Interrupt_Flags flag) -> bool;
     void set_interrupt_enable(Interrupt_Type type, bool enabled);
 
     // Accessor methods
-    inline SPI_Base get_base() { return base_; }
-    inline SPI_Config& get_config() { return config_; }
+    inline auto get_base() -> SPI_Base { return base_; }
+    inline auto get_config() -> SPI_Config& { return config_; }
 
-    inline volatile uint32_t* reg_address(SPI_Regs reg) const {
-        return reinterpret_cast<volatile uint32_t*>(base_address_ + static_cast<uint32_t>(reg));
+    [[nodiscard]] inline auto reg_address(SPI_Regs reg) const -> volatile uint32_t* {
+        const auto idx = static_cast<size_t>(base_);
+        return reinterpret_cast<volatile uint32_t*>(SPI_baseAddress[idx] + static_cast<uint32_t>(reg));
     }
 
 private:
@@ -85,11 +94,10 @@ private:
 
     SPI_Base base_;
     SPI_Clock_Config SPI_pclk_info_;
-    uint32_t base_address_;
     SPI_Config config_;
 
     template <SPI_Base Base>
-    friend SPI& get_instance_for_base();
+    friend auto get_instance_for_base() -> SPI&;
 };
 
 } // namespace spi

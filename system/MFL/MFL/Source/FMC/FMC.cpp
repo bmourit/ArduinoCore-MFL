@@ -22,12 +22,12 @@
 
 namespace fmc {
 
-FMC& FMC::get_instance() {
+auto FMC::get_instance() -> FMC& {
     static FMC instance;
     return instance;
 }
 
-FMC::FMC() {}
+FMC::FMC() = default;
 
 /**
  * @brief Unlock the FMC memory regions.
@@ -127,7 +127,7 @@ void FMC::lock_bank1() {
  *
  * @return The state of the FMC after the mass erase operation.
  */
-FMC_Error_Type FMC::mass_erase() {
+auto FMC::mass_erase() -> FMC_Error_Type {
     FMC_Error_Type state = ready_wait_bank0(Timeout_Count);
 
     if (state == FMC_Error_Type::READY) {
@@ -166,7 +166,7 @@ FMC_Error_Type FMC::mass_erase() {
  *
  * @return The state of the FMC after the erase operation.
  */
-FMC_Error_Type FMC::erase_page(uint32_t address) {
+auto FMC::erase_page(uint32_t address) -> FMC_Error_Type {
     // Choose bank based on FMC size or address threshold
     bool is_bank0 = (get_fmc_size() <= Bank0_Size || address < Bank0_End_Address);
 
@@ -195,7 +195,7 @@ FMC_Error_Type FMC::erase_page(uint32_t address) {
  *
  * @return The state of the FMC after the erase operation.
  */
-FMC_Error_Type FMC::erase_bank0() {
+auto FMC::erase_bank0() -> FMC_Error_Type {
     FMC_Error_Type state = ready_wait_bank0(Timeout_Count);
     if (state != FMC_Error_Type::READY) {
         return state;
@@ -221,7 +221,7 @@ FMC_Error_Type FMC::erase_bank0() {
  *
  * @return The state of the FMC after the erase operation.
  */
-FMC_Error_Type FMC::erase_bank1() {
+auto FMC::erase_bank1() -> FMC_Error_Type {
     FMC_Error_Type state = ready_wait_bank1(Timeout_Count);
     if (state != FMC_Error_Type::READY) {
         return state;
@@ -251,7 +251,7 @@ FMC_Error_Type FMC::erase_bank1() {
  * @param data The data to be programmed.
  * @return The state of the FMC after the program operation.
  */
-FMC_Error_Type FMC::program_word(uint32_t address, uint32_t data) {
+auto FMC::program_word(uint32_t address, uint32_t data) -> FMC_Error_Type {
     // Choose bank based on FMC size or address threshold
     bool is_bank0 = (get_fmc_size() <= Bank0_Size || address < Bank0_End_Address);
 
@@ -278,7 +278,7 @@ FMC_Error_Type FMC::program_word(uint32_t address, uint32_t data) {
  * @param data The data to be programmed.
  * @return The state of the FMC after the program operation.
  */
-FMC_Error_Type FMC::program_halfword(uint32_t address, uint16_t data) {
+auto FMC::program_halfword(uint32_t address, uint16_t data) -> FMC_Error_Type {
     // Choose bank based on FMC size or address threshold
     bool is_bank0 = (get_fmc_size() <= Bank0_Size || address < Bank0_End_Address);
 
@@ -305,7 +305,7 @@ FMC_Error_Type FMC::program_halfword(uint32_t address, uint16_t data) {
  * @param data The data to be reprogrammed.
  * @return The state of the FMC after the reprogramming operation.
  */
-FMC_Error_Type FMC::reprogram_word(uint32_t address, uint32_t data) {
+auto FMC::reprogram_word(uint32_t address, uint32_t data) -> FMC_Error_Type {
     // Choose bank based on FMC size or address threshold
     bool is_bank0 = (get_fmc_size() <= Bank0_Size || address < Bank0_End_Address);
 
@@ -346,7 +346,7 @@ void FMC::set_wait_state(Wait_State wait) {
  *
  * @return The state of Bank 0 of the FMC.
  */
-FMC_Error_Type FMC::get_bank0_state() {
+auto FMC::get_bank0_state() -> FMC_Error_Type {
     if (read_bit(*this, FMC_Regs::STAT0, static_cast<uint32_t>(STAT0_Bits::BUSY))) {
         return FMC_Error_Type::BUSY;
     } else if (read_bit(*this, FMC_Regs::STAT0, static_cast<uint32_t>(STAT0_Bits::WPERR))) {
@@ -370,7 +370,7 @@ FMC_Error_Type FMC::get_bank0_state() {
  *
  * @return The state of Bank 1 of the FMC.
  */
-FMC_Error_Type FMC::get_bank1_state() {
+auto FMC::get_bank1_state() -> FMC_Error_Type {
     if (read_bit(*this, FMC_Regs::STAT1, static_cast<uint32_t>(STAT1_Bits::BUSY))) {
         return FMC_Error_Type::BUSY;
     } else if (read_bit(*this, FMC_Regs::STAT1, static_cast<uint32_t>(STAT1_Bits::WPERR))) {
@@ -392,7 +392,7 @@ FMC_Error_Type FMC::get_bank1_state() {
  * @param timeout The maximum number of cycles to wait for Bank 0 to become ready.
  * @return The state of Bank 0 of the FMC, either ready, timeout, or an error state.
  */
-FMC_Error_Type FMC::ready_wait_bank0(uint32_t timeout) {
+auto FMC::ready_wait_bank0(uint32_t timeout) -> FMC_Error_Type {
     FMC_Error_Type state;
 
     // Loop until either we get a non-BUSY state or timeout occurs
@@ -418,7 +418,7 @@ FMC_Error_Type FMC::ready_wait_bank0(uint32_t timeout) {
  * @param timeout The maximum number of cycles to wait for Bank 1 to become ready.
  * @return The state of Bank 1 of the FMC, either ready, timeout, or an error state.
  */
-FMC_Error_Type FMC::ready_wait_bank1(uint32_t timeout) {
+auto FMC::ready_wait_bank1(uint32_t timeout) -> FMC_Error_Type {
     FMC_Error_Type state;
 
     // Loop until either we get a non-BUSY state or timeout occurs
@@ -445,7 +445,7 @@ FMC_Error_Type FMC::ready_wait_bank1(uint32_t timeout) {
  *             enumeration value.
  * @return True if the specified flag is set, otherwise false.
  */
-bool FMC::get_flag(Status_Flags flag) {
+auto FMC::get_flag(Status_Flags flag) -> bool {
     const auto& config = status_flag_index[static_cast<size_t>(flag)];
     return read_bit(*this, config.register_offset, static_cast<uint32_t>(config.bit_info));
 }
@@ -476,7 +476,7 @@ void FMC::clear_flag(Status_Flags flag) {
  *             enumeration value.
  * @return True if the specified flag is set, otherwise false.
  */
-bool FMC::get_interrupt_flag(Interrupt_Flags flag) {
+auto FMC::get_interrupt_flag(Interrupt_Flags flag) -> bool {
     const auto& config = interrupt_flag_index[static_cast<size_t>(flag)];
     const bool flag_value = read_bit(*this, config.flag_register_offset, static_cast<uint32_t>(config.flag_bit_info));
     const bool is_enabled = read_bit(*this, config.interrupt_register_offset, static_cast<uint32_t>(config.interrupt_bit_info));
@@ -515,6 +515,5 @@ void FMC::set_interrupt_enable(Interrupt_Types type, bool enable) {
     const auto& config = interrupt_type_index[static_cast<size_t>(type)];
     write_bit(*this, config.register_offset, static_cast<uint32_t>(config.bit_info), enable);
 }
-
 
 } // namespace fmc

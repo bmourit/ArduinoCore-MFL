@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 #include <array>
 
 #include "usart_config.hpp"
@@ -29,13 +29,11 @@
 
 namespace usart {
 
-class RCU;
-class GPIO;
-
 class USART {
 public:
-    static Result<USART, USART_Error_Type> get_instance(USART_Base Base);
+    static auto get_instance(USART_Base Base) -> Result<USART, USART_Error_Type>;
 
+    // Initialize
     void init(USART_Config config = default_config);
     void reset();
     void release();
@@ -58,11 +56,11 @@ public:
 
     // Send and receive 16bit data
     void send_data(uint16_t data);
-    uint16_t receive_data16();
+    auto receive_data16() -> uint16_t;
 
     // Send and receive 8bit data
     void send_data(uint8_t data);
-    uint8_t receive_data8();
+    auto receive_data8() -> uint8_t;
 
     // DMA send or receive
     void receive_data_dma_enable(bool enable);
@@ -98,21 +96,21 @@ public:
     void set_hwfc_cts_enable(bool enable);
 
     // Interrupts and flags
-    bool get_flag(Status_Flags flag);
+    auto get_flag(Status_Flags flag) -> bool;
     void clear_flag(Status_Flags flag);
-    bool get_interrupt_flag(Interrupt_Flags flag);
+    auto get_interrupt_flag(Interrupt_Flags flag) -> bool;
     void clear_interrupt_flag(Interrupt_Flags flag);
     void set_interrupt_enable(Interrupt_Type type, bool enable);
     void set_interrupt_priority(uint8_t prepriority, uint8_t subpriority);
     void prepare_receive_interrupts();
 
     // Callbacks
-    using IRQCallback = void (*)(void);
+    using IRQCallback = void (*)();
     void register_interrupt_callback(Interrupt_Type type, IRQCallback callback);
     void unregister_interrupt_callback(Interrupt_Type type);
 
-    // Error handler
-    bool check_error_flags();
+    // Error handlers
+    auto check_error_flags() -> bool;
     void handle_errors();
 
     // Interrupt handlers
@@ -122,52 +120,52 @@ public:
     void handle_interrupt();
 
     // Non-blocking
-    bool usart_receive_interrupt(uint8_t& data);
-    bool usart_transmit_interrupt(uint8_t data);
+    auto usart_receive_interrupt(uint8_t& data) -> bool;
+    auto usart_transmit_interrupt(uint8_t data) -> bool;
 
     // Blocking
-    bool usart_receive_polling(uint8_t& data);
-    bool usart_transmit_polling(uint8_t data);
+    auto usart_receive_polling(uint8_t& data) -> bool;
+    auto usart_transmit_polling(uint8_t data) -> bool;
 
     // DMA
-    bool usart_receive_dma(uint8_t& data);
-    bool usart_transmit_dma(uint8_t data);
+    auto usart_receive_dma(uint8_t& data) -> bool;
+    auto usart_transmit_dma(uint8_t data) -> bool;
 
     // DMA with interrupts
-    bool usart_receive_dma_interrupt(uint8_t& data);
-    bool usart_transmit_dma_interrupt(uint8_t data);
+    auto usart_receive_dma_interrupt(uint8_t& data) -> bool;
+    auto usart_transmit_dma_interrupt(uint8_t data) -> bool;
 
     // Accessor methods
-    inline USART_Base get_base() { return base_; }
-    inline USART_Config& get_config() { return config_; }
-    inline RingBuffer<uint8_t, RxBufferSize>& get_rx_buffer() { return rx_buffer_; }
-    inline RingBuffer<uint8_t, TxBufferSize>& get_tx_buffer() { return tx_buffer_; }
-    inline uint8_t get_last_data() { return config_.last_data; }
+    inline auto get_base() -> USART_Base { return base_; }
+    inline auto get_config() -> USART_Config& { return config_; }
+    inline auto get_rx_buffer() -> RingBuffer<uint8_t, RxBufferSize>& { return rx_buffer_; }
+    inline auto get_tx_buffer() -> RingBuffer<uint8_t, TxBufferSize>& { return tx_buffer_; }
+    inline auto get_last_data() -> uint8_t { return config_.last_data; }
 
     // Accessor wrapper methods for buffer
-    inline bool read_rx_buffer(uint8_t& data) {
+    inline auto read_rx_buffer(uint8_t& data) -> bool {
         if (rx_buffer_.isEmpty()) return false;
         return rx_buffer_.read(data);
     }
-    inline bool write_tx_buffer(uint8_t data) {
+    inline auto write_tx_buffer(uint8_t data) -> bool {
         if (tx_buffer_.isFull()) return false;
         return tx_buffer_.write(data);
     }
-
     inline void modify_rx_buffer_head(uint8_t head) { rx_buffer_.setHead(head); }
     inline void modify_tx_buffer_head(uint8_t head) { tx_buffer_.setHead(head); }
     inline void modify_rx_buffer_tail(uint8_t tail) { rx_buffer_.setTail(tail); }
     inline void modify_tx_buffer_tail(uint8_t tail) { tx_buffer_.setTail(tail); }
     inline void flush_buffer(bool is_rx) { is_rx ? rx_buffer_.flush() : tx_buffer_.flush(); }
-    inline size_t available_for_read(bool is_rx) { return is_rx ? rx_buffer_.availableForRead() : tx_buffer_.availableForRead(); }
-    inline size_t available_for_write(bool is_rx) { return is_rx ? rx_buffer_.availableForWrite() : tx_buffer_.availableForWrite(); }
-    inline bool peek_buffer(bool is_rx, uint8_t& data) { return is_rx ? rx_buffer_.peek(data) : tx_buffer_.peek(data); }
-    inline uint8_t* get_buffer_data(bool is_rx) { return is_rx ? rx_buffer_.data() : tx_buffer_.data(); }
-    inline bool buffer_is_empty(bool is_rx) { return is_rx ? rx_buffer_.isEmpty() : tx_buffer_.isEmpty(); }
+    inline auto available_for_read(bool is_rx) -> size_t { return is_rx ? rx_buffer_.availableForRead() : tx_buffer_.availableForRead(); }
+    inline auto available_for_write(bool is_rx) -> size_t { return is_rx ? rx_buffer_.availableForWrite() : tx_buffer_.availableForWrite(); }
+    inline auto peek_buffer(bool is_rx, uint8_t& data) -> bool { return is_rx ? rx_buffer_.peek(data) : tx_buffer_.peek(data); }
+    inline auto get_buffer_data(bool is_rx) -> uint8_t* { return is_rx ? rx_buffer_.data() : tx_buffer_.data(); }
+    inline auto buffer_is_empty(bool is_rx) -> bool { return is_rx ? rx_buffer_.isEmpty() : tx_buffer_.isEmpty(); }
 
     // Calculate register and offset
-    inline volatile uint32_t* reg_address(USART_Regs reg) const {
-        return reinterpret_cast<volatile uint32_t*>(base_address_ + static_cast<uint32_t>(reg));
+    [[nodiscard]] inline auto reg_address(USART_Regs reg) const -> volatile uint32_t* {
+        const auto idx = static_cast<uint32_t>(base_);
+        return reinterpret_cast<volatile uint32_t*>(USART_baseAddress[idx] + static_cast<uint32_t>(reg));
     }
 
 private:
@@ -177,14 +175,13 @@ private:
     // Private member variables
     USART_Base base_;
     USART_Clock_Config USART_pclk_info_;
-    uint32_t base_address_;
     USART_Config config_;
     RingBuffer<uint8_t, RxBufferSize> rx_buffer_;
     RingBuffer<uint8_t, TxBufferSize> tx_buffer_;
     IRQCallback interrupt_callbacks_[static_cast<size_t>(Interrupt_Type::INTR_COUNT)];
 
     template <USART_Base Base>
-    friend USART& get_instance_for_base();
+    friend auto get_instance_for_base() -> USART&;
 };
 
 } // namespace usart

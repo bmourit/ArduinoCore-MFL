@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 #include <array>
 
 #include "gpio_config.hpp"
@@ -29,43 +29,48 @@
 
 namespace gpio {
 
-class RCU;
-class AFIO;
-
 class GPIO {
 public:
-    static Result<GPIO, GPIO_Error_Type> get_instance(GPIO_Base Base);
+    static auto get_instance(GPIO_Base Base) -> Result<GPIO, GPIO_Error_Type>;
 
     // Reset
     void reset();
+
     // Set and get pin mode
     void set_pin_mode(Pin_Number pin, Pin_Mode mode, Output_Speed speed = Output_Speed::SPEED_MAX);
-    Pin_Mode get_pin_mode(Pin_Number pin);
+    auto get_pin_mode(Pin_Number pin) -> Pin_Mode;
+
     // Pin level
     void set_pin_high(Pin_Number pin);
     void set_pin_low(Pin_Number pin);
     void set_pin_level(Pin_Number pin, bool high);
+
     // Read/write
     void write_pin(Pin_Number pin, bool set);
-    bool read_pin(Pin_Number pin);
+    auto read_pin(Pin_Number pin) -> bool;
     void toggle_pin(Pin_Number pin);
+
     // Port
     void set_port(uint16_t data);
+
     // Pin state
-    bool get_pin_input_state(Pin_Number pin);
-    bool get_pin_output_state(Pin_Number pin);
+    auto get_pin_input_state(Pin_Number pin) -> bool;
+    auto get_pin_output_state(Pin_Number pin) -> bool;
+
     // Port state
-    uint16_t get_port_input_state();
-    uint16_t get_port_output_state();
+    auto get_port_input_state() -> uint16_t;
+    auto get_port_output_state() -> uint16_t;
+
     // Lock
     void lock_pin(Pin_Number pin);
 
     // Accessor methods
-    inline GPIO_Base get_base() { return base_; }
+    inline auto get_base() -> GPIO_Base { return base_; }
 
     // Register address
-    inline volatile uint32_t* reg_address(GPIO_Regs reg) const {
-        return reinterpret_cast<volatile uint32_t*>(base_address_ + static_cast<uint32_t>(reg));
+    [[nodiscard]] inline auto reg_address(GPIO_Regs reg) const -> volatile uint32_t* {
+        const auto idx = static_cast<uint32_t>(base_);
+        return reinterpret_cast<volatile uint32_t*>(GPIO_baseAddress[idx] + static_cast<uint32_t>(reg));
     }
 
 private:
@@ -74,12 +79,36 @@ private:
 
     GPIO_Base base_;
     GPIO_Clock_Config GPIO_pclk_info_;
-    uint32_t base_address_;
 
     template <GPIO_Base Base>
-    friend GPIO& get_instance_for_base();
+    friend auto get_instance_for_base() -> GPIO&;
 };
 
+static inline void fast_write_pin(GPIO_Base base, Pin_Number pin, bool value) {
+    if (value) {
+        volatile auto* bop_data = reinterpret_cast<volatile uint32_t*>(GPIO_baseAddress[static_cast<size_t>(base)] + BOP_OFFSET);
+        *bop_data = (1U << static_cast<uint32_t>(pin));
+    } else {
+        volatile auto* bc_data = reinterpret_cast<volatile uint32_t*>(GPIO_baseAddress[static_cast<size_t>(base)] + BC_OFFSET);
+        *bc_data = (1U << static_cast<uint32_t>(pin));
+    }
+}
+
+static inline auto fast_read_pin(GPIO_Base base, Pin_Number pin) -> bool {
+    volatile auto* istat_data = reinterpret_cast<volatile uint32_t*>(GPIO_baseAddress[static_cast<size_t>(base)] + ISTAT_OFFSET);
+    return (*istat_data & (1U << static_cast<uint32_t>(pin))) != Clear;
+}
+
+static inline void fast_toggle_pin(GPIO_Base base, Pin_Number pin) {
+    volatile auto* octl_data = reinterpret_cast<volatile uint32_t*>(GPIO_baseAddress[static_cast<size_t>(base)] + OCTL_OFFSET);
+    bool value = (*octl_data & (1U << static_cast<uint32_t>(pin))) ? false : true;
+    fast_write_pin(base, pin, value);
+}
+
+//////////////////////////////////// DEPRECATED ////////////////////////////////////
+//
+// These two functions are deprecated in favor of fast_write_pin
+//
 static inline void fast_set_pin(GPIO_Base base, Pin_Number pin) {
     volatile uint32_t* bop_data = reinterpret_cast<volatile uint32_t*>(GPIO_baseAddress[static_cast<size_t>(base)] + BOP_OFFSET);
     *bop_data = (1U << static_cast<size_t>(pin));
@@ -89,19 +118,6 @@ static inline void fast_clear_pin(GPIO_Base base, Pin_Number pin) {
     volatile uint32_t* bc_data = reinterpret_cast<volatile uint32_t*>(GPIO_baseAddress[static_cast<size_t>(base)] + BC_OFFSET);
     *bc_data = (1U << static_cast<size_t>(pin));
 }
-
-static inline bool fast_read_pin(GPIO_Base base, Pin_Number pin) {
-    volatile uint32_t* istat_data = reinterpret_cast<volatile uint32_t*>(GPIO_baseAddress[static_cast<size_t>(base)] + ISTAT_OFFSET);
-    return (*istat_data & (1U << static_cast<size_t>(pin))) != Clear;
-}
-
-static inline void fast_toggle_pin(GPIO_Base base, Pin_Number pin) {
-    volatile uint32_t* octl_data = reinterpret_cast<volatile uint32_t*>(GPIO_baseAddress[static_cast<size_t>(base)] + OCTL_OFFSET);
-    if (*octl_data & (1U << static_cast<size_t>(pin))) {
-        fast_clear_pin(base, pin);
-    } else {
-        fast_set_pin(base, pin);
-    }
-}
+////////////////////////////////////////////////////////////////////////////////////
 
 } // namespace gpio

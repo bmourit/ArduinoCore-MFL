@@ -19,8 +19,8 @@
 
 #pragma once
 
-#include <stdlib.h>
-#include <stdint.h>
+#include <cstdlib>
+#include <cstdint>
 #include <array>
 
 #include "CONFIG.hpp"
@@ -28,7 +28,6 @@
 
 
 namespace gpio {
-
 
 ///////////////////////////// BASE ADDRESS /////////////////////////////
 
@@ -40,13 +39,12 @@ enum class GPIO_Base : uint8_t {
     INVALID
 };
 
-static constexpr uintptr_t GPIO_baseAddress[] = {
-    0x40010800U, // GPIOA
-    0x40010C00U, // GPIOB
-    0x40011000U, // GPIOC
-    0x40011400U  // GPIOD
+static inline constexpr std::array<uintptr_t, 4> GPIO_baseAddress = {
+    0x4001'0800U, // GPIOA
+    0x4001'0C00U, // GPIOB
+    0x4001'1000U, // GPIOC
+    0x4001'1400U  // GPIOD
 };
-
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
@@ -72,7 +70,6 @@ enum class AFIO_Regs : uint8_t {
     CPSCTL = 0x20U
 };
 
-
 ///////////////////////////// REGISTER BITS /////////////////////////////
 
 enum class EC_Bits : uint32_t {
@@ -85,7 +82,6 @@ enum class CPSCTL_Bits : uint8_t {
     CPS_EN = 0,
     CPS_RDY = 8
 };
-
 
 ///////////////////////////// ENUMS /////////////////////////////
 
@@ -102,11 +98,11 @@ enum class Pin_Mode : uint8_t {
 };
 
 enum class Output_Speed : uint8_t {
-    INVALID = 0U,
-    SPEED_10MHZ = 1U,
-    SPEED_2MHZ = 2U,
-    SPEED_50MHZ = 3U,
-    SPEED_MAX = 4U
+    INVALID,
+    SPEED_10MHZ,
+    SPEED_2MHZ,
+    SPEED_50MHZ,
+    SPEED_MAX
 };
 
 enum class Event_Port : uint8_t {
@@ -229,7 +225,6 @@ enum class GPIO_Error_Type : uint8_t {
     INVALID_SELECTION
 };
 
-
 ///////////////////////////// STRUCTURES /////////////////////////////
 
 struct GPIO_Clock_Config {
@@ -237,7 +232,7 @@ struct GPIO_Clock_Config {
     rcu::RCU_PCLK_Reset reset_reg : 6;
 };
 
-static inline constexpr std::array<GPIO_Clock_Config, 4> GPIO_pclk_index {{
+inline constexpr std::array<GPIO_Clock_Config, 4> GPIO_pclk_index {{
     {rcu::RCU_PCLK::PCLK_GPIOA, rcu::RCU_PCLK_Reset::PCLK_GPIOARST},
     {rcu::RCU_PCLK::PCLK_GPIOB, rcu::RCU_PCLK_Reset::PCLK_GPIOBRST},
     {rcu::RCU_PCLK::PCLK_GPIOC, rcu::RCU_PCLK_Reset::PCLK_GPIOCRST},
@@ -250,7 +245,7 @@ struct Remap_Info {
     Remap_Type type;
 };
 
-static inline constexpr std::array<Remap_Info, 59> remap_index {{
+inline constexpr std::array<Remap_Info, 59> remap_index {{
     {AFIO_Regs::PCF0, REG_BIT_DEF(0, 0), Remap_Type::NONE},                 // SPI0 no remap
     {AFIO_Regs::PCF0, REG_BIT_DEF(0, 0), Remap_Type::REMAP},                // SPI0 remap
     {AFIO_Regs::PCF0, REG_BIT_DEF(1, 1), Remap_Type::NONE},                 // I2C0 no remap
@@ -317,7 +312,7 @@ struct Exti_Source_Info {
     uint32_t bit_info;
 };
 
-static inline constexpr std::array<Exti_Source_Info, 16> source_index {{
+inline constexpr std::array<Exti_Source_Info, 16> source_index {{
     {AFIO_Regs::EXTISS0, REG_BIT_DEF(0, 3)},
     {AFIO_Regs::EXTISS0, REG_BIT_DEF(4, 7)},
     {AFIO_Regs::EXTISS0, REG_BIT_DEF(8, 11)},
@@ -336,25 +331,23 @@ static inline constexpr std::array<Exti_Source_Info, 16> source_index {{
     {AFIO_Regs::EXTISS3, REG_BIT_DEF(12, 15)},
 }};
 
-
 ///////////////////////////// CONSTANTS /////////////////////////////
 
-static inline constexpr uint32_t LockValue = 0x00010000U;
+inline constexpr uint32_t LockValue = 0x0001'0000U;
 
 // For option fast bit manipulation functions
-static inline constexpr uint32_t GPIOA_BASE_ADDRESS = 0x40010800U;
-static inline constexpr uint32_t GPIOB_BASE_ADDRESS = 0x40010C00U;
-static inline constexpr uint32_t GPIOC_BASE_ADDRESS = 0x40011000U;
-static inline constexpr uint32_t GPIOD_BASE_ADDRESS = 0x40011400U;
+inline constexpr uint32_t GPIOA_BASE_ADDRESS = 0x4001'0800U;
+inline constexpr uint32_t GPIOB_BASE_ADDRESS = 0x4001'0C00U;
+inline constexpr uint32_t GPIOC_BASE_ADDRESS = 0x4001'1000U;
+inline constexpr uint32_t GPIOD_BASE_ADDRESS = 0x4001'1400U;
 
-static inline constexpr uint32_t CTL0_OFFSET = 0x00U;
-static inline constexpr uint32_t CTL1_OFFSET = 0x04U;
-static inline constexpr uint32_t ISTAT_OFFSET = 0x08U;
-static inline constexpr uint32_t OCTL_OFFSET = 0x0CU;
-static inline constexpr uint32_t BOP_OFFSET = 0x10U;
-static inline constexpr uint32_t BC_OFFSET = 0x14U;
-static inline constexpr uint32_t SPD_OFFSET = 0x3CU;
-
+inline constexpr uint32_t CTL0_OFFSET = 0x00U;
+inline constexpr uint32_t CTL1_OFFSET = 0x04U;
+inline constexpr uint32_t ISTAT_OFFSET = 0x08U;
+inline constexpr uint32_t OCTL_OFFSET = 0x0CU;
+inline constexpr uint32_t BOP_OFFSET = 0x10U;
+inline constexpr uint32_t BC_OFFSET = 0x14U;
+inline constexpr uint32_t SPD_OFFSET = 0x3CU;
 
 ///////////////////////////// UNUSED DOCUMENTATION ONLY /////////////////////////////
 
@@ -587,6 +580,5 @@ enum class PCF1_Bits : uint32_t {
     CTC_REMAP = REG_BIT_DEF(11, 12)
 };
 */
-
 
 } // namespace gpio

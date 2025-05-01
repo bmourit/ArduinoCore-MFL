@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 #include <array>
 
 #include "adc_config.hpp"
@@ -31,62 +31,81 @@ namespace adc {
 
 class ADC {
 public:
-    static Result<ADC, ADC_Error_Type> get_instance(ADC_Base Base);
+    static auto get_instance(ADC_Base Base) -> Result<ADC, ADC_Error_Type>;
 
     // Reset
     void reset();
+
     // Enable
     void enable();
     void disable();
     void set_enable(bool enable);
-    bool is_enabled();
-    // Configuration
+    auto is_enabled() -> bool;
+
+    // Calibration
     void calibration_enable();
-    void set_dma_enable(bool enable);
-    void set_temperature_voltage_reference_enable(bool enable);
+
+    // Resolution
     void set_resolution(ADC_Resolution resolution);
+
+    // DMA
+    void set_dma_enable(bool enable);
+
+    // Reference
+    void set_temperature_voltage_reference_enable(bool enable);
+
+    // Mode
     void set_group_channel_discontinuous_mode(Channel_Group_Type channel_group, uint8_t length);
     void set_mode(Sync_Mode mode);
     void set_functional_mode(Functional_Mode function, bool enable);
+
+    // Configuration
     void set_data_alignment(Data_Alignment align);
     void set_channel_length(Channel_Group_Type channel_group, uint32_t length);
     void set_regular_channel_sequence(uint8_t rank, ADC_Channel channel, ADC_Sample_Time sample_time);
     void set_inserted_channel_sequence(uint8_t rank, ADC_Channel channel, ADC_Sample_Time sample_time);
     void set_inserted_channel_offset(Inserted_Channel inserted_channel, uint16_t offset);
+
     // Triggers
     void set_external_trigger_enable(Channel_Group_Type channel_group, bool enable);
     void set_external_group_source(Channel_Group_Type channel_group, External_Trigger_Source source);
     void set_software_trigger_group(Channel_Group_Type channel_group);
-    // Read data
-    uint32_t get_regular_data();
-    uint32_t get_inserted_data(Inserted_Channel inserted_channel);
-    uint32_t get_sync_mode_data();
+
+    // Data
+    auto get_regular_data() -> uint32_t;
+    auto get_inserted_data(Inserted_Channel inserted_channel) -> uint32_t;
+    auto get_sync_mode_data() -> uint32_t;
+
     // Watchdog
     void single_channel_watchdog_enable(ADC_Channel channel);
     void group_channel_watchdog_enable(Channel_Group_Type channel_group);
     void watchdog_disable();
     void set_watchdog_threshold(uint16_t low, uint16_t high);
+
     // Oversample
     void set_oversampling_configuration(Oversampling_Conversion mode, Oversampling_Shift shift, Oversampling_Ratio ratio);
     void set_oversampling_enable(bool enable);
+
     // Interrupts and flags
-    bool get_flag(Status_Flags flag);
+    auto get_flag(Status_Flags flag) -> bool;
     void clear_flag(Status_Flags flag);
-    bool get_interrupt_flag(Interrupt_Flags flag);
+    auto get_interrupt_flag(Interrupt_Flags flag) -> bool;
     void clear_interrupt_flag(Interrupt_Flags flag);
     void set_interrupt_enable(Interrupt_Type type, bool enable);
 
     // Operational mode specific
-    uint32_t start_regular_single_conversion(ADC_Channel channel, ADC_Sample_Time sample, ADC_Resolution resolution, bool calibrate = false);
+    auto start_regular_single_conversion(ADC_Channel channel, ADC_Sample_Time sample, ADC_Resolution resolution, bool calibrate = false) -> uint32_t;
 
     // Accessor methods
-    inline ADC_Base get_base() { return base_; }
+    inline auto get_base() -> ADC_Base { return base_; }
 
-    inline volatile uint32_t* reg_address(ADC_Regs reg) const {
-        return reinterpret_cast<volatile uint32_t*>(base_address_ + static_cast<uint32_t>(reg));
+    [[nodiscard]] inline auto reg_address(ADC_Regs reg) const -> volatile uint32_t* {
+        const auto idx = static_cast<uint32_t>(base_);
+        return reinterpret_cast<volatile uint32_t*>(ADC_baseAddress[idx] + static_cast<uint32_t>(reg));
     }
-    inline volatile uint32_t* reg_address(ADC_Regs reg, uint32_t extra_offset) const {
-        return reinterpret_cast<volatile uint32_t*>(base_address_ + static_cast<uint32_t>(reg) + extra_offset);
+    [[nodiscard]] inline auto reg_address(ADC_Regs reg, uint32_t extra_offset) const -> volatile uint32_t* {
+        const auto idx = static_cast<uint32_t>(base_);
+        return reinterpret_cast<volatile uint32_t*>(ADC_baseAddress[idx] + static_cast<uint32_t>(reg) + extra_offset);
     }
 
 private:
@@ -95,16 +114,32 @@ private:
 
     ADC_Base base_;
     ADC_Clock_Config ADC_pclk_info_;
-    uint32_t base_address_;
     uint32_t prescaler_;
+
+    inline constexpr uint32_t make_reciprocal(uint32_t divisor) {
+        return static_cast<uint32_t>((static_cast<uint64_t>(1ULL << 32) + divisor / 2) / divisor);
+    }
+
+    inline uint32_t compute_delay_cycles(uint32_t system_clock) {
+        constexpr uint32_t recip_100k = make_reciprocal(100'000U);
+        constexpr uint32_t recip_10k  = make_reciprocal(10'000U);
+        constexpr uint32_t recip_1k   = make_reciprocal(1'000U);
+
+        const uint32_t reciprocal =
+            (system_clock >= 100'000'000U) ? recip_100k :
+            (system_clock >= 10'000'000U)  ? recip_10k  :
+                                             recip_1k;
+
+        return static_cast<uint32_t>((static_cast<uint64_t>(system_clock) * reciprocal) >> 32);
+    }
 
     inline void set_sampling_time(ADC_Channel channel, ADC_Sample_Time sample_time) {
         if (channel == ADC_Channel::INVALID) {
             return;
         }
 
-        const uint32_t chan = static_cast<uint32_t>(channel);
-        const uint32_t sampt = static_cast<uint32_t>(sample_time);
+        const auto chan = static_cast<uint32_t>(channel);
+        const auto sampt = static_cast<uint32_t>(sample_time);
         const bool use_sampt0 = (chan >= 10U);
 
         const ADC_Regs reg = use_sampt0 ? ADC_Regs::SAMPT0 : ADC_Regs::SAMPT1;
@@ -119,16 +154,9 @@ private:
         if (chan == 16U || chan == 17U) {
             set_temperature_voltage_reference_enable(true);
             const uint32_t system_clock = RCU_I.get_system_clock();
-            uint32_t delay_cycles;
 
             // Calculate delay cycles based on the system clock frequency
-            if (system_clock >= 100'000'000U) {
-                delay_cycles = system_clock / 100'000U;
-            } else if (system_clock >= 10'000'000U) {
-                delay_cycles = system_clock / 10'000U;
-            } else {
-                delay_cycles = system_clock / 1'000U;
-            }
+            const uint32_t delay_cycles = compute_delay_cycles(system_clock);
 
             // Delay the calculated number of cycles
             for (uint32_t i = 0; i < delay_cycles; ++i) {
@@ -138,7 +166,7 @@ private:
     }
 
     template <ADC_Base Base>
-    friend ADC& get_instance_for_base();
+    friend auto get_instance_for_base() -> ADC&;
 
 public:
     // Inlined Operational mode specific methods
@@ -189,12 +217,12 @@ public:
         }
     }
 
-    inline uint32_t get_prescaler_value() {
+    inline auto get_prescaler_value() -> uint32_t {
         const rcu::ADC_Prescaler adc_prescaler = RCU_I.get_adc_prescaler();
-        const uint8_t index = static_cast<uint8_t>(adc_prescaler);
+        const auto index = static_cast<uint8_t>(adc_prescaler);
 
         // Array of prescaler values corresponding to ADC_Prescaler values
-        static constexpr uint32_t prescaler_values[] = {
+        constexpr uint32_t prescaler_values[] = {
             2U, 4U, 6U, 8U, 2U, 12U, 8U, 16U, 5U, 6U, 10U, 20U, 0U
         };
 
@@ -206,6 +234,5 @@ public:
         return 0U;  // Default for any unexpected values
     }
 };
-
 
 } // namespace adc

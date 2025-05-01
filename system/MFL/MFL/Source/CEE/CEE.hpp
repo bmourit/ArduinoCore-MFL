@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 
 #include "cee_config.hpp"
 #include "RegRW.hpp"
@@ -28,14 +28,15 @@ namespace cee {
 
 class CEE {
 public:
-    static CEE& get_instance();
+    static auto get_instance() -> CEE&;
 
+    // Enable
     void set_enhanced_mode_enable(bool enable);
 
-    static inline constexpr uintptr_t CEE_baseAddress = 0x4002103CU;
+    static inline constexpr uintptr_t CEE_baseAddress = 0x4002'103CU;
 
     // Register access needed for read_bit/write_bit functionality
-    inline volatile uint32_t* reg_address(CEE_Regs reg) const {
+    [[nodiscard]] inline auto reg_address(CEE_Regs reg) const -> volatile uint32_t* {
         return reinterpret_cast<volatile uint32_t*>(CEE_baseAddress + static_cast<uint32_t>(reg));
     }
 
@@ -44,7 +45,7 @@ private:
 
     // Prevent copying or assigning
     CEE(const CEE&) = delete;
-    CEE& operator=(const CEE&) = delete;
+    auto operator=(const CEE&) -> CEE& = delete;
 };
 
 } // namespace exti

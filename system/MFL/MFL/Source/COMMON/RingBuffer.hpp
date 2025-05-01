@@ -19,16 +19,16 @@
 
 #pragma once
 
-#include <stdint.h>
-#include <stddef.h>
+#include <cstdint>
+#include <cstddef>
 
 template <typename T, size_t N>
 class RingBuffer {
 public:
-    RingBuffer() : head_(0), tail_(0), full_(false) {}
+    RingBuffer() = default;
 
     // Write a single element to the buffer, returns true if successful
-    inline bool write(const T& value) {
+    inline auto write(const T& value) -> bool {
         if (isFull()) return false;  // Prevent overflow
         buffer_[head_] = value;
         head_ = (head_ + 1) % N;
@@ -37,7 +37,7 @@ public:
     }
 
     // Read a single element from the buffer, returns true if successful
-    inline bool read(T& value) {
+    inline auto read(T& value) -> bool {
         if (isEmpty()) return false;  // No data to read
         value = buffer_[tail_];
         tail_ = (tail_ + 1) % N;
@@ -46,7 +46,7 @@ public:
     }
 
     // Peek the next element without removing it, returns true if valid
-    inline bool peek(T& value) const {
+    inline auto peek(T& value) const -> bool {
         if (isEmpty()) return false;
         value = buffer_[tail_];
         return true;
@@ -60,46 +60,42 @@ public:
     }
 
     // Check if the buffer is empty
-    inline bool isEmpty() const { return (!full_ && (head_ == tail_)); }
+    [[nodiscard]] inline auto isEmpty() const -> bool { return (!full_ && (head_ == tail_)); }
 
     // Check if the buffer is full
-    inline bool isFull() const { return full_; }
+    [[nodiscard]] inline auto isFull() const -> bool { return full_; }
 
     // Get the current number of elements available for reading
-    inline size_t availableForRead() const { return size(); }
+    [[nodiscard]] inline auto availableForRead() const -> size_t { return size(); }
 
     // Get the number of free slots available for writing
-    inline size_t availableForWrite() const { return N - size(); }
+    [[nodiscard]] inline auto availableForWrite() const -> size_t { return N - size(); }
 
     // Get the maximum capacity of the buffer
-    inline constexpr size_t capacity() const { return N; }
+    [[nodiscard]] inline constexpr auto capacity() const -> size_t { return N; }
 
     // Provides r/w access to the buffer head
-    inline size_t getHead() { return head_; }
-    inline void setHead(size_t value) {
-        head_ = value;
-    }
+    inline auto getHead() -> size_t { return head_; }
+    inline void setHead(size_t value) { head_ = value; }
 
     // Provides r/w access to the buffer tail
-    inline size_t getTail() { return tail_; }
-    inline  void setTail(size_t value) {
-        tail_ = value;
-    }
+    inline auto getTail() -> size_t { return tail_; }
+    inline  void setTail(size_t value) { tail_ = value; }
 
     // Provides access to the underlying buffer
-    inline T* data() { return buffer_; }
+    inline auto data() -> T* { return buffer_; }
 
     // Provides a const version for read-only access
-    inline const T* data() const { return buffer_; }
+    inline auto data() const -> const T* { return buffer_; }
 
 private:
     T buffer_[N];           // Circular buffer storage
-    volatile size_t head_;  // Head index (next write position)
-    volatile size_t tail_;  // Tail index (next read position)
-    volatile bool full_;    // Indicates if the buffer is full
+    volatile size_t head_{0};  // Head index (next write position)
+    volatile size_t tail_{0};  // Tail index (next read position)
+    volatile bool full_{false};    // Indicates if the buffer is full
 
     // Get the current number of elements in the buffer
-    inline size_t size() const {
+    [[nodiscard]] inline auto size() const -> size_t {
         if (full_) return N;
         return (head_ >= tail_) ? (head_ - tail_) : (N + head_ - tail_);
     }

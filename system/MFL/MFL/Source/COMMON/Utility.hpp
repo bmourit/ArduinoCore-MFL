@@ -19,16 +19,16 @@
 
 #pragma once
 
-#include <stdlib.h>
+#include <cstdlib>
 
-inline uint32_t custom_min(uint32_t a, uint32_t b) {
+inline auto custom_min(uint32_t a, uint32_t b) -> uint32_t {
     return (a < b) ? a : b;
 }
 
-inline uint32_t custom_max(uint32_t a, uint32_t b) {
+inline auto custom_max(uint32_t a, uint32_t b) -> uint32_t {
     return (a > b) ? a : b;
 }
 
-inline uint32_t custom_clamp(uint32_t value, uint32_t min_val, uint32_t max_val) {
+inline auto custom_clamp(uint32_t value, uint32_t min_val, uint32_t max_val) -> uint32_t {
     return custom_max(min_val, custom_min(value, max_val));
 }

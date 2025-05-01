@@ -19,8 +19,8 @@
 
 #pragma once
 
-#include <stdlib.h>
-#include <stdint.h>
+#include <cstdlib>
+#include <cstdint>
 #include <array>
 
 #include "CONFIG.hpp"
@@ -28,14 +28,12 @@
 
 namespace sdio {
 
-
 ///////////////////////////// BASE ADDRESS /////////////////////////////
 
 enum class SDIO_Base : uint8_t {
     SDIO_BASE,
     INVALID
 };
-
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
@@ -60,7 +58,6 @@ enum class SDIO_Regs : uint8_t {
     FIFO = 0x80U
 };
 
-
 ///////////////////////////// REGISTER BITS /////////////////////////////
 
 enum class PWRCTL_Bits : uint32_t {
@@ -78,9 +75,9 @@ enum class CLKCTL_Bits : uint32_t {
     DIV8 = 31
 };
 
-inline constexpr uint8_t DIV_Pos = 0U;
+inline constexpr uint8_t DIV_Pos = 0;
 inline constexpr uint8_t DIV_Mask = 0xFFU;
-inline constexpr uint8_t BUSMODE_Pos = 11U;
+inline constexpr uint8_t BUSMODE_Pos = 11;
 inline constexpr uint8_t BUSMODE_Mask = 0x3U;
 
 enum class CMDAGMT_Bits : uint32_t {
@@ -101,11 +98,11 @@ enum class CMDCTL_Bits : uint32_t {
     ATAEN = 14
 };
 
-inline constexpr uint8_t CMDIDX_Pos = 0U;
+inline constexpr uint8_t CMDIDX_Pos = 0;
 inline constexpr uint8_t CMDIDX_Mask = 0x3FU;
-inline constexpr uint8_t CMDRESP_Pos = 6U;
+inline constexpr uint8_t CMDRESP_Pos = 6;
 inline constexpr uint8_t CMDRESP_Mask = 0x3U;
-inline constexpr uint8_t WAITTYPE_Pos = 8U;
+inline constexpr uint8_t WAITTYPE_Pos = 8;
 inline constexpr uint8_t WAITTYPE_Mask = 0x3U;
 
 enum class RSPCMDIDX_Bits : uint32_t {
@@ -128,7 +125,7 @@ enum class DATACTL_Bits : uint32_t {
     IOEN = 11
 };
 
-inline constexpr uint8_t BLKSZ_Pos = 4U;
+inline constexpr uint8_t BLKSZ_Pos = 4;
 inline constexpr uint8_t BLKSZ_Mask = 0x7U;
 
 enum class DATACNT_Bits : uint32_t {
@@ -170,10 +167,10 @@ enum class Status_Flags : uint8_t {
     FLAG_ATAEND
 };
 
-inline constexpr uint32_t CCRCERR_Mask = (1U << 0U);
-inline constexpr uint32_t CMDTMOUT_Mask = (1U << 2U);
-inline constexpr uint32_t CMDRECV_Mask = (1U << 6U);
-inline constexpr uint32_t CMDRUN_Mask = (1U << 11U);
+inline constexpr uint32_t CCRCERR_Mask = (1U << 0);
+inline constexpr uint32_t CMDTMOUT_Mask = (1U << 2);
+inline constexpr uint32_t CMDRECV_Mask = (1U << 6);
+inline constexpr uint32_t CMDRUN_Mask = (1U << 11);
 
 enum class Clear_Flags : uint8_t {
     FLAG_CCRCERRC,
@@ -191,34 +188,17 @@ enum class Clear_Flags : uint8_t {
     FLAG_ATAENDC = 23
 };
 
-inline const uint32_t clear_command_flags = (
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_CCRCERRC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_CMDTMOUTC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_CMDRECVC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_CMDSENDC))
+inline constexpr uint32_t clear_command_flags = (
+    (1U << 0U) | (1U << 2U) | (1U << 6U) | (1U << 7U)
 );
 
-inline const uint32_t clear_data_flags = (
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_DTCRCERRC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_DTTMOUTC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_TXUREC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_RXOREC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_DTENDC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_DTBLKENDC))
+inline constexpr uint32_t clear_data_flags = (
+    (1U << 1U) | (1U << 3U) | (1U << 4U) | (1U << 5U) | (1U << 8U) | (1U << 10U)
 );
 
-inline const uint32_t clear_common_flags = (
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_CCRCERRC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_DTCRCERRC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_CMDTMOUTC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_DTTMOUTC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_TXUREC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_RXOREC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_CMDRECVC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_CMDSENDC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_DTENDC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_DTBLKENDC)) |
-    (1U << static_cast<uint32_t>(Clear_Flags::FLAG_SDIOINTC))
+inline constexpr uint32_t clear_common_flags = (
+    (1U << 0U) | (1U << 1U) | (1U << 2U) | (1U << 3U) | (1U << 4U) | (1U << 5U) |
+    (1U << 6U) | (1U << 7U) | (1U << 8U) | (1U << 10U) | (1U << 22U)
 );
 
 enum class Interrupt_Flags : uint8_t {
@@ -275,7 +255,6 @@ enum class Interrupt_Type : uint8_t {
     SDIOINTIE,
     ATAENDIE
 };
-
 
 ///////////////////////////// ENUMS /////////////////////////////
 
@@ -565,24 +544,24 @@ struct Error_Map {
     SDIO_Error_Type errorType : 6;
 };
 
-static inline constexpr std::array<Error_Map, 17> errorTableR1 {{
-    {static_cast<uint8_t>(R1_Status::OUT_OF_RANGE), SDIO_Error_Type::COMMAND_OUT_OF_RANGE},
-    {static_cast<uint8_t>(R1_Status::ADDRESS_ERROR), SDIO_Error_Type::INVALID_ADDRESS},
-    {static_cast<uint8_t>(R1_Status::BLOCK_LEN_ERROR), SDIO_Error_Type::INVALID_BLOCK_LENGTH},
-    {static_cast<uint8_t>(R1_Status::ERASE_SEQ_ERROR), SDIO_Error_Type::ERASE_SEQUENCE_ERROR},
-    {static_cast<uint8_t>(R1_Status::ERASE_PARAM), SDIO_Error_Type::INVALID_ERASE_BLOCKS},
-    {static_cast<uint8_t>(R1_Status::WP_VIOLATION), SDIO_Error_Type::WRITE_PROTECT_VIOLATION},
-    {static_cast<uint8_t>(R1_Status::LOCK_UNLOCK_FAILED), SDIO_Error_Type::LOCK_UNLOCK_FAILED},
-    {static_cast<uint8_t>(R1_Status::COM_CRC_ERROR), SDIO_Error_Type::COMMAND_CRC_ERROR},
-    {static_cast<uint8_t>(R1_Status::ILLEGAL_COMMAND), SDIO_Error_Type::ILLEGAL_COMMAND},
-    {static_cast<uint8_t>(R1_Status::CARD_ECC_FAILED), SDIO_Error_Type::ECC_FAILED},
-    {static_cast<uint8_t>(R1_Status::CC_ERROR), SDIO_Error_Type::CARD_CONTROLLER_ERROR},
-    {static_cast<uint8_t>(R1_Status::ERROR), SDIO_Error_Type::ERROR},
-    {static_cast<uint8_t>(R1_Status::CID_CSD_OVERWRITE), SDIO_Error_Type::CSD_OVERWRITE},
-    {static_cast<uint8_t>(R1_Status::WP_ERASE_SKIP), SDIO_Error_Type::ERASE_SKIP},
-    {static_cast<uint8_t>(R1_Status::CARD_ECC_DISABLED), SDIO_Error_Type::ECC_DISABLED},
-    {static_cast<uint8_t>(R1_Status::ERASE_RESET), SDIO_Error_Type::ERASE_SEQUENCE_RESET},
-    {static_cast<uint8_t>(R1_Status::AKE_SEQ_ERROR), SDIO_Error_Type::AUTHENTICATION_ERROR}
+inline constexpr std::array<Error_Map, 17> errorTableR1 {{
+    {3U, SDIO_Error_Type::AUTHENTICATION_ERROR},
+    {13U, SDIO_Error_Type::ERASE_SEQUENCE_RESET},
+    {14U, SDIO_Error_Type::ECC_DISABLED},
+    {15U, SDIO_Error_Type::ERASE_SKIP},
+    {16U, SDIO_Error_Type::CSD_OVERWRITE},
+    {19U, SDIO_Error_Type::ERROR},
+    {20U, SDIO_Error_Type::CARD_CONTROLLER_ERROR},
+    {21U, SDIO_Error_Type::ECC_FAILED},
+    {22U, SDIO_Error_Type::ILLEGAL_COMMAND},
+    {23U, SDIO_Error_Type::COMMAND_CRC_ERROR},
+    {24U, SDIO_Error_Type::LOCK_UNLOCK_FAILED},
+    {26U, SDIO_Error_Type::WRITE_PROTECT_VIOLATION},
+    {27U, SDIO_Error_Type::INVALID_ERASE_BLOCKS},
+    {28U, SDIO_Error_Type::ERASE_SEQUENCE_ERROR},
+    {29U, SDIO_Error_Type::INVALID_BLOCK_LENGTH},
+    {30U, SDIO_Error_Type::INVALID_ADDRESS},
+    {31U, SDIO_Error_Type::COMMAND_OUT_OF_RANGE}
 }};
 
 // Bit positions
@@ -592,22 +571,21 @@ enum class R6_Status : uint8_t {
     COM_CRC_ERROR = 15U
 };
 
-static inline constexpr std::array<Error_Map, 3> errorTableR6 {{
-    {static_cast<uint8_t>(R6_Status::ERROR), SDIO_Error_Type::ERROR},
-    {static_cast<uint8_t>(R6_Status::ILLEGAL_COMMAND), SDIO_Error_Type::ILLEGAL_COMMAND},
-    {static_cast<uint8_t>(R6_Status::COM_CRC_ERROR), SDIO_Error_Type::COMMAND_CRC_ERROR}
+inline constexpr std::array<Error_Map, 3> errorTableR6 {{
+    {13U, SDIO_Error_Type::ERROR},
+    {14U, SDIO_Error_Type::ILLEGAL_COMMAND},
+    {15U, SDIO_Error_Type::COMMAND_CRC_ERROR}
 }};
-
 
 ///////////////////////////// STRUCTURES /////////////////////////////
 
 struct SDIO_Config {
     uint32_t desired_clock;
-    Clock_Edge clock_edge;
-    Bus_Width width;
-    bool enable_bypass;
-    bool enable_powersave;
-    bool enable_hwclock;
+    bool enable_bypass : 1;
+    bool enable_powersave : 1;
+    bool enable_hwclock : 1;
+    Clock_Edge clock_edge : 1;
+    Bus_Width width : 2;
 };
 
 struct Card_Identification {
@@ -639,10 +617,10 @@ struct Card_CSD {
 struct Card_Info {
     Card_Identification cid;
     Card_CSD csd;
-    Card_Type type;
     uint32_t capacity;
     uint32_t block_size;
     uint16_t relative_address;
+    Card_Type type : 3;
 };
 
 struct DMA_Instance_Config {
@@ -651,64 +629,60 @@ struct DMA_Instance_Config {
 };
 
 struct Command_Type {
-    Command_Index cmd_index;
     uint32_t cmd_arg;
-    Command_Response response;
-    Wait_Type wait_type;
-    bool send_cmd;
+    Command_Index cmd_index : 6;
+    Command_Response response : 2;
+    Wait_Type wait_type : 2;
+    bool send_cmd : 1;
 };
 
 struct Data_Type {
     uint32_t timeout;
     uint32_t length;
     uint32_t block_size;
-    Transfer_Mode mode;
-    Transfer_Direction direction;
-    bool send_data;
+    Transfer_Mode mode : 1;
+    Transfer_Direction direction : 1;
+    bool send_data : 1;
 };
-
 
 ///////////////////////////// CONSTANTS /////////////////////////////
 
-inline constexpr uint32_t KILOBYTE = 1024U;
+inline constexpr uint32_t KILOBYTE = 1'024U;
 inline constexpr uint32_t BLOCK_SIZE = 512U;                    // Block size for high-capacity cards
-inline constexpr uint32_t Check_Pattern = 0x000001AAU;
-inline constexpr uint32_t Voltage_Window = 0x80100000U;         // Host 3.3V request
-inline constexpr uint32_t Max_Voltage_Checks = 0x0000FFFFU;     // Maximum number of voltage validation checks
-inline constexpr uint32_t Max_Data_Length = 0x01FFFFFFU;        // Maximum length of data
-inline constexpr uint32_t Data_Timeout = 0xFFFFFFFFU;           // Data timeout of the state machine
-inline constexpr uint32_t Default_Init_Clock = 400000U;         // Max init clock 400KHz but in practice is not stable, so use 300Khz
-inline constexpr uint32_t Default_Desired_Clock = 25000000U;    // Maximum possible clock speed
-inline constexpr uint32_t SDCARD_Standard = 0x00000000U;        // SDCard standard capacity
-inline constexpr uint32_t SDCARD_HCS = 0x40000000U;             // HCS bit = 1 for voltage validation
-inline constexpr uint32_t Switch_1_8V_Capacity = 0x01000000U;
-inline constexpr uint32_t Card_Locked = 0x02000000U;
-inline constexpr uint32_t SCR_Width_4 = 0x00040000U;
-inline constexpr uint32_t SCR_Width_1 = 0x00010000U;
-inline constexpr uint32_t All_R1_Error_Bits = 0xFDF9E008U;
-inline constexpr uint32_t FIFO_Half_Words = 0x00000008U;
-inline constexpr uint32_t FIFO_Half_Bytes = 0x00000020U;
-inline constexpr uint32_t PasswordKey1 = 0x01020600U;
-inline constexpr uint32_t PasswordKey2 = 0x03040506U;
-inline constexpr uint32_t CardStateMask = 0x0000000FU;
-//inline constexpr uint32_t Clear_All_Cmd_Flags = 0x00C002F5U;
-//inline constexpr uint32_t Clear_All_Dat_Flags = 0x00C0073AU;
-inline constexpr uint32_t R6_Error_Bits = 0x0000E000U;
+inline constexpr uint32_t Check_Pattern = 0x0000'01AAU;
+inline constexpr uint32_t Voltage_Window = 0x8010'0000U;        // Host 3.3V request
+inline constexpr uint32_t Max_Voltage_Checks = 0x0000'FFFFU;    // Maximum number of voltage validation checks
+inline constexpr uint32_t Max_Data_Length = 0x01FF'FFFFU;       // Maximum length of data
+inline constexpr uint32_t Data_Timeout = 0xFFFF'FFFFU;          // Data timeout of the state machine
+inline constexpr uint32_t Default_Init_Clock = 400'000U;        // Max init clock 400KHz but in practice is not stable, so use 300Khz
+inline constexpr uint32_t Default_Desired_Clock = 25'000'000U;  // Maximum possible clock speed
+inline constexpr uint32_t SDCARD_Standard = 0x0000'0000U;       // SDCard standard capacity
+inline constexpr uint32_t SDCARD_HCS = 0x4000'0000U;            // HCS bit = 1 for voltage validation
+inline constexpr uint32_t Switch_1_8V_Capacity = 0x0100'0000U;
+inline constexpr uint32_t Card_Locked = 0x0200'0000U;
+inline constexpr uint32_t SCR_Width_4 = 0x0004'0000U;
+inline constexpr uint32_t SCR_Width_1 = 0x0001'0000U;
+inline constexpr uint32_t All_R1_Error_Bits = 0xFDF9'E008U;
+inline constexpr uint32_t FIFO_Half_Words = 0x0000'0008U;
+inline constexpr uint32_t FIFO_Half_Bytes = 0x0000'0020U;
+inline constexpr uint32_t PasswordKey1 = 0x0102'0600U;
+inline constexpr uint32_t PasswordKey2 = 0x0304'0506U;
+inline constexpr uint32_t CardStateMask = 0x0000'000FU;
+inline constexpr uint32_t R6_Error_Bits = 0x0000'E000U;
 inline constexpr uint8_t RCA_Shift = 0x10U;
-
 
 ///////////////////////////// INITIALIZATION DEFAULTS /////////////////////////////
 
-static inline const SDIO_Config default_config = {
-    Default_Init_Clock,
-    Clock_Edge::RISING_EDGE,
-    Bus_Width::WIDTH_1BIT,
-    false,
-    false,
-    false
+inline constexpr SDIO_Config default_config = {
+    .desired_clock = Default_Init_Clock,
+    .enable_bypass = false,
+    .enable_powersave = false,
+    .enable_hwclock = false,
+    .clock_edge = Clock_Edge::RISING_EDGE,
+    .width = Bus_Width::WIDTH_1BIT
 };
 
-static inline const DMA_Instance_Config default_dma_config = {
+inline constexpr DMA_Instance_Config default_dma_config = {
     dma::DMA_Base::DMA1_BASE,
     dma::DMA_Channel::CHANNEL3
 };

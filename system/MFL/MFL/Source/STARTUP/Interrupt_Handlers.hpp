@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 
 // Single macro to define default ISR behavior
 #define DEFINE_EXTERN_ISR(name) extern "C" void name(void);

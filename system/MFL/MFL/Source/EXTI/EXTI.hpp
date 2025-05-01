@@ -20,36 +20,37 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 
 #include "exti_config.hpp"
 #include "RegRW.hpp"
 
 namespace exti {
 
-class RCU;
-
 class EXTI {
 public:
-    static EXTI& get_instance();
+    static auto get_instance() -> EXTI&;
 
     // Initialize
     void init(EXTI_Line line, EXTI_Mode mode, EXTI_Trigger trigger);
+
     // Reset
     void reset();
+
     // Events
     void set_event_enable(EXTI_Line line, bool enable);
+
     // Interrupts and flags
-    bool get_flag(Status_Flags flag);
+    auto get_flag(Status_Flags flag) -> bool;
     void clear_flag(Status_Flags flag);
-    bool get_interrupt_flag(Interrupt_Flags flag);
+    auto get_interrupt_flag(Interrupt_Flags flag) -> bool;
     void clear_interrupt_flag(Interrupt_Flags flag);
     void set_interrupt_enable(Interrupt_Type type, bool enable);
     void set_software_interrupt_enable(EXTI_Line line, bool enable);
 
-    static inline constexpr uintptr_t EXTI_baseAddress = 0x40010400U;
+    static inline constexpr uintptr_t EXTI_baseAddress = 0x4001'0400U;
 
-    inline volatile uint32_t* reg_address(EXTI_Regs reg) const {
+    [[nodiscard]] inline auto reg_address(EXTI_Regs reg) const -> volatile uint32_t* {
         return reinterpret_cast<volatile uint32_t*>(EXTI_baseAddress + static_cast<uint32_t>(reg));
     }
 
@@ -58,7 +59,7 @@ private:
 
     // Prevent copying or assigning
     EXTI(const EXTI&) = delete;
-    EXTI& operator=(const EXTI&) = delete;
+    auto operator=(const EXTI&) -> EXTI& = delete;
 };
 
 } // namespace exti

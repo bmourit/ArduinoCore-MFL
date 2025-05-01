@@ -22,12 +22,14 @@
 
 namespace dac {
 
-DAC& DAC::get_instance() {
+auto DAC::get_instance() -> DAC& {
     static DAC instance;
     return instance;
 }
 
-DAC::DAC() : is_clock_enabled_(false) {
+DAC::DAC() :
+    is_clock_enabled_(false)
+{
     if (!is_clock_enabled_) {
         RCU_I.set_pclk_enable(rcu::RCU_PCLK::PCLK_DAC, true);
         RCU_I.set_pclk_reset_enable(rcu::RCU_PCLK_Reset::PCLK_DACRST, true);
@@ -173,7 +175,7 @@ void DAC::set_output_buffer_enable(Internal_Device instance, bool enable) {
  * @return The current output value of the specified DAC internal device, or zero
  *         if the device is invalid.
  */
-uint16_t DAC::get_output_value(Internal_Device instance) {
+auto DAC::get_output_value(Internal_Device instance) -> uint16_t {
     if (instance == Internal_Device::INVALID) {
         return 0;
     }

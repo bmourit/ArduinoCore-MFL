@@ -17,7 +17,7 @@
 // If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include <stdint.h>
+#include <cstdint>
 
 // Single macro to define default ISR behavior
 #define DEFINE_DEFAULT_ISR(name) \
@@ -175,5 +175,5 @@ const volatile uintptr_t g_pfnVectors[] = {
     reinterpret_cast<uintptr_t>(DMA1_Channel0_IRQHandler),
     reinterpret_cast<uintptr_t>(DMA1_Channel1_IRQHandler),
     reinterpret_cast<uintptr_t>(DMA1_Channel2_IRQHandler),
-    reinterpret_cast<uintptr_t>(DMA1_Channel3_4_IRQHandler),
+    reinterpret_cast<uintptr_t>(DMA1_Channel3_4_IRQHandler)
 };

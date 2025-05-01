@@ -19,18 +19,15 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace startup {
 
-class RCU;
-class PMU;
-class CEE;
-
 class STARTUP {
 public:
-    static STARTUP& get_instance();
+    static auto get_instance() -> STARTUP&;
 
+    // Initialize
     void startup_init();
 
 private:
@@ -38,8 +35,7 @@ private:
 
     // Prevent copying or assigning
     STARTUP(const STARTUP&) = delete;
-    STARTUP& operator=(const STARTUP&) = delete;
+    auto operator=(const STARTUP&) -> STARTUP& = delete;
 };
-
 
 } // namespace startup

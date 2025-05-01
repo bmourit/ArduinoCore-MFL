@@ -17,7 +17,7 @@
 // If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include <stdint.h>
+#include <cstdint>
 #include <type_traits>
 
 #include "STARTUP.hpp"
@@ -26,15 +26,16 @@
 #include "RCU.hpp"
 #include "CONFIG.hpp"
 #include "CEE.hpp"
+#include "AFIO.hpp"
 
 namespace startup {
 
-STARTUP& STARTUP::get_instance() {
+auto STARTUP::get_instance() -> STARTUP& {
     static STARTUP instance;
     return instance;
 }
 
-STARTUP::STARTUP() {}
+STARTUP::STARTUP() = default;
 
 /**
  * @brief Initializes the startup sequence for the GD32F10x/GD32F30x MCU family.
@@ -63,6 +64,7 @@ STARTUP::STARTUP() {}
 void STARTUP::startup_init() {
     // Enable HXTAL
     rcu::RCU::get_instance().set_osci_enable(rcu::OSCI_Select::HXTAL, true);
+
     // Wait until HXTAL is stable
     while (!rcu::RCU::get_instance().is_osci_stable(rcu::OSCI_Select::HXTAL)) {
     }
@@ -103,6 +105,7 @@ void STARTUP::startup_init() {
 
     // Enable PLL
     rcu::RCU::get_instance().set_osci_enable(rcu::OSCI_Select::PLL_CK, true);
+
     // Wait for PLL to stablize
     while (!rcu::RCU::get_instance().is_osci_stable(rcu::OSCI_Select::PLL_CK)) {
     }
@@ -116,6 +119,7 @@ void STARTUP::startup_init() {
 
     // PLL as system clock
     rcu::RCU::get_instance().set_system_source(rcu::System_Clock_Source::SOURCE_PLL);
+
     // Verify PLL is set as system clock
     while (rcu::RCU::get_instance().get_system_source() != rcu::System_Clock_Source::SOURCE_PLL) {
     }
@@ -127,14 +131,20 @@ void STARTUP::startup_init() {
         rcu::RCU::get_instance().set_adc_prescaler(rcu::ADC_Prescaler::CKAHB_DIV10);    // 12 MHz
     }
 
-#ifndef DISABLE_CEE_ENHANCE
-    // Set CEE enahnced mode
-    cee::CEE::get_instance().set_enhanced_mode_enable(true);
-#endif
+    #ifndef DISABLE_CEE_ENHANCE
+        // Set CEE enahnced mode
+        cee::CEE::get_instance().set_enhanced_mode_enable(true);
+    #endif
+
+    if constexpr (std::is_same_v<mcu::ChipSeries, mcu::F103R>) {
+        // Enable the gpio compensation cell
+        gpio::AFIO::get_instance().set_compensation(true);
+        while (!gpio::AFIO::get_instance().get_compensation()) {
+        }
+    }
 
     // Set the global variable
     rcu::RCU::get_instance().update_system_clock();
 }
-
 
 } // namespace startup

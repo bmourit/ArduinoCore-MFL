@@ -19,13 +19,12 @@
 
 #pragma once
 
-#include <stdlib.h>
-#include <stdint.h>
+#include <cstdlib>
+#include <cstdint>
 
 #include "CONFIG.hpp"
 
 namespace cee {
-
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
@@ -33,12 +32,10 @@ enum class CEE_Regs : uint8_t {
     CEE = 0x00U
 };
 
-
 ///////////////////////////// REGISTER BITS /////////////////////////////
 
 enum class CEE_Bits : uint8_t {
     CEE_EN = 7
 };
-
 
 } // namespace cee

@@ -22,12 +22,14 @@
 
 namespace bkp {
 
-BKP& BKP::get_instance() {
+auto BKP::get_instance() -> BKP& {
     static BKP instance;
     return instance;
 }
 
-BKP::BKP() : is_clock_enabled_(false) {
+BKP::BKP() :
+    is_clock_enabled_(false)
+{
     if (!is_clock_enabled_) {
         RCU_I.set_pclk_enable(rcu::RCU_PCLK::PCLK_PMU, true);
         RCU_I.set_pclk_reset_enable(rcu::RCU_PCLK_Reset::PCLK_BKPIRST, true);
@@ -62,7 +64,7 @@ void BKP::reset() {
  * @param data The new 16-bit value to set the selected backup data register.
  */
 void BKP::set_data(Backup_Data data_offset, uint16_t data) {
-    uint32_t offset = static_cast<uint32_t>(data_offset);
+    auto offset = static_cast<uint32_t>(data_offset);
     uint32_t reg_offset;
 
     // Use conditional operator to avoid branching
@@ -89,8 +91,8 @@ void BKP::set_data(Backup_Data data_offset, uint16_t data) {
  * @return The current 16-bit value of the selected backup data register, or
  *         0 if the specified register index is not within the valid range.
  */
-uint16_t BKP::get_data(Backup_Data data_offset) {
-    uint32_t offset = static_cast<uint32_t>(data_offset);
+auto BKP::get_data(Backup_Data data_offset) -> uint16_t {
+    auto offset = static_cast<uint32_t>(data_offset);
     uint32_t reg_offset;
 
     // Use conditional operator for efficient register offset calculation
@@ -258,7 +260,7 @@ void BKP::set_tamper_interrupt_enable(bool enable) {
  *             Status_Flags enumeration.
  * @return true if the flag is set, false otherwise.
  */
-bool BKP::get_flag(Status_Flags flag) {
+auto BKP::get_flag(Status_Flags flag) -> bool {
     return (read_bit(*this, BKP_Regs::TPCS, static_cast<uint32_t>(flag)));
 }
 
@@ -285,7 +287,7 @@ void BKP::clear_flag(Clear_Flags flag) {
  *             Interrupt_Flags enumeration.
  * @return true if the flag is set, false otherwise.
  */
-bool BKP::get_interrupt_flag(Interrupt_Flags flag) {
+auto BKP::get_interrupt_flag(Interrupt_Flags flag) -> bool {
     return (read_bit(*this, BKP_Regs::TPCS, static_cast<uint32_t>(flag)));
 }
 
@@ -302,6 +304,5 @@ bool BKP::get_interrupt_flag(Interrupt_Flags flag) {
 void BKP::clear_interrupt_flag(Clear_Flags flag) {
     write_bit(*this, BKP_Regs::TPCS, static_cast<uint32_t>(flag), true);
 }
-
 
 } // namespace bkp

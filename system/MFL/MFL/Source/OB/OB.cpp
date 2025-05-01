@@ -22,12 +22,12 @@
 
 namespace fmc {
 
-OB& OB::get_instance() {
+auto OB::get_instance() -> OB& {
     static OB instance;
     return instance;
 }
 
-OB::OB() {}
+OB::OB() = default;
 
 /**
  * @brief Set the Option Bytes Lock (OBWEN) bit in the FMC Control
@@ -163,7 +163,7 @@ FMC_Error_Type OB::set_ob_write_protection(WP_Sector sector) {
  *
  * @return The current write protection settings
  */
-uint32_t OB::get_ob_write_protection() {
+auto OB::get_ob_write_protection() -> uint32_t {
     return read_register<uint32_t>(*this, FMC_Regs::WP);
 }
 
@@ -224,7 +224,7 @@ FMC_Error_Type OB::set_ob_security_protection(OB_Security_Type type) {
  *
  * @return True if security protection is enabled, false otherwise.
  */
-bool OB::get_ob_security_protection() {
+auto OB::get_ob_security_protection() -> bool {
     return read_bit(*this, FMC_Regs::OBSTAT, static_cast<uint32_t>(OBSTAT_Bits::SPC));
 }
 
@@ -282,7 +282,7 @@ FMC_Error_Type OB::set_ob_user(OB_Watchdog_Type type, OB_Deep_Sleep deepsleep, O
  *
  * @return The current user configuration settings as an 8-bit value.
  */
-uint8_t OB::get_ob_user() {
+auto OB::get_ob_user() -> uint8_t {
     uint32_t value = read_register<uint32_t>(*this, FMC_Regs::OBSTAT);
     value = (value >> 2U);
     return static_cast<uint8_t>(value);
@@ -330,7 +330,7 @@ FMC_Error_Type OB::set_ob_data(uint32_t address, uint8_t data) {
  *
  * @return The current Option Bytes data as a 16-bit value.
  */
-uint16_t OB::get_ob_data() {
+auto OB::get_ob_data() -> uint16_t {
     uint32_t value = read_register<uint32_t>(*this, FMC_Regs::OBSTAT);
     value = (value >> 10U);
     return static_cast<uint16_t>(value);

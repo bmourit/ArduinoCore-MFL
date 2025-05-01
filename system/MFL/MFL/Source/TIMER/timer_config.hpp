@@ -19,15 +19,14 @@
 
 #pragma once
 
-#include <stdlib.h>
-#include <stdint.h>
+#include <cstdlib>
+#include <cstdint>
 #include <array>
 
 #include "CONFIG.hpp"
 #include "rcu_config.hpp"
 
 namespace timer {
-
 
 ///////////////////////////// BASE ADDRESS /////////////////////////////
 
@@ -43,17 +42,16 @@ enum class TIMER_Base : uint8_t {
     INVALID
 };
 
-static inline constexpr uintptr_t TIMER_baseAddress[] = {
-    0x40012C00U, // TIMER0
-    0x40000000U, // TIMER1
-    0x40000400U, // TIMER2
-    0x40000800U, // TIMER3
-    0x40000C00U, // TIMER4
-    0x40001000U, // TIMER5
-    0x40001400U, // TIMER6
-    0x40013400U  // TIMER7
+static inline constexpr std::array<uintptr_t, 8> TIMER_baseAddress = {
+    0x4001'2C00U, // TIMER0
+    0x4000'0000U, // TIMER1
+    0x4000'0400U, // TIMER2
+    0x4000'0800U, // TIMER3
+    0x4000'0C00U, // TIMER4
+    0x4000'1000U, // TIMER5
+    0x4000'1400U, // TIMER6
+    0x4001'3400U  // TIMER7
 };
-
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
@@ -81,7 +79,6 @@ enum class TIMER_Regs : uint8_t {
     IRMP = 0x50U,
     CFG = 0xFCU
 };
-
 
 ///////////////////////////// REGISTER BITS /////////////////////////////
 
@@ -122,21 +119,21 @@ enum class SMCFG_Bits : uint32_t {
 };
 
 enum class DMAINTEN_Bits : uint32_t {
-    UPIE = 0,
-    CH0IE = 1,
-    CH1IE = 2,
-    CH2IE = 3,
-    CH3IE = 4,
-    CMTIE = 5,
-    TRGIE = 6,
-    BRKIE = 7,
-    UPDEN = 8,
-    CH0DEN = 9,
-    CH1DEN = 10,
-    CH2DEN = 11,
-    CH3DEN = 12,
-    CMTDEN = 13,
-    TRGDEN = 14
+    UPIE,
+    CH0IE,
+    CH1IE,
+    CH2IE,
+    CH3IE,
+    CMTIE,
+    TRGIE,
+    BRKIE,
+    UPDEN,
+    CH0DEN,
+    CH1DEN,
+    CH2DEN,
+    CH3DEN,
+    CMTDEN,
+    TRGDEN
 };
 
 enum class INTF_Bits : uint32_t {
@@ -155,14 +152,14 @@ enum class INTF_Bits : uint32_t {
 };
 
 enum class SWEVG_Bits : uint32_t {
-    UPG = 0,
-    CH0G = 1,
-    CH1G = 2,
-    CH2G = 3,
-    CH3G = 4,
-    CMTG = 5,
-    TRGG = 6,
-    BRKG = 7
+    UPG,
+    CH0G,
+    CH1G,
+    CH2G,
+    CH3G,
+    CMTG,
+    TRGG,
+    BRKG
 };
 
 enum class CHCTL0_Bits : uint32_t {
@@ -204,20 +201,20 @@ enum class CHCTL1_Bits : uint32_t {
 };
 
 enum class CHCTL2_Bits : uint32_t {
-    CH0EN = 0,
-    CH0P = 1,
-    CH0NEN = 2,
-    CH0NP = 3,
-    CH1EN = 4,
-    CH1P = 5,
-    CH1NEN = 6,
-    CH1NP = 7,
-    CH2EN = 8,
-    CH2P = 9,
-    CH2NEN = 10,
-    CH2NP = 11,
-    CH3EN = 12,
-    CH3P = 13
+    CH0EN,
+    CH0P,
+    CH0NEN,
+    CH0NP,
+    CH1EN,
+    CH1P,
+    CH1NEN,
+    CH1NP,
+    CH2EN,
+    CH2P,
+    CH2NEN,
+    CH2NP,
+    CH3EN,
+    CH3P
 };
 
 enum class CNT_Bits : uint32_t {
@@ -261,10 +258,9 @@ enum class DMATB_Bits : uint32_t {
 };
 
 enum class CFG_Bits : uint32_t {
-    OUTSEL = 0,
-    CHVSEL = 1
+    OUTSEL,
+    CHVSEL
 };
-
 
 ///////////////////////////// ENUMS /////////////////////////////
 
@@ -295,26 +291,26 @@ enum class Status_Flags : uint32_t {
 };
 
 enum class Interrupt_Flags : uint32_t {
-    INTR_FLAG_UP = 0,
-    INTR_FLAG_CH0 = 1,
-    INTR_FLAG_CH1 = 2,
-    INTR_FLAG_CH2 = 3,
-    INTR_FLAG_CH3 = 4,
-    INTR_FLAG_CMT = 5,
-    INTR_FLAG_TRG = 6,
-    INTR_FLAG_BRK = 7,
+    INTR_FLAG_UP,
+    INTR_FLAG_CH0,
+    INTR_FLAG_CH1,
+    INTR_FLAG_CH2,
+    INTR_FLAG_CH3,
+    INTR_FLAG_CMT,
+    INTR_FLAG_TRG,
+    INTR_FLAG_BRK,
     INVALID = 15
 };
 
 enum class Interrupt_Type : uint32_t {
-    INTR_UPIE = 0,
-    INTR_CH0IE = 1,
-    INTR_CH1IE = 2,
-    INTR_CH2IE = 3,
-    INTR_CH3IE = 4,
-    INTR_CMTIE = 5,
-    INTR_TRGIE = 6,
-    INTR_BRKIE = 7,
+    INTR_UPIE,
+    INTR_CH0IE,
+    INTR_CH1IE,
+    INTR_CH2IE,
+    INTR_CH3IE,
+    INTR_CMTIE,
+    INTR_TRGIE,
+    INTR_BRKIE,
     INVALID = 15
 };
 
@@ -370,14 +366,14 @@ enum class DMA_Burst_Length : uint8_t {
 };
 
 enum class Event_Source : uint32_t {
-    EVENT_SRC_UPG = 0,
-    EVENT_SRC_CH0G = 1,
-    EVENT_SRC_CH1G = 2,
-    EVENT_SRC_CH2G = 3,
-    EVENT_SRC_CH3G = 4,
-    EVENT_SRC_CMTG = 5,
-    EVENT_SRC_TRGG = 6,
-    EVENT_SRC_BRKG = 7
+    EVENT_SRC_UPG,
+    EVENT_SRC_CH0G,
+    EVENT_SRC_CH1G,
+    EVENT_SRC_CH2G,
+    EVENT_SRC_CH3G,
+    EVENT_SRC_CMTG,
+    EVENT_SRC_TRGG,
+    EVENT_SRC_BRKG
 };
 
 // Center aligned mode
@@ -595,7 +591,6 @@ enum class TIMER_Error_Type : uint8_t {
     INVALID_SELECTION
 };
 
-
 ///////////////////////////// STRUCTURES /////////////////////////////
 
 struct TIMER_Clock_Config {
@@ -603,7 +598,7 @@ struct TIMER_Clock_Config {
     rcu::RCU_PCLK_Reset reset_reg : 6;
 };
 
-static inline constexpr std::array<TIMER_Clock_Config, 8> TIMER_pclk_index {{
+inline constexpr std::array<TIMER_Clock_Config, 8> TIMER_pclk_index {{
     {rcu::RCU_PCLK::PCLK_TIMER0, rcu::RCU_PCLK_Reset::PCLK_TIMER0RST},
     {rcu::RCU_PCLK::PCLK_TIMER1, rcu::RCU_PCLK_Reset::PCLK_TIMER1RST},
     {rcu::RCU_PCLK::PCLK_TIMER2, rcu::RCU_PCLK_Reset::PCLK_TIMER2RST},
@@ -616,75 +611,74 @@ static inline constexpr std::array<TIMER_Clock_Config, 8> TIMER_pclk_index {{
 
 struct TIMER_Break {
     uint16_t dead_time;
-    Break_Input break_state;
-    Break_Polarity break_polarity;
-    Output_Auto output_auto_state;
-    ROS_State ros_state;
-    IOS_State ios_state;
-    CCHP_Protect protection;
+    Break_Input break_state : 1;
+    Break_Polarity break_polarity : 1;
+    Output_Auto output_auto_state : 1;
+    ROS_State ros_state : 1;
+    IOS_State ios_state : 1;
+    CCHP_Protect protection : 3;
 };
 
 struct TIMER_Input_Capture {
     uint16_t digital_filter;
-    Polarity_Select polarity;
-    Input_Capture_Select source_select;
-    Input_Capture_Prescaler prescaler;
+    Polarity_Select polarity : 1;
+    Input_Capture_Select source_select : 2;
+    Input_Capture_Prescaler prescaler : 2;
 };
 
 struct TIMER_Output_Compare {
-    Output_Compare_State state;
-    Output_Compare_State companion_state;
-    Polarity_Select polarity;
-    Polarity_Select companion_polarity;
-    Idle_State idle_state;
-    Idle_State companion_idle_state;
+    Output_Compare_State state : 1;
+    Output_Compare_State companion_state : 1;
+    Polarity_Select polarity : 1;
+    Polarity_Select companion_polarity : 1;
+    Idle_State idle_state : 1;
+    Idle_State companion_idle_state : 1;
 };
 
 struct TIMER_Config {
     uint32_t prescaler;
     uint32_t period;
     uint32_t repetition_count;
-    Division_Ratio divider;
-    Center_Align align;
-    Count_Direction counting_direction;
+    Division_Ratio divider : 2;
+    Center_Align align : 2;
+    Count_Direction counting_direction : 1;
 };
-
 
 ///////////////////////////// INITIALIZATION DEFAULTS /////////////////////////////
 
-static inline const TIMER_Config default_config = {
-    0U,
-    0xFFFFFFFFU,
-    0U,
-    Division_Ratio::DIV1,
-    Center_Align::EDGE,
-    Count_Direction::UP
+inline constexpr TIMER_Config default_config = {
+    .prescaler = 0U,
+    .period = 0xFFFFFFFFU,
+    .repetition_count = 0U,
+    .divider = Division_Ratio::DIV1,
+    .align = Center_Align::EDGE,
+    .counting_direction = Count_Direction::UP
 };
 
-static inline const TIMER_Break default_break = {
-    0U,
-    Break_Input::BREAK_DISABLE,
-    Break_Polarity::BREAK_LOW,
-    Output_Auto::OUTPUT_AUTO_DISABLE,
-    ROS_State::ROS_DISABLE,
-    IOS_State::IOS_DISABLE,
-    CCHP_Protect::CCHP_OFF
+inline constexpr TIMER_Break default_break = {
+    .dead_time = 0U,
+    .break_state = Break_Input::BREAK_DISABLE,
+    .break_polarity = Break_Polarity::BREAK_LOW,
+    .output_auto_state = Output_Auto::OUTPUT_AUTO_DISABLE,
+    .ros_state = ROS_State::ROS_DISABLE,
+    .ios_state = IOS_State::IOS_DISABLE,
+    .protection = CCHP_Protect::CCHP_OFF
 };
 
-static inline const TIMER_Input_Capture default_capture = {
-    0U,
-    Polarity_Select::HIGH_RISING,
-    Input_Capture_Select::IO_INPUT_CI0FE0,
-    Input_Capture_Prescaler::DIV1
+inline constexpr TIMER_Input_Capture default_capture = {
+    .digital_filter = 0U,
+    .polarity = Polarity_Select::HIGH_RISING,
+    .source_select = Input_Capture_Select::IO_INPUT_CI0FE0,
+    .prescaler = Input_Capture_Prescaler::DIV1
 };
 
-static inline const TIMER_Output_Compare default_compare = {
-    Output_Compare_State::OC_DISABLE,
-    Output_Compare_State::OC_DISABLE,
-    Polarity_Select::HIGH_RISING,
-    Polarity_Select::HIGH_RISING,
-    Idle_State::IDLE_LOW,
-    Idle_State::IDLE_LOW
+inline constexpr TIMER_Output_Compare default_compare = {
+    .state = Output_Compare_State::OC_DISABLE,
+    .companion_state = Output_Compare_State::OC_DISABLE,
+    .polarity = Polarity_Select::HIGH_RISING,
+    .companion_polarity = Polarity_Select::HIGH_RISING,
+    .idle_state = Idle_State::IDLE_LOW,
+    .companion_idle_state = Idle_State::IDLE_LOW
 };
 
 } // namespace timer

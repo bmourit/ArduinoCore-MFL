@@ -23,12 +23,12 @@
 
 namespace exti {
 
-EXTI& EXTI::get_instance() {
+auto EXTI::get_instance() -> EXTI& {
     static EXTI instance;
     return instance;
 }
 
-EXTI::EXTI() {}
+EXTI::EXTI() = default;
 
 /**
  * @brief Initialize the EXTI line configuration.
@@ -46,12 +46,11 @@ EXTI::EXTI() {}
  *                should generate an interrupt or event.
  */
 void EXTI::init(EXTI_Line line, EXTI_Mode mode, EXTI_Trigger trigger) {
-    // Early return for invalid line
     if (line == EXTI_Line::INVALID) {
         return;
     }
 
-    const uint32_t line_bit = static_cast<uint32_t>(line);
+    const auto line_bit = static_cast<uint32_t>(line);
 
     // Reset all registers for this line
     // This ensures a clean configuration state
@@ -118,7 +117,7 @@ void EXTI::set_event_enable(EXTI_Line line, bool enable) {
  *             Status_Flags enumeration.
  * @return true if the flag is set, false otherwise.
  */
-bool EXTI::get_flag(Status_Flags flag) {
+auto EXTI::get_flag(Status_Flags flag) -> bool {
     if (flag == Status_Flags::INVALID) {
         return false;
     }
@@ -153,7 +152,7 @@ void EXTI::clear_flag(Status_Flags flag) {
  *             Interrupt_Flags enumeration.
  * @return true if the flag is set, false otherwise.
  */
-bool EXTI::get_interrupt_flag(Interrupt_Flags flag) {
+auto EXTI::get_interrupt_flag(Interrupt_Flags flag) -> bool {
     if (flag == Interrupt_Flags::INVALID) {
         return false;
     }
@@ -212,6 +211,5 @@ void EXTI::set_interrupt_enable(Interrupt_Type type, bool enable) {
     }
     write_bit(*this, EXTI_Regs::INTEN, static_cast<uint32_t>(type), enable);
 }
-
 
 } // namespace exti

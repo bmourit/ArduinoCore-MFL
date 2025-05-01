@@ -19,37 +19,47 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 
 #include "rtc_config.hpp"
 #include "RegRW.hpp"
+#include "BKP.hpp"
 
 namespace rtc {
 
-class RCU;
-class PMU;
-class BKP;
-
 class RTC {
 public:
-    static RTC& get_instance();
+    static auto get_instance() -> RTC&;
 
+    // Prescaler
     void set_prescaler(uint32_t prescaler);
+
+    // Alarm
     void set_alarm(uint32_t alarm);
-    uint32_t get_divider();
+
+    // Divider
+    auto get_divider() -> uint32_t;
+
+    // Configuration
     void start_configuration();
     void stop_configuration();
+
+    // Wait
     void lwoff_wait();
     void sync_register_wait();
-    uint32_t get_counter();
+
+    // Counter
+    auto get_counter() -> uint32_t;
     void set_counter(uint32_t counter);
-    bool get_flag(Status_Flags flag);
+
+    // Interrupts and flags
+    auto get_flag(Status_Flags flag) -> bool;
     void clear_flag(Status_Flags flag);
     void set_interrupt_enable(Interrupt_Type type, bool enable);
 
-    static inline constexpr uintptr_t RTC_baseAddress = 0x40002800U;
+    static inline constexpr uintptr_t RTC_baseAddress = 0x4000'2800U;
 
-    inline volatile uint32_t* reg_address(RTC_Regs reg) const {
+    [[nodiscard]] inline auto reg_address(RTC_Regs reg) const -> volatile uint32_t* {
         return reinterpret_cast<volatile uint32_t*>(RTC_baseAddress + static_cast<uint32_t>(reg));
     }
 
@@ -61,7 +71,7 @@ private:
 
     // Prevent copying or assigning
     RTC(const RTC&) = delete;
-    RTC& operator=(const RTC&) = delete;
+    auto operator=(const RTC&) -> RTC& = delete;
 
     mutable bool is_clock_enabled_;
 };

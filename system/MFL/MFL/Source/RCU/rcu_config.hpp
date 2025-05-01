@@ -19,14 +19,13 @@
 
 #pragma once
 
-#include <stdlib.h>
-#include <stdint.h>
+#include <cstdlib>
+#include <cstdint>
 #include <array>
 
 #include "CONFIG.hpp"
 
 namespace rcu {
-
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
@@ -49,28 +48,14 @@ enum class RCU_Regs : uint8_t {
     ADDAPB1EN = 0xE4U
 };
 
-
 ///////////////////////////// STARTUP FUNCTIONALITY /////////////////////////////
 
-static inline const unsigned char AHBPrescaler[] = {
-    0x00U,
-    0x00U,
-    0x00U,
-    0x00U,
-    0x00U,
-    0x00U,
-    0x00U,
-    0x00U,
-    0x01U,
-    0x02U,
-    0x03U,
-    0x04U,
-    0x06U,
-    0x07U,
-    0x08U,
-    0x09U
+inline constexpr std::array<unsigned char, 16> AHBPrescaler = {
+    0x00U, 0x00U, 0x00U, 0x00U,
+    0x00U, 0x00U, 0x00U, 0x00U,
+    0x01U, 0x02U, 0x03U, 0x04U,
+    0x06U, 0x07U, 0x08U, 0x09U
 };
-
 
 ///////////////////////////// REGISTER BITS /////////////////////////////
 
@@ -322,7 +307,7 @@ struct index_to_bits {
     uint8_t bit_info : 5;
 };
 
-static inline constexpr std::array<index_to_bits, 42> pclk_index {{
+inline constexpr std::array<index_to_bits, 42> pclk_index {{
     {RCU_Regs::AHBEN, 0},
     {RCU_Regs::AHBEN, 1},
     {RCU_Regs::AHBEN, 6},
@@ -408,7 +393,7 @@ enum class RCU_PCLK_Reset : uint8_t {
     PCLK_ADC2RST
 };
 
-static inline constexpr std::array<index_to_bits, 36> pclk_reset_index {{
+inline constexpr std::array<index_to_bits, 36> pclk_reset_index {{
     {RCU_Regs::APB1RST, 0},
     {RCU_Regs::APB1RST, 1},
     {RCU_Regs::APB1RST, 2},
@@ -447,7 +432,6 @@ static inline constexpr std::array<index_to_bits, 36> pclk_reset_index {{
     {RCU_Regs::APB2RST, 15}
 }};
 
-
 ///////////////////////////// SLEEP /////////////////////////////
 
 enum class RCU_PCLK_Sleep : uint8_t {
@@ -455,11 +439,10 @@ enum class RCU_PCLK_Sleep : uint8_t {
     PCLK_SLEEP_FMC
 };
 
-static inline constexpr std::array<index_to_bits, 2> pclk_sleep_index {{
+inline constexpr std::array<index_to_bits, 2> pclk_sleep_index {{
     {RCU_Regs::AHBEN, 2},
     {RCU_Regs::AHBEN, 4}
 }};
-
 
 ///////////////////////////// INTERRUPTS AND FLAGS /////////////////////////////
 
@@ -478,7 +461,7 @@ enum class Status_Flags : uint8_t {
     FLAG_LPRST
 };
 
-static inline constexpr std::array<index_to_bits, 12> status_flag_index {{
+inline constexpr std::array<index_to_bits, 12> status_flag_index {{
     {RCU_Regs::CTL, 1},
     {RCU_Regs::CTL, 17},
     {RCU_Regs::CTL, 25},
@@ -503,7 +486,7 @@ enum class Interrupt_Flags : uint8_t {
     INTR_FLAG_IRC48MSTB
 };
 
-static inline constexpr std::array<index_to_bits, 7> interrupt_flag_index {{
+inline constexpr std::array<index_to_bits, 7> interrupt_flag_index {{
     {RCU_Regs::INTR, 0},
     {RCU_Regs::INTR, 1},
     {RCU_Regs::INTR, 2},
@@ -523,7 +506,7 @@ enum class Clear_Flags : uint8_t {
     INTR_FLAG_IRC48MSTB_CLR
 };
 
-static inline constexpr std::array<index_to_bits, 7> clear_flag_index {{
+inline constexpr std::array<index_to_bits, 7> clear_flag_index {{
     {RCU_Regs::INTR, 16},
     {RCU_Regs::INTR, 17},
     {RCU_Regs::INTR, 18},
@@ -542,7 +525,7 @@ enum class Interrupt_Type : uint8_t {
     INTR_IRC48MSTB
 };
 
-static inline constexpr std::array<index_to_bits, 6> interrupt_type_index {{
+inline constexpr std::array<index_to_bits, 6> interrupt_type_index {{
     {RCU_Regs::INTR, 8},
     {RCU_Regs::INTR, 9},
     {RCU_Regs::INTR, 10},
@@ -562,7 +545,7 @@ enum class OSCI_Select : uint8_t {
     PLL_CK
 };
 
-static inline constexpr std::array<index_to_bits, 6> osci_select_index {{
+inline constexpr std::array<index_to_bits, 6> osci_select_index {{
     {RCU_Regs::CTL, 16},
     {RCU_Regs::BDCTL, 0},
     {RCU_Regs::CTL, 0},
@@ -570,7 +553,6 @@ static inline constexpr std::array<index_to_bits, 6> osci_select_index {{
     {RCU_Regs::RSTSCK, 0},
     {RCU_Regs::CTL, 24}
 }};
-
 
 ///////////////////////////// SYSTEM CLOCK /////////////////////////////
 
@@ -594,7 +576,7 @@ struct System_Clock_Source_Mapping {
     System_Clock_Source source : 2;
 };
 
-static inline constexpr std::array<System_Clock_Source_Mapping, 3> source_mapping {{
+inline constexpr std::array<System_Clock_Source_Mapping, 3> source_mapping {{
     {0, System_Clock_Source::SOURCE_IRC8M},
     {1, System_Clock_Source::SOURCE_HXTAL},
     {2, System_Clock_Source::SOURCE_PLL}
@@ -625,25 +607,23 @@ enum class APB_Prescaler : uint8_t {
     INVALID = 8
 };
 
-
 ///////////////////////////// ADC /////////////////////////////
 
 enum class ADC_Prescaler : uint8_t {
-    CKAPB2_DIV2 = 0,
-    CKAPB2_DIV4 = 1,
-    CKAPB2_DIV6 = 2,
-    CKAPB2_DIV8 = 3,
-    CKAPB2_DIV2B = 4,
-    CKAPB2_DIV12 = 5,
-    CKAPB2_DIV8B = 6,
-    CKAPB2_DIV16 = 7,
-    CKAHB_DIV5 = 8,
-    CKAHB_DIV6 = 9,
-    CKAHB_DIV10 = 10,
-    CKAHB_DIV20 = 11,
-    INVALID = 12
+    CKAPB2_DIV2,
+    CKAPB2_DIV4,
+    CKAPB2_DIV6,
+    CKAPB2_DIV8,
+    CKAPB2_DIV2B,
+    CKAPB2_DIV12,
+    CKAPB2_DIV8B,
+    CKAPB2_DIV16,
+    CKAHB_DIV5,
+    CKAHB_DIV6,
+    CKAHB_DIV10,
+    CKAHB_DIV20,
+    INVALID
 };
-
 
 ///////////////////////////// PLL /////////////////////////////
 
@@ -658,7 +638,7 @@ struct PLL_Source_Mapping {
     PLL_Source source : 2;
 };
 
-static inline constexpr std::array<PLL_Source_Mapping, 2> pll_mapping {{
+inline constexpr std::array<PLL_Source_Mapping, 2> pll_mapping {{
     {false, PLL_Source::PLLSRC_IRC8M_DIV2},
     {true, PLL_Source::PLLSRC_HXTAL_IRC48M}
 }};
@@ -709,11 +689,10 @@ struct PLL_Presel_Mapping {
     PLL_Presel source : 2;
 };
 
-static inline constexpr std::array<PLL_Presel_Mapping, 2> pll_presel_mapping {{
+inline constexpr std::array<PLL_Presel_Mapping, 2> pll_presel_mapping {{
     {false, PLL_Presel::PLLPRESRC_HXTAL},
     {true, PLL_Presel::PLLPRESRC_IRC48M}
 }};
-
 
 ///////////////////////////// USB /////////////////////////////
 
@@ -727,7 +706,6 @@ enum class USB_Prescaler : uint8_t {
     DIV4
 };
 
-
 ///////////////////////////// CKOUT0 /////////////////////////////
 
 enum class CKOUT0_Source : uint8_t {
@@ -738,7 +716,6 @@ enum class CKOUT0_Source : uint8_t {
     CKOUT0SRC_CKPLL_DIV2 = 7
 };
 
-
 ///////////////////////////// LXTAL /////////////////////////////
 
 enum class LXTAL_Drive : uint8_t {
@@ -747,7 +724,6 @@ enum class LXTAL_Drive : uint8_t {
     LXTAL_MED_HIGHDRI,
     LXTAL_HIGHDRI
 };
-
 
 ///////////////////////////// RTC /////////////////////////////
 
@@ -758,7 +734,6 @@ enum class RTC_Source : uint8_t {
     RTCSRC_HXTAL_DIV_128
 };
 
-
 ///////////////////////////// DEEPSLEEP /////////////////////////////
 
 enum class DeepSleep_Voltage : uint8_t {
@@ -768,7 +743,6 @@ enum class DeepSleep_Voltage : uint8_t {
     DEEPSLEEP_V_3
 };
 
-
 ///////////////////////////// CK48M /////////////////////////////
 
 enum class CK48M_Source : uint8_t {
@@ -776,22 +750,20 @@ enum class CK48M_Source : uint8_t {
     CK48MSRC_IRC48M
 };
 
-
 ///////////////////////////// CONSTANTS /////////////////////////////
 
-static inline constexpr uint32_t CoreClockFrequency = 120'000'000U;
-static inline constexpr uint32_t HXTAL_VALUE = 8'000'000U;
-static inline constexpr uint32_t IRC8M_VALUE = 8'000'000U;
-static inline constexpr uint32_t IRC48M_VALUE = 48'000'000U;
-static inline constexpr uint32_t IRC40K_VALUE = 40'000U;
-static inline constexpr uint32_t LXTAL_VALUE = 32'768U;
-static inline constexpr uint32_t OSC_STARTUP_TIMEOUT = 65'535U;
-static inline constexpr uint32_t HXTAL_STARTUP_TIMEOUT = 65'535U;
-static inline constexpr uint32_t LXTAL_STARTUP_TIMEOUT = 65'535U;
-static inline constexpr uint32_t IRC8M_STARTUP_TIMEOUT = 1'280U;
+inline constexpr uint32_t CoreClockFrequency = 120'000'000U;
+inline constexpr uint32_t HXTAL_VALUE = 8'000'000U;
+inline constexpr uint32_t IRC8M_VALUE = 8'000'000U;
+inline constexpr uint32_t IRC48M_VALUE = 48'000'000U;
+inline constexpr uint32_t IRC40K_VALUE = 40'000U;
+inline constexpr uint32_t LXTAL_VALUE = 32'768U;
+inline constexpr uint32_t OSC_STARTUP_TIMEOUT = 65'535U;
+inline constexpr uint32_t HXTAL_STARTUP_TIMEOUT = 65'535U;
+inline constexpr uint32_t LXTAL_STARTUP_TIMEOUT = 65'535U;
+inline constexpr uint32_t IRC8M_STARTUP_TIMEOUT = 1'280U;
 
-static inline constexpr uint8_t AHB_EXP[16] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6, 7, 8, 9};
-static inline constexpr uint8_t APB1_EXP[8] = {0, 0, 0, 0, 1, 2, 3, 4};
-static inline constexpr uint8_t APB2_EXP[8] = {0, 0, 0, 0, 1, 2, 3, 4};
+inline constexpr std::array<uint8_t, 16> AHB_EXP = { {0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 6, 7, 8, 9} };
+inline constexpr std::array<uint8_t, 8> APB_EXP = { {0, 0, 0, 0, 1, 2, 3, 4} };
 
 } // namespace rcu

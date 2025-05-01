@@ -19,30 +19,37 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 
 #include "gpio_config.hpp"
 #include "RegRW.hpp"
 
 namespace gpio {
 
-class RCU;
-
 class AFIO {
 public:
-    static AFIO& get_instance();
+    static auto get_instance() -> AFIO&;
 
+    // Reset
     void reset();
+
+    // Remap
     void set_remap(Pin_Remap_Select remap);
+
+    // EXTI
     void set_exti_source(Source_Port port, Pin_Number pin);
+
+    // Event
     void set_output_event(Event_Port port, Pin_Number pin);
     void set_output_event_enable(bool enable);
+
+    // Compensation
     void set_compensation(bool enable);
-    bool get_compensation();
+    auto get_compensation() -> bool;
 
-    static inline constexpr uintptr_t AFIO_baseAddress = 0x40010000U;
+    static inline constexpr uintptr_t AFIO_baseAddress = 0x4001'0000U;
 
-    inline volatile uint32_t* reg_address(AFIO_Regs reg) const {
+    [[nodiscard]] inline auto reg_address(AFIO_Regs reg) const -> volatile uint32_t* {
         return reinterpret_cast<volatile uint32_t*>(AFIO_baseAddress + static_cast<uint32_t>(reg));
     }
 
@@ -51,11 +58,10 @@ private:
 
     // Prevent copying or assigning
     AFIO(const AFIO&) = delete;
-    AFIO& operator=(const AFIO&) = delete;
+    auto operator=(const AFIO&) -> AFIO& = delete;
 
     mutable bool is_clock_enabled_;
 };
-
 
 } // namespace gpio
 

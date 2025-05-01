@@ -19,13 +19,12 @@
 
 #pragma once
 
-#include <stdlib.h>
-#include <stdint.h>
+#include <cstdlib>
+#include <cstdint>
 
 #include "CONFIG.hpp"
 
 namespace bkp {
-
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
@@ -77,7 +76,6 @@ enum class BKP_Regs : uint8_t {
     DATA41 = 0xBC
 };
 
-
 ///////////////////////////// REGISTER BITS /////////////////////////////
 
 enum class DATA_Bits : uint32_t {
@@ -94,8 +92,8 @@ enum class OCTL_Bits : uint32_t {
 };
 
 enum class TPCTL_Bits : uint8_t {
-    TPEN = 0U,
-    TPAL = 1U
+    TPEN,
+    TPAL
 };
 
 enum class TPCS_Bits : uint8_t {
@@ -105,7 +103,6 @@ enum class TPCS_Bits : uint8_t {
     TEF = 8U,
     TIF = 9U
 };
-
 
 ///////////////////////////// ENUMS /////////////////////////////
 
@@ -134,8 +131,8 @@ enum class Status_Flags : uint8_t {
 };
 
 enum class Clear_Flags : uint8_t {
-    TAMPER_FLAG_CLEAR = 0U,
-    TAMPER_INTR_FLAG_CLEAR = 1U
+    TAMPER_FLAG_CLEAR,
+    TAMPER_INTR_FLAG_CLEAR
 };
 
 enum class Interrupt_Flags : uint8_t {
@@ -186,6 +183,5 @@ enum class Backup_Data : uint8_t {
     DATA_40,
     DATA_41
 };
-
 
 } // namespace backup

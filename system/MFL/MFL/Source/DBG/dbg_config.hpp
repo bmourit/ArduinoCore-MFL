@@ -19,13 +19,12 @@
 
 #pragma once
 
-#include <stdlib.h>
-#include <stdint.h>
+#include <cstdlib>
+#include <cstdint>
 
 #include "CONFIG.hpp"
 
 namespace armdbg {
-
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
@@ -33,7 +32,6 @@ enum class DBG_Regs : uint8_t {
     ID = 0x00U,
     CTL0 = 0x04U
 };
-
 
 ///////////////////////////// REGISTER BITS /////////////////////////////
 
@@ -57,13 +55,12 @@ enum class CTL0_Bits : uint8_t {
     TIMER6_HOLD = 20U
 };
 
-
 ///////////////////////////// ALIASES /////////////////////////////
 
 enum class Low_Power_Debug : uint8_t {
-    DEBUG_SLEEP = 0U,
-    DEBUG_DEEPSLEEP = 1U,
-    DEBUG_STANDBY = 2U
+    DEBUG_SLEEP,
+    DEBUG_DEEPSLEEP,
+    DEBUG_STANDBY
 };
 
 enum class Debug_Peripheral : uint8_t {
@@ -81,6 +78,5 @@ enum class Debug_Peripheral : uint8_t {
     TIMER5 = 19U,
     TIMER6 = 20U
 };
-
 
 } // namespace armdbg

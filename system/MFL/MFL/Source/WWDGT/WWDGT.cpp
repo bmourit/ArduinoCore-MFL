@@ -22,12 +22,14 @@
 
 namespace wwdgt {
 
-WWDGT& WWDGT::get_instance() {
+auto WWDGT::get_instance() -> WWDGT& {
     static WWDGT instance;
     return instance;
 }
 
-WWDGT::WWDGT() : is_clock_enabled_(false) {
+WWDGT::WWDGT() :
+    is_clock_enabled_(false)
+{
     if (!is_clock_enabled_) {
         RCU_I.set_pclk_enable(rcu::RCU_PCLK::PCLK_WWDGT, true);
         RCU_I.set_pclk_reset_enable(rcu::RCU_PCLK_Reset::PCLK_WWDGTRST, true);
@@ -108,7 +110,7 @@ void WWDGT::setup(uint16_t value, uint16_t window, Prescaler_Values prescaler) {
  *
  * @return true if the EWIF is set, false otherwise.
  */
-bool WWDGT::get_flag() {
+auto WWDGT::get_flag() -> bool {
     return read_bit(*this, WWDGT_Regs::STAT, static_cast<uint32_t>(STAT_Bits::EWIF));
 }
 
@@ -139,6 +141,5 @@ void WWDGT::clear_flag() {
 void WWDGT::set_interrupt_enable(bool enable) {
     write_bit(*this, WWDGT_Regs::CFG, static_cast<uint32_t>(CFG_Bits::EWIE), enable);
 }
-
 
 } // namespace wwdgt

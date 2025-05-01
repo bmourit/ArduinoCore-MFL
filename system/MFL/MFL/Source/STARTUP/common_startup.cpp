@@ -17,7 +17,7 @@
 // If not, see <https://www.gnu.org/licenses/>.
 //
 
-#include <stdint.h>
+#include <cstdint>
 
 #include "CONFIG.hpp"
 #include "RCU.hpp"
@@ -54,16 +54,16 @@ struct RCUMin {
 
 static RCUMin* const regs = reinterpret_cast<RCUMin*>(0x40021000U);
 
-constexpr uint32_t AHBPSC = 0x000000F0U;
-constexpr uint32_t AHB_SHIFT = 4U;
-constexpr uint32_t CKSYS_DIV2 = (8U << AHB_SHIFT);
-constexpr uint32_t CKSYS_DIV4 = (9U << AHB_SHIFT);
-constexpr uint32_t CKSYS_DIV8 = (10U << AHB_SHIFT);
-constexpr uint32_t CKSYS_DIV16 = (11U << AHB_SHIFT);
-constexpr uint32_t IRC8MEN = 0x00000001U;
-constexpr uint32_t SCSS = 0x0000000CU;
-constexpr uint32_t SCSS_SHIFT = 2U;
-constexpr uint32_t SOURCE_PLL = 2U;
+static constexpr uint32_t AHBPSC = 0x000000F0U;
+static constexpr uint32_t AHB_SHIFT = 4U;
+static constexpr uint32_t CKSYS_DIV2 = (8U << AHB_SHIFT);
+static constexpr uint32_t CKSYS_DIV4 = (9U << AHB_SHIFT);
+static constexpr uint32_t CKSYS_DIV8 = (10U << AHB_SHIFT);
+static constexpr uint32_t CKSYS_DIV16 = (11U << AHB_SHIFT);
+static constexpr uint32_t IRC8MEN = 0x00000001U;
+static constexpr uint32_t SCSS = 0x0000000CU;
+static constexpr uint32_t SCSS_SHIFT = 2U;
+static constexpr uint32_t SOURCE_PLL = 2U;
 
 static inline void stabilize_voltage(uint32_t cycles) {
     asm volatile (
@@ -103,21 +103,26 @@ static inline void safe_switch_vcore_voltage(uint32_t cycles) {
  * 6. Sets the vector table offset to 0x08007000.
  */
 extern "C" void system_startup() {
-#if (__FPU_PRESENT == 1) && (__FPU_USED == 1)
-    // Set CP10 and CP11 full access
-    SCB->CPACR |= ((3U << 10 * 2) | (3U << 11 * 2));
-#endif
+    #if (__FPU_PRESENT == 1) && (__FPU_USED == 1)
+        // Set CP10 and CP11 full access
+        SCB->CPACR |= ((3U << 10 * 2) | (3U << 11 * 2));
+    #endif
+
     regs->CTL |= IRC8MEN;
     if (((regs->CFG0 & SCSS) >> SCSS_SHIFT) == SOURCE_PLL) {
-        safe_switch_vcore_voltage(5120);
+        safe_switch_vcore_voltage(5120U);
     }
+
     regs->CFG0 &= 0xFFFFFFFCU;
-    stabilize_voltage(8000);
+    // Safety
+    stabilize_voltage(8000U);
+
     regs->CTL &= 0xFEF6FFFFU;
     regs->INTR = 0x009F0000U;
     regs->CTL &= 0xFFFBFFFFU;
     regs->CFG0 = 0x00000000U;
     regs->CFG1 = 0x00000000U;
+
     // Vector table offset
     SCB->VTOR = VTOR_ADDRESS;
 }
@@ -161,5 +166,5 @@ extern "C" void Reset_Handler() {
     // Call destructors
     for (void (**p)() = __fini_array_start; p < __fini_array_end; ++p) (*p)();
 
-    while (1);
+    while (true);
 }

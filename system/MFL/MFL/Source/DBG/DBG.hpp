@@ -19,35 +19,37 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 
 #include "dbg_config.hpp"
 #include "RegRW.hpp"
 
 namespace armdbg {
 
-class RCU;
-
 class ARMDBG {
 public:
-    ARMDBG& get_instance();
+    auto get_instance() -> ARMDBG&;
 
     // Reset
     void reset();
+
     // Debug ID
-    uint32_t get_debug_id();
+    auto get_debug_id() -> uint32_t;
+
     // Trace
     void set_debug_trace_enable(bool enable);
+
     // Peripheral
     void set_peripheral_debug_enable(Debug_Peripheral peripheral, bool enable);
+
     // Low power
     void set_debug_low_power_enable(Low_Power_Debug type, bool enable);
 
     // Base address
-    static inline constexpr uintptr_t DBG_baseAddress = 0xE0042000U;
+    static inline constexpr uintptr_t DBG_baseAddress = 0xE004'2000U;
 
     // Offset access
-    inline volatile uint32_t* reg_address(DBG_Regs reg) const {
+    [[nodiscard]] inline auto reg_address(DBG_Regs reg) const -> volatile uint32_t* {
         return reinterpret_cast<volatile uint32_t*>(DBG_baseAddress + static_cast<uint32_t>(reg));
     }
 
@@ -56,8 +58,7 @@ private:
 
     // Prevent copying or assigning
     ARMDBG(const ARMDBG&) = delete;
-    ARMDBG& operator=(const ARMDBG&) = delete;
+    auto operator=(const ARMDBG&) -> ARMDBG& = delete;
 };
-
 
 } // namespace armdbg

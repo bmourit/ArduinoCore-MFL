@@ -19,13 +19,12 @@
 
 #pragma once
 
-#include <stdlib.h>
-#include <stdint.h>
+#include <cstdlib>
+#include <cstdint>
 
 #include "CONFIG.hpp"
 
 namespace rtc {
-
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
@@ -42,28 +41,27 @@ enum class RTC_Regs : uint8_t {
     ALRML = 0x24U
 };
 
-
 ///////////////////////////// REGISTER BITS /////////////////////////////
 
 enum class INTEN_Bits : uint8_t {
-    SCIE = 0,
-    ALRMIE = 1,
-    OVIE = 2
+    SCIE,
+    ALRMIE,
+    OVIE
 };
 
 enum class Interrupt_Type : uint8_t {
-    INTR_SCIE = 0,
-    INTR_ALRMIE = 1,
-    INTR_OVIE = 2
+    INTR_SCIE,
+    INTR_ALRMIE,
+    INTR_OVIE
 };
 
 enum class CTL_Bits : uint8_t {
-    SCIF = 0,
-    ALRMIF = 1,
-    OVIF = 2,
-    RSYNF = 3,
-    CMF = 4,
-    LWOFF = 5
+    SCIF,
+    ALRMIF,
+    OVIF,
+    RSYNF,
+    CMF,
+    LWOFF
 };
 
 enum class Status_Flags : uint8_t {

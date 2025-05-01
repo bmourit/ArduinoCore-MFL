@@ -23,12 +23,12 @@
 namespace timer {
 
 template <TIMER_Base Base>
-TIMER& get_instance_for_base() {
+auto get_instance_for_base() -> TIMER& {
     static TIMER instance(Base);
     return instance;
 }
 
-Result<TIMER, TIMER_Error_Type> TIMER::get_instance(TIMER_Base Base) {
+auto TIMER::get_instance(TIMER_Base Base) -> Result<TIMER, TIMER_Error_Type> {
     switch (Base) {
         case TIMER_Base::TIMER0_BASE:
             return get_enum_instance<TIMER_Base, TIMER, TIMER_Error_Type>(
@@ -71,21 +71,22 @@ Result<TIMER, TIMER_Error_Type> TIMER::get_instance(TIMER_Base Base) {
 std::array<bool, static_cast<size_t>(TIMER_Base::INVALID)> TIMER::clock_enabled_ = {false};
 
 TIMER::TIMER(TIMER_Base Base) :
-    base_(Base),
-    TIMER_pclk_info_(TIMER_pclk_index[static_cast<size_t>(Base)]),
-    base_address_(TIMER_baseAddress[static_cast<size_t>(Base)]),
-    config_(default_config),
-    break_config_(default_break),
-    capture_config_(default_capture),
-    compare_config_(default_compare)
+    base_(Base)
 {
-    if (!clock_enabled_[static_cast<size_t>(Base)]) {
+    const auto idx = static_cast<size_t>(Base);
+    TIMER_pclk_info_ = TIMER_pclk_index[idx];
+    config_ = default_config;
+    break_config_ = default_break;
+    capture_config_ = default_capture;
+    compare_config_ = default_compare;
+
+    if (!clock_enabled_[idx]) {
         RCU_I.set_pclk_enable(TIMER_pclk_info_.clock_reg, true);
         RCU_I.set_pclk_reset_enable(TIMER_pclk_info_.reset_reg, true);
         RCU_I.set_pclk_reset_enable(TIMER_pclk_info_.reset_reg, false);
-        clock_enabled_[static_cast<size_t>(Base)] = true;
+        clock_enabled_[idx] = true;
     }
-    // Initialize default values
+
     init();
 }
 
@@ -291,7 +292,7 @@ void TIMER::set_counter_value(uint16_t counter) {
  *
  * @return The current counter value of the TIMER peripheral.
  */
-uint32_t TIMER::get_counter() {
+auto TIMER::get_counter() -> uint32_t {
     return read_bit_range(*this, TIMER_Regs::CNT, static_cast<uint32_t>(CNT_Bits::CNT));
 }
 
@@ -324,7 +325,7 @@ void TIMER::set_prescaler_reload(uint16_t prescaler, PSC_Reload reload) {
  *
  * @return The current prescaler value of the TIMER peripheral.
  */
-uint16_t TIMER::get_prescaler() {
+auto TIMER::get_prescaler() -> uint16_t {
     return static_cast<uint16_t>(read_bit_range(*this, TIMER_Regs::PSC, static_cast<uint32_t>(PSC_Bits::PSC)));
 }
 
@@ -335,7 +336,7 @@ uint16_t TIMER::get_prescaler() {
  * register to the specified value. When the auto-reload shadow enable bit is
  * set, the current auto-reload value is loaded from the shadow register.
  *
- * @param[in] enable The auto-reload shadow enable bit to be set.
+ * @param enable The auto-reload shadow enable bit to be set.
  */
 void TIMER::set_auto_reload_shadow_enable(bool enable) {
     write_bit(*this, TIMER_Regs::CTL0, static_cast<uint32_t>(CTL0_Bits::ARSE), enable);
@@ -348,7 +349,7 @@ void TIMER::set_auto_reload_shadow_enable(bool enable) {
  * specified value. The auto-reload value is the value that the counter is
  * reloaded with when the counter reaches zero.
  *
- * @param[in] auto_reload The auto-reload value to be set.
+ * @param auto_reload The auto-reload value to be set.
  */
 void TIMER::set_auto_reload(uint16_t auto_reload) {
     write_bit_range(*this, TIMER_Regs::CAR, static_cast<uint32_t>(CAR_Bits::CARL), static_cast<uint32_t>(auto_reload));
@@ -362,7 +363,7 @@ void TIMER::set_auto_reload(uint16_t auto_reload) {
  *
  * @return The current auto-reload value of the TIMER peripheral.
  */
-uint16_t TIMER::get_auto_reload() {
+auto TIMER::get_auto_reload() -> uint16_t {
     return read_bit_range(*this, TIMER_Regs::CAR, static_cast<uint32_t>(CAR_Bits::CARL));
 }
 
@@ -373,7 +374,7 @@ uint16_t TIMER::get_auto_reload() {
  * value. The repetition counter determines how many times the auto-reload
  * value is reloaded when the counter reaches zero.
  *
- * @param[in] repeat The repetition counter value to be set.
+ * @param repeat The repetition counter value to be set.
  */
 void TIMER::repetition_value_config(uint16_t repeat) {
     write_bit_range(*this, TIMER_Regs::CREP, static_cast<uint32_t>(CREP_Bits::CREP), static_cast<uint32_t>(repeat));
@@ -388,7 +389,7 @@ void TIMER::repetition_value_config(uint16_t repeat) {
  * to 0, the auto-reload value is reloaded every time the counter reaches
  * zero.
  *
- * @param[in] pulse The pulse mode to be set. Pass Pulse_Mode::SINGLE_PULSE
+ * @param pulse The pulse mode to be set. Pass Pulse_Mode::SINGLE_PULSE
  *                  to set the SPM bit to 1, or Pulse_Mode::REPEATED_PULSE
  *                  to set the SPM bit to 0.
  */
@@ -405,7 +406,7 @@ void TIMER::set_pulse_mode(Pulse_Mode pulse) {
  * interrupts, an interrupt will be generated every time a DMA transfer
  * is completed.
  *
- * @param[in] dma The DMA channel to be enabled. The DMA channel can be
+ * @param dma The DMA channel to be enabled. The DMA channel can be
  *                one of the following: DMA_UP, DMA_CH0, DMA_CH1, DMA_CH2,
  *                DMA_CH3, DMA_CMT, DMA_TRG, or DMA_BRK.
  */
@@ -421,7 +422,7 @@ void TIMER::dma_enable(DMA_Select dma) {
  * request is disabled, no interrupts will be generated for the specified DMA
  * channel.
  *
- * @param[in] dma The DMA channel to be disabled. The DMA channel can be
+ * @param dma The DMA channel to be disabled. The DMA channel can be
  *                one of the following: DMA_UP, DMA_CH0, DMA_CH1, DMA_CH2,
  *                DMA_CH3, DMA_CMT, DMA_TRG, or DMA_BRK.
  */
@@ -437,10 +438,10 @@ void TIMER::dma_disable(DMA_Select dma) {
  * configured to request interrupts, an interrupt will be generated every
  * time a DMA transfer is completed.
  *
- * @param[in] dma The DMA channel to be enabled or disabled. The DMA channel
+ * @param dma The DMA channel to be enabled or disabled. The DMA channel
  *                can be one of the following: DMA_UP, DMA_CH0, DMA_CH1,
  *                DMA_CH2, DMA_CH3, DMA_CMT, DMA_TRG, or DMA_BRK.
- * @param[in] enable Set to true to enable the DMA request, false to disable
+ * @param enable Set to true to enable the DMA request, false to disable
  *                   it.
  */
 void TIMER::set_dma_enable(DMA_Select dma, bool enable) {
@@ -455,7 +456,7 @@ void TIMER::set_dma_enable(DMA_Select dma, bool enable) {
  * generated upon an update event. If the DMAS bit is set to 0, the DMA
  * request is generated upon a channel event.
  *
- * @param[in] request The DMA request source to be set. Pass DMA_Request::UPDATE_EVENT
+ * @param request The DMA request source to be set. Pass DMA_Request::UPDATE_EVENT
  *                    to generate the DMA request upon an update event, or
  *                    DMA_Request::CHANNEL_EVENT to generate the DMA request
  *                    upon a channel event.
@@ -475,13 +476,13 @@ void TIMER::set_dma_request_source(DMA_Request request) {
  * of DMATA_CTL0. If the DMATC bit is set to 0, the DMA transfer count is set
  * to the default value of DMATC_TRANSFER_COUNT1.
  *
- * @param[in] address The DMA transfer address to be set. The DMA transfer
+ * @param address The DMA transfer address to be set. The DMA transfer
  *                    address can be one of the following: DMATA_CTL0, DMATA_CTL1,
  *                    DMATA_SMCFG, DMATA_DMAINTEN, DMATA_INTF, DMATA_SWEVG, DMATA_CHCTL0,
  *                    DMATA_CHCTL1, DMATA_CHCTL2, DMATA_CNT, DMATA_PSC, DMATA_CAR, DMATA_CREP,
  *                    DMATA_CH0CV, DMATA_CH1CV, DMATA_CH2CV, DMATA_CH3CV, DMATA_CCHP, DMATA_DMACFG,
  *                    or DMATA_DMATB.
- * @param[in] length The DMA transfer count (burst length) to be set. The DMA
+ * @param length The DMA transfer count (burst length) to be set. The DMA
  *                   transfer count can be one of the following: DMATC_TRANSFER_COUNT1,
  *                   DMATC_TRANSFER_COUNT2, DMATC_TRANSFER_COUNT3, DMATC_TRANSFER_COUNT4,
  *                   DMATC_TRANSFER_COUNT5, DMATC_TRANSFER_COUNT6, DMATC_TRANSFER_COUNT7,
@@ -676,13 +677,13 @@ void TIMER::output_compare_init(Timer_Channel channel, TIMER_Output_Compare comp
         uint32_t iso;
         uint32_t iso_n;
     } CH_BITS[] = {
-        {static_cast<uint32_t>(CHCTL0_Bits::CH0MS), static_cast<uint32_t>(CHCTL2_Bits::CH0EN), static_cast<uint32_t>(CHCTL2_Bits::CH0P), static_cast<uint32_t>(CHCTL2_Bits::CH0NEN), static_cast<uint32_t>(CHCTL2_Bits::CH0NP), static_cast<uint32_t>(CTL1_Bits::ISO0), static_cast<uint32_t>(CTL1_Bits::ISO0N)},
-        {static_cast<uint32_t>(CHCTL0_Bits::CH1MS), static_cast<uint32_t>(CHCTL2_Bits::CH1EN), static_cast<uint32_t>(CHCTL2_Bits::CH1P), static_cast<uint32_t>(CHCTL2_Bits::CH1NEN), static_cast<uint32_t>(CHCTL2_Bits::CH1NP), static_cast<uint32_t>(CTL1_Bits::ISO1), static_cast<uint32_t>(CTL1_Bits::ISO1N)},
-        {static_cast<uint32_t>(CHCTL1_Bits::CH2MS), static_cast<uint32_t>(CHCTL2_Bits::CH2EN), static_cast<uint32_t>(CHCTL2_Bits::CH2P), static_cast<uint32_t>(CHCTL2_Bits::CH2NEN), static_cast<uint32_t>(CHCTL2_Bits::CH2NP), static_cast<uint32_t>(CTL1_Bits::ISO2), static_cast<uint32_t>(CTL1_Bits::ISO2N)},
-        {static_cast<uint32_t>(CHCTL1_Bits::CH3MS), static_cast<uint32_t>(CHCTL2_Bits::CH3EN), static_cast<uint32_t>(CHCTL2_Bits::CH3P), 0U, 0U, static_cast<uint32_t>(CTL1_Bits::ISO3), 0U}
+        {.ms = static_cast<uint32_t>(CHCTL0_Bits::CH0MS), .en = static_cast<uint32_t>(CHCTL2_Bits::CH0EN), .p = static_cast<uint32_t>(CHCTL2_Bits::CH0P), .nen = static_cast<uint32_t>(CHCTL2_Bits::CH0NEN), .np = static_cast<uint32_t>(CHCTL2_Bits::CH0NP), .iso = static_cast<uint32_t>(CTL1_Bits::ISO0), .iso_n = static_cast<uint32_t>(CTL1_Bits::ISO0N)},
+        {.ms = static_cast<uint32_t>(CHCTL0_Bits::CH1MS), .en = static_cast<uint32_t>(CHCTL2_Bits::CH1EN), .p = static_cast<uint32_t>(CHCTL2_Bits::CH1P), .nen = static_cast<uint32_t>(CHCTL2_Bits::CH1NEN), .np = static_cast<uint32_t>(CHCTL2_Bits::CH1NP), .iso = static_cast<uint32_t>(CTL1_Bits::ISO1), .iso_n = static_cast<uint32_t>(CTL1_Bits::ISO1N)},
+        {.ms = static_cast<uint32_t>(CHCTL1_Bits::CH2MS), .en = static_cast<uint32_t>(CHCTL2_Bits::CH2EN), .p = static_cast<uint32_t>(CHCTL2_Bits::CH2P), .nen = static_cast<uint32_t>(CHCTL2_Bits::CH2NEN), .np = static_cast<uint32_t>(CHCTL2_Bits::CH2NP), .iso = static_cast<uint32_t>(CTL1_Bits::ISO2), .iso_n = static_cast<uint32_t>(CTL1_Bits::ISO2N)},
+        {.ms = static_cast<uint32_t>(CHCTL1_Bits::CH3MS), .en = static_cast<uint32_t>(CHCTL2_Bits::CH3EN), .p = static_cast<uint32_t>(CHCTL2_Bits::CH3P), .nen = 0U, .np = 0U, .iso = static_cast<uint32_t>(CTL1_Bits::ISO3), .iso_n = 0U}
     };
 
-    const size_t idx = static_cast<size_t>(channel);
+    const auto idx = static_cast<size_t>(channel);
     const auto& bits = CH_BITS[idx];
 
     // Clear mode bits
@@ -989,7 +990,7 @@ void TIMER::input_capture_init(Timer_Channel channel, TIMER_Input_Capture captur
         return;
     }
 
-    static constexpr struct ChannelBits {
+    constexpr struct ChannelBits {
         uint32_t ms;
         uint32_t en;
         uint32_t p;
@@ -998,13 +999,13 @@ void TIMER::input_capture_init(Timer_Channel channel, TIMER_Input_Capture captur
         uint32_t capflt;
         uint32_t cappsc;
     } CH_BITS[] = {
-        {static_cast<uint32_t>(CHCTL0_Bits::CH0MS), static_cast<uint32_t>(CHCTL2_Bits::CH0EN), static_cast<uint32_t>(CHCTL2_Bits::CH0P), static_cast<uint32_t>(CHCTL2_Bits::CH0NEN), static_cast<uint32_t>(CHCTL2_Bits::CH0NP), static_cast<uint32_t>(CHCTL0_Bits::CH0CAPFLT), static_cast<uint32_t>(CHCTL0_Bits::CH0CAPPSC)},
-        {static_cast<uint32_t>(CHCTL0_Bits::CH1MS), static_cast<uint32_t>(CHCTL2_Bits::CH1EN), static_cast<uint32_t>(CHCTL2_Bits::CH1P), static_cast<uint32_t>(CHCTL2_Bits::CH1NEN), static_cast<uint32_t>(CHCTL2_Bits::CH1NP), static_cast<uint32_t>(CHCTL0_Bits::CH1CAPFLT), static_cast<uint32_t>(CHCTL0_Bits::CH1CAPPSC)},
-        {static_cast<uint32_t>(CHCTL1_Bits::CH2MS), static_cast<uint32_t>(CHCTL2_Bits::CH2EN), static_cast<uint32_t>(CHCTL2_Bits::CH2P), static_cast<uint32_t>(CHCTL2_Bits::CH2NEN), static_cast<uint32_t>(CHCTL2_Bits::CH2NP), static_cast<uint32_t>(CHCTL1_Bits::CH2CAPFLT), static_cast<uint32_t>(CHCTL1_Bits::CH2CAPPSC)},
-        {static_cast<uint32_t>(CHCTL1_Bits::CH3MS), static_cast<uint32_t>(CHCTL2_Bits::CH3EN), static_cast<uint32_t>(CHCTL2_Bits::CH3P), 0U, 0U, static_cast<uint32_t>(CHCTL1_Bits::CH3CAPFLT), static_cast<uint32_t>(CHCTL1_Bits::CH3CAPPSC)},
+        {.ms=static_cast<uint32_t>(CHCTL0_Bits::CH0MS), .en=static_cast<uint32_t>(CHCTL2_Bits::CH0EN), .p=static_cast<uint32_t>(CHCTL2_Bits::CH0P), .nen=static_cast<uint32_t>(CHCTL2_Bits::CH0NEN), .np=static_cast<uint32_t>(CHCTL2_Bits::CH0NP), .capflt=static_cast<uint32_t>(CHCTL0_Bits::CH0CAPFLT), .cappsc=static_cast<uint32_t>(CHCTL0_Bits::CH0CAPPSC)},
+        {.ms=static_cast<uint32_t>(CHCTL0_Bits::CH1MS), .en=static_cast<uint32_t>(CHCTL2_Bits::CH1EN), .p=static_cast<uint32_t>(CHCTL2_Bits::CH1P), .nen=static_cast<uint32_t>(CHCTL2_Bits::CH1NEN), .np=static_cast<uint32_t>(CHCTL2_Bits::CH1NP), .capflt=static_cast<uint32_t>(CHCTL0_Bits::CH1CAPFLT), .cappsc=static_cast<uint32_t>(CHCTL0_Bits::CH1CAPPSC)},
+        {.ms=static_cast<uint32_t>(CHCTL1_Bits::CH2MS), .en=static_cast<uint32_t>(CHCTL2_Bits::CH2EN), .p=static_cast<uint32_t>(CHCTL2_Bits::CH2P), .nen=static_cast<uint32_t>(CHCTL2_Bits::CH2NEN), .np=static_cast<uint32_t>(CHCTL2_Bits::CH2NP), .capflt=static_cast<uint32_t>(CHCTL1_Bits::CH2CAPFLT), .cappsc=static_cast<uint32_t>(CHCTL1_Bits::CH2CAPPSC)},
+        {.ms=static_cast<uint32_t>(CHCTL1_Bits::CH3MS), .en=static_cast<uint32_t>(CHCTL2_Bits::CH3EN), .p=static_cast<uint32_t>(CHCTL2_Bits::CH3P), .nen=0U, .np=0U, .capflt=static_cast<uint32_t>(CHCTL1_Bits::CH3CAPFLT), .cappsc=static_cast<uint32_t>(CHCTL1_Bits::CH3CAPPSC)},
     };
 
-    const size_t idx = static_cast<size_t>(channel);
+    const auto idx = static_cast<size_t>(channel);
     const auto& bits = CH_BITS[idx];
     const TIMER_Regs reg = (channel <= Timer_Channel::CH1) ? TIMER_Regs::CHCTL0 : TIMER_Regs::CHCTL1;
 
@@ -1184,7 +1185,7 @@ void TIMER::external_trigger_configure(External_Trigger_Prescaler prescaler, Pol
  * @param channel The channel to get the capture compare value for
  * @return The capture compare value for the specified channel
  */
-uint32_t TIMER::get_capture_compare(Timer_Channel channel) {
+auto TIMER::get_capture_compare(Timer_Channel channel) -> uint32_t {
     if (channel == Timer_Channel::INVALID) {
         return 0;
     }
@@ -1465,7 +1466,7 @@ void TIMER::set_output_value_enable(bool enable) {
  *             Status_Flags enumeration.
  * @return true if the flag is set, false otherwise.
  */
-bool TIMER::get_flag(Status_Flags flag) {
+auto TIMER::get_flag(Status_Flags flag) -> bool {
     if (flag == Status_Flags::INVALID) {
         return false;
     }
@@ -1503,7 +1504,7 @@ void TIMER::clear_flag(Status_Flags flag) {
  * @param flag The interrupt flag to check, specified as an Interrupt_Flags enumeration value.
  * @return true if the specified interrupt flag is set and enabled, false otherwise.
  */
-bool TIMER::get_interrupt_flag(Interrupt_Flags flag) {
+auto TIMER::get_interrupt_flag(Interrupt_Flags flag) -> bool {
     if (flag == Interrupt_Flags::INVALID) {
         return false;
     }
@@ -1586,6 +1587,5 @@ void TIMER::disable_all_interrupts() {
 
     write_bits(*this, TIMER_Regs::DMAINTEN, all_types, false);
 }
-
 
 } // namespace timer

@@ -19,13 +19,12 @@
 
 #pragma once
 
-#include <stdlib.h>
-#include <stdint.h>
+#include <cstdlib>
+#include <cstdint>
 
 #include "CONFIG.hpp"
 
 namespace wwdgt {
-
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
@@ -34,7 +33,6 @@ enum class WWDGT_Regs : uint8_t {
     CFG = 0x04U,
     STAT = 0x08U
 };
-
 
 ///////////////////////////// REGISTER BITS /////////////////////////////
 
@@ -52,7 +50,6 @@ enum class CFG_Bits : uint32_t {
 enum class STAT_Bits : uint8_t {
     EWIF = 0
 };
-
 
 ///////////////////////////// ENUMS /////////////////////////////
 

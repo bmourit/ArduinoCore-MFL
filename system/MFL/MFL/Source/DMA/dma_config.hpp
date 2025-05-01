@@ -19,15 +19,14 @@
 
 #pragma once
 
-#include <stdlib.h>
-#include <stdint.h>
+#include <cstdlib>
+#include <cstdint>
 #include <array>
 
 #include "CONFIG.hpp"
 #include "rcu_config.hpp"
 
 namespace dma {
-
 
 ///////////////////////////// BASE ADDRESS /////////////////////////////
 
@@ -37,11 +36,10 @@ enum class DMA_Base : uint8_t {
     INVALID
 };
 
-static inline constexpr uintptr_t DMA_baseAddress[] = {
-    0x40020000U,
-    0x40020400U
+static inline constexpr std::array<uintptr_t, 2> DMA_baseAddress = {
+    0x4002'0000U,
+    0x4002'0400U
 };
-
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
@@ -92,7 +90,6 @@ enum class Channel_Regs : uint8_t {
     INVALID
 };
 
-
 ///////////////////////////// REGISTER BITS /////////////////////////////
 
 enum class INTF_Bits : uint8_t {
@@ -128,34 +125,34 @@ enum class INTF_Bits : uint8_t {
 };
 
 enum class INTC_Bits : uint8_t {
-    GIFC0 = 0,
-    FTFIFC0 = 1,
-    HTFIFC0 = 2,
-    ERRIFC0 = 3,
-    GIFC1 = 4,
-    FTFIFC1 = 5,
-    HTFIFC1 = 6,
-    ERRIFC1 = 7,
-    GIFC2 = 8,
-    FTFIFC2 = 9,
-    HTFIFC2 = 10,
-    ERRIFC2 = 11,
-    GIFC3 = 12,
-    FTFIFC3 = 13,
-    HTFIFC3 = 14,
-    ERRIFC3 = 15,
-    GIFC4 = 16,
-    FTFIFC4 = 17,
-    HTFIFC4 = 18,
-    ERRIFC4 = 19,
-    GIFC5 = 20,
-    FTFIFC5 = 21,
-    HTFIFC5 = 22,
-    ERRIFC5 = 23,
-    GIFC6 = 24,
-    FTFIFC6 = 25,
-    HTFIFC6 = 26,
-    ERRIFC6 = 27
+    GIFC0,
+    FTFIFC0,
+    HTFIFC0,
+    ERRIFC0,
+    GIFC1,
+    FTFIFC1,
+    HTFIFC1,
+    ERRIFC1,
+    GIFC2,
+    FTFIFC2,
+    HTFIFC2,
+    ERRIFC2,
+    GIFC3,
+    FTFIFC3,
+    HTFIFC3,
+    ERRIFC3,
+    GIFC4,
+    FTFIFC4,
+    HTFIFC4,
+    ERRIFC4,
+    GIFC5,
+    FTFIFC5,
+    HTFIFC5,
+    ERRIFC5,
+    GIFC6,
+    FTFIFC6,
+    HTFIFC6,
+    ERRIFC6
 };
 
 enum class CHXCTL_Bits : uint32_t {
@@ -173,7 +170,6 @@ enum class CHXCTL_Bits : uint32_t {
     M2M = 14,
     ALL = REG_BIT_DEF(0, 14)
 };
-
 
 ///////////////////////////// ENUMS /////////////////////////////
 
@@ -251,14 +247,13 @@ enum class DMA_Error_Type : uint8_t {
     INVALID_SELECTION
 };
 
-
 ///////////////////////////// STRUCTURES /////////////////////////////
 
 struct DMA_Clock_Config {
     rcu::RCU_PCLK clock_reg : 6;
 };
 
-static inline constexpr std::array<DMA_Clock_Config, 2> DMA_pclk_index {{
+inline constexpr std::array<DMA_Clock_Config, 2> DMA_pclk_index {{
     {rcu::RCU_PCLK::PCLK_DMA0},
     {rcu::RCU_PCLK::PCLK_DMA1}
 }};
@@ -267,37 +262,34 @@ struct DMA_Config {
     uint32_t count;
     uint32_t memory_address;
     uint32_t peripheral_address;
-    Bit_Width peripheral_bit_width;
-    Bit_Width memory_bit_width;
-    Increase_Mode peripheral_increase;
-    Increase_Mode memory_increase;
-    Channel_Priority channel_priority;
-    Transfer_Direction direction;
-    bool circular_mode;
-    bool memory_to_memory;
+    Bit_Width peripheral_bit_width : 2;
+    Bit_Width memory_bit_width : 2;
+    Increase_Mode peripheral_increase : 1;
+    Increase_Mode memory_increase : 1;
+    Channel_Priority channel_priority : 2;
+    Transfer_Direction direction : 1;
+    bool circular_mode : 1;
+    bool memory_to_memory : 1;
 };
-
 
 ///////////////////////////// CONSTANTS /////////////////////////////
 
-static inline constexpr uint32_t Lower16BitMask = 0x0000FFFFU;
-
+inline constexpr uint32_t Lower16BitMask = 0x0000'FFFFU;
 
 ///////////////////////////// INITIALIZATION DEFAULTS /////////////////////////////
 
-static inline const DMA_Config default_config = {
-    0U,
-    0U,
-    0U,
-    Bit_Width::WIDTH_8BIT,
-    Bit_Width::WIDTH_8BIT,
-    Increase_Mode::INCREASE_DISABLE,
-    Increase_Mode::INCREASE_DISABLE,
-    Channel_Priority::LOW_PRIORITY,
-    Transfer_Direction::P2M,
-    false,
-    false
+inline constexpr DMA_Config default_config = {
+    .count = 0U,
+    .memory_address = 0U,
+    .peripheral_address = 0U,
+    .peripheral_bit_width = Bit_Width::WIDTH_8BIT,
+    .memory_bit_width = Bit_Width::WIDTH_8BIT,
+    .peripheral_increase = Increase_Mode::INCREASE_DISABLE,
+    .memory_increase = Increase_Mode::INCREASE_DISABLE,
+    .channel_priority = Channel_Priority::LOW_PRIORITY,
+    .direction = Transfer_Direction::P2M,
+    .circular_mode = false,
+    .memory_to_memory = false
 };
-
 
 } // namespace dma

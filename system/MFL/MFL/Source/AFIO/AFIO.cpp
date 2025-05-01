@@ -22,7 +22,7 @@
 
 namespace gpio {
 
-AFIO& AFIO::get_instance() {
+auto AFIO::get_instance() -> AFIO& {
     static AFIO instance;
     return instance;
 }
@@ -79,6 +79,7 @@ void AFIO::set_exti_source(Source_Port port, Pin_Number pin) {
     if (pin == Pin_Number::INVALID || port == Source_Port::INVALID) {
         return;
     }
+
     const auto& source_info = source_index[static_cast<size_t>(pin)];
     write_bit_range(*this, source_info.reg, source_info.bit_info, static_cast<uint32_t>(port));
 }
@@ -99,6 +100,7 @@ void AFIO::set_output_event(Event_Port port, Pin_Number pin) {
     if (pin == Pin_Number::INVALID || port == Event_Port::INVALID) {
         return;
     }
+
     write_bit_ranges(*this, AFIO_Regs::EC,
                      static_cast<uint32_t>(EC_Bits::PORT), static_cast<uint32_t>(port),
                      static_cast<uint32_t>(EC_Bits::PIN), static_cast<uint32_t>(pin));
@@ -144,10 +146,9 @@ void AFIO::set_compensation(bool enable) {
  * 
  * NOTE: This function is only valid for F303R!
  */
-bool AFIO::get_compensation() {
+auto AFIO::get_compensation() -> bool {
     return read_bit(*this, AFIO_Regs::CPSCTL, static_cast<uint32_t>(CPSCTL_Bits::CPS_RDY));
 }
-
 
 } // namespace gpio
 

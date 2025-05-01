@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 #include <array>
 
 #include "dma_config.hpp"
@@ -28,57 +28,71 @@
 
 namespace dma {
 
-class RCU;
-
 class DMA {
 public:
-    static Result<DMA, DMA_Error_Type> get_instance(DMA_Base Base, DMA_Channel Channel);
+    static auto get_instance(DMA_Base Base, DMA_Channel Channel) -> Result<DMA, DMA_Error_Type>;
 
     // Init
     void init(DMA_Config config = default_config);
+
     // Reset
     void reset();
+
     // Circulation mode
     void set_circulation_mode_enable(bool enable);
+
     // M2M
     void set_memory_to_memory_enable(bool enable);
+
     // Channel
     void set_channel_enable(bool enable);
+
     // RX/TX addresses
     void set_data_address(Data_Type type, uint32_t address);
+
     // Get and set Transfer count
+    auto get_transfer_count() -> uint32_t;
     void set_transfer_count(uint32_t count);
-    uint32_t get_transfer_count();
+
     // Priority
     void set_channel_priority(Channel_Priority priority);
+
     // Bit width
     void set_bit_width(Data_Type type, Bit_Width width);
+
     // Increase mode
     void set_increase_mode_enable(Data_Type type, bool enable);
+
     // Direction
     void set_transfer_direction(Transfer_Direction direction);
+
     // Abandon transfer
     void set_transfer_abandon();
+
     // Clear channel
     void clear_channel();
+
     // Flags
-    bool get_flag(Status_Flags flag);
+    auto get_flag(Status_Flags flag) -> bool;
     void clear_flag(Status_Flags flag);
     void clear_flags(uint32_t flags);
+
     // Interrupt flags
-    bool get_interrupt_flag(Interrupt_Flags flag);
+    auto get_interrupt_flag(Interrupt_Flags flag) -> bool;
     void clear_interrupt_flag(Interrupt_Flags flag);
+
     // Interrupts
     void set_interrupt_enable(Interrupt_Type type, bool enable);
 
     // Accessor methods
-    inline DMA_Base get_base() { return base_; }
-    inline DMA_Channel get_channel() { return channel_; }
-    inline DMA_Config get_config() { return config_; }
+    inline auto get_base() -> DMA_Base { return base_; }
+    inline auto get_channel() -> DMA_Channel { return channel_; }
+    inline auto get_config() -> DMA_Config { return config_; }
 
     // Register address
-    inline volatile uint32_t* reg_address(DMA_Regs reg) const {
-        return reinterpret_cast<volatile uint32_t*>(base_address_ + static_cast<uint32_t>(reg));
+    [[nodiscard]] inline auto reg_address(DMA_Regs reg) const -> volatile uint32_t* {
+        const auto idx = static_cast<uint32_t>(base_);
+        return reinterpret_cast<volatile uint32_t*>(DMA_baseAddress[idx] + static_cast<uint32_t>(reg));
     }
 
 private:
@@ -88,7 +102,6 @@ private:
     DMA_Base base_;
     DMA_Channel channel_;
     DMA_Clock_Config DMA_pclk_info_;
-    uint32_t base_address_;
     DMA_Config config_;
 
     struct CachedOffsets {
@@ -101,52 +114,47 @@ private:
     void cache_register_offsets();
 
     // Inlined methods
-    inline INTF_Bits get_channel_bits_from_flag(Status_Flags flag) {
-        // Get indices with bounds checking
-        const uint8_t flag_idx = static_cast<uint8_t>(flag);
-        const uint8_t channel_idx = static_cast<uint8_t>(channel_);
-    
-        // Early return for invalid inputs
-        if (flag_idx >= 4 || channel_idx >= 7) {    // 4 flag types, 7 channels (0-6)
-            return INTF_Bits::INVALID;
-        }
-
-        // Use a 2D table with direct indexing for better performance
-        // First dimension: flag index, Second dimension: channel number
-        static constexpr INTF_Bits flag_map[4][7] = {
-            {
+    inline auto get_channel_bits_from_flag(Status_Flags flag) -> INTF_Bits {
+        constexpr std::array<std::array<INTF_Bits, 7>, 4> flag_map {{
+            {{
                 INTF_Bits::GIF0, INTF_Bits::GIF1, INTF_Bits::GIF2,
                 INTF_Bits::GIF3, INTF_Bits::GIF4, INTF_Bits::GIF5,
                 INTF_Bits::GIF6
-            },
-            {
+            }},
+            {{
                 INTF_Bits::FTFIF0, INTF_Bits::FTFIF1, INTF_Bits::FTFIF2,
                 INTF_Bits::FTFIF3, INTF_Bits::FTFIF4, INTF_Bits::FTFIF5,
                 INTF_Bits::FTFIF6
-            },
-            {
+            }},
+            {{
                 INTF_Bits::HTFIF0, INTF_Bits::HTFIF1, INTF_Bits::HTFIF2,
                 INTF_Bits::HTFIF3, INTF_Bits::HTFIF4, INTF_Bits::HTFIF5,
                 INTF_Bits::HTFIF6
-            },
-            {
+            }},
+            {{
                 INTF_Bits::ERRIF0, INTF_Bits::ERRIF1, INTF_Bits::ERRIF2,
                 INTF_Bits::ERRIF3, INTF_Bits::ERRIF4, INTF_Bits::ERRIF5,
                 INTF_Bits::ERRIF6
-            }
-        };
+            }}
+        }};
 
-        // Direct array access with pre-validated indices
+        const auto flag_idx = static_cast<uint8_t>(flag);
+        const auto channel_idx = static_cast<uint8_t>(channel_);
+
+        if (flag_idx >= flag_map.size() || channel_idx >= flag_map[0].size()) {
+            return INTF_Bits::INVALID;
+        }
+
         return flag_map[flag_idx][channel_idx];
     }
 
-    inline DMA_Regs get_channel_offset_from_reg(Channel_Regs reg) {
+    inline auto get_channel_offset_from_reg(Channel_Regs reg) -> DMA_Regs {
         // Early return for invalid inputs
         if (reg == Channel_Regs::INVALID) {
             return DMA_Regs::INVALID;
         }
 
-        const uint8_t channel_idx = static_cast<uint8_t>(channel_);
+        const auto channel_idx = static_cast<uint8_t>(channel_);
         if (channel_idx > 6) {  // 7 channels (0-6)
             return DMA_Regs::INVALID;
         }
@@ -171,8 +179,7 @@ private:
     }
 
     template <DMA_Base Base, DMA_Channel Channel>
-    friend DMA& get_instance_for_base();
+    friend auto get_instance_for_base() -> DMA&;
 };
-
 
 } // namespace dma

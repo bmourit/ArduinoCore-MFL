@@ -19,54 +19,60 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 
 #include "pmu_config.hpp"
 #include "RegRW.hpp"
 
 namespace pmu {
 
-class RCU;
-
 class PMU {
 public:
-    static PMU& get_instance();
+    static auto get_instance() -> PMU&;
 
     // Reset
     void reset();
+
     // Low voltage detection
     void lvd_enable(LVD_Threshold threshold);
     void lvd_disable();
+
     // Output voltage
     void set_ldo_output(Output_Voltage level);
+
     // High driver mode
     void set_high_driver_enable(bool enable);
     void high_driver_switch(bool enable);
+
     // Low driver mode
     void set_low_driver_on_deep_sleep_enable(bool enable);
     void set_low_driver_on_deep_sleep(Low_Driver mode);
+
     // Driver selection for power modes
     void set_driver_on_low_power(Power_Driver driver);
     void set_driver_on_normal_power(Power_Driver driver);
+
     // Sleep/Standby
     void set_standby_enable();
     void set_sleep_enable(PMU_Commands cmd);
     void set_deep_sleep_enable(Power_Driver driver, PMU_Commands command, bool enable);
     void set_sleep_mode_command(uint8_t value);
     void set_deep_sleep_mode_command(uint8_t value);
-    void set_standby_mode(void);
+    void set_standby_mode();
+
     // Wakeup
     void set_wakeup_pin_enable(bool enable);
+
     // Backup
     void set_backup_write_enable(bool enable);
 
     // Flags
-    bool get_flag(Status_Flags flag);
+    auto get_flag(Status_Flags flag) -> bool;
     void clear_flag(Clear_Flags flag);
 
-    static inline constexpr uintptr_t PMU_baseAddress = 0x40007000U;
+    static inline constexpr uintptr_t PMU_baseAddress = 0x4000'7000U;
 
-    inline volatile uint32_t* reg_address(PMU_Regs reg) const {
+    [[nodiscard]] inline auto reg_address(PMU_Regs reg) const -> volatile uint32_t* {
         return reinterpret_cast<volatile uint32_t*>(PMU_baseAddress + static_cast<uint32_t>(reg));
     }
 
@@ -75,11 +81,10 @@ private:
 
     // Prevent copying or assigning
     PMU(const PMU&) = delete;
-    PMU& operator=(const PMU&) = delete;
+    auto operator=(const PMU&) -> PMU& = delete;
 
     mutable bool is_clock_enabled_;
 };
-
 
 } // namespace pmu
 

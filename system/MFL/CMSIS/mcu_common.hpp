@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <type_traits>
 
 namespace mcu {

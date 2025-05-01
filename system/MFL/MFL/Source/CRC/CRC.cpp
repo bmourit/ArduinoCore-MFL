@@ -22,12 +22,14 @@
 
 namespace crc {
 
-CRC& CRC::get_instance() {
+auto CRC::get_instance() -> CRC& {
     static CRC instance;
     return instance;
 }
 
-CRC::CRC() : is_clock_enabled_(false) {
+CRC::CRC() :
+    is_clock_enabled_(false)
+{
     if (!is_clock_enabled_) {
         RCU_I.set_pclk_enable(rcu::RCU_PCLK::PCLK_CRC, true);
         is_clock_enabled_ = true;
@@ -62,7 +64,7 @@ void CRC::reset_data() {
  *
  * @return The current value of the CRC data register.
  */
-uint32_t CRC::get_data() {
+auto CRC::get_data() -> uint32_t {
     return read_register<uint32_t>(*this, CRC_Regs::DATA);
 }
 
@@ -76,7 +78,7 @@ uint32_t CRC::get_data() {
  *
  * @return The current value of the free data register bits.
  */
-uint8_t CRC::get_free_data(void) {
+auto CRC::get_free_data() -> uint8_t {
     return read_bit8_range(*this, CRC_Regs::FDATA, static_cast<uint32_t>(FDATA_Bits::FDATA));
 }
 
@@ -105,29 +107,9 @@ void CRC::set_free_data(uint8_t data) {
  *
  * @return The calculated CRC value associated with the provided data value.
  */
-uint32_t CRC::calculate_data(uint32_t data) {
+auto CRC::calculate_data(uint32_t data) -> uint32_t {
     write_register(*this, CRC_Regs::DATA, data);
     return read_register<uint32_t>(*this, CRC_Regs::DATA);
 }
-
-/**
- * @brief Calculates the CRC for an array of 32-bit data values and returns the result.
- *
- * This method iterates over an array of 32-bit data values, writing each
- * value to the DATA register to compute the cumulative CRC. After processing
- * all the data, the final CRC value is retrieved from the DATA register.
- *
- * @param data Pointer to an array of 32-bit data values for which to calculate the CRC.
- * @param size The number of elements in the data array.
- *
- * @return The calculated CRC value after processing all the data values.
- */
-uint32_t CRC::calculate_mulitple_data(const uint32_t *data, uint32_t size) {
-    for (auto i = 0U; i < size; ++i) {
-        write_register(*this, CRC_Regs::DATA, data[i]);
-    }
-    return read_register<uint32_t>(*this, CRC_Regs::DATA);
-}
-
 
 } // namespace crc

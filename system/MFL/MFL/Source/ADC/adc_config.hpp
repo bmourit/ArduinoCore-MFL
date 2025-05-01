@@ -19,15 +19,14 @@
 
 #pragma once
 
-#include <stdlib.h>
-#include <stdint.h>
+#include <cstdlib>
+#include <cstdint>
 #include <array>
 
 #include "CONFIG.hpp"
 #include "rcu_config.hpp"
 
 namespace adc {
-
 
 ///////////////////////////// BASE ADDRESS /////////////////////////////
 
@@ -38,12 +37,11 @@ enum class ADC_Base : uint8_t {
     INVALID
 };
 
-static inline constexpr uintptr_t ADC_baseAddress[] = {
-    0x40012400U, // ADC0
-    0x40012800U, // ADC1
-    0x40013C00U  // ADC2
+static inline constexpr std::array<uintptr_t, 3> ADC_baseAddress = {
+    0x4001'2400U,   // ADC0
+    0x4001'2800U,   // ADC1
+    0x4001'3C00U    // ADC2
 };
-
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
@@ -80,7 +78,6 @@ enum class ADC_Regs : uint8_t {
     RDATA = 0x4CU,
     OVSAMPCTL = 0x80U
 };
-
 
 ///////////////////////////// REGISTER BITS /////////////////////////////
 
@@ -182,7 +179,6 @@ enum class OVSAMPCTL_Bits : uint32_t {
     TOVS = 9,
     DRES = REG_BIT_DEF(12, 13)
 };
-
 
 ///////////////////////////// ENUMS /////////////////////////////
 
@@ -332,17 +328,17 @@ enum class ADC_Channel : uint8_t {
 };
 
 enum class Status_Flags : uint8_t {
-    FLAG_WDE = 0,
-    FLAG_EOC = 1,
-    FLAG_EOIC = 2,
-    FLAG_STIC = 3,
-    FLAG_STRC = 4
+    FLAG_WDE,
+    FLAG_EOC,
+    FLAG_EOIC,
+    FLAG_STIC,
+    FLAG_STRC
 };
 
 enum class Interrupt_Flags : uint8_t {
-    INTR_FLAG_WDE = 0,
-    INTR_FLAG_EOC = 1,
-    INTR_FLAG_EOIC = 2
+    INTR_FLAG_WDE,
+    INTR_FLAG_EOC,
+    INTR_FLAG_EOIC
 };
 
 enum class Interrupt_Type : uint8_t {
@@ -359,7 +355,6 @@ enum class ADC_Error_Type : uint8_t {
     INVALID_SELECTION
 };
 
-
 ///////////////////////////// STRUCTURES /////////////////////////////
 
 struct ADC_Clock_Config {
@@ -367,17 +362,15 @@ struct ADC_Clock_Config {
     rcu::RCU_PCLK_Reset reset_reg : 6;
 };
 
-static inline constexpr std::array<ADC_Clock_Config, 3> ADC_pclk_index {{
+inline constexpr std::array<ADC_Clock_Config, 3> ADC_pclk_index {{
     {rcu::RCU_PCLK::PCLK_ADC0, rcu::RCU_PCLK_Reset::PCLK_ADC0RST},
     {rcu::RCU_PCLK::PCLK_ADC1, rcu::RCU_PCLK_Reset::PCLK_ADC1RST},
     {rcu::RCU_PCLK::PCLK_ADC2, rcu::RCU_PCLK_Reset::PCLK_ADC2RST}
 }};
 
-
 ///////////////////////////// CONSTANTS /////////////////////////////
 
-static inline constexpr uint32_t Calibration_Delay_Cycles = 14U;
-
+inline constexpr uint32_t Calibration_Delay_Cycles = 14U;
 
 ///////////////////////////// UNUSED DOCUMENTATION ONLY /////////////////////////////
 
@@ -390,6 +383,5 @@ enum class STAT_Bits : uint32_t {
     STRC = REG_BIT_DEF(4, 4)
 };
 */
-
 
 }	// namespace adc

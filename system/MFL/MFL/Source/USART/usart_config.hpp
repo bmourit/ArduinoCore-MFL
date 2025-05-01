@@ -19,15 +19,14 @@
 
 #pragma once
 
-#include <stdlib.h>
-#include <stdint.h>
+#include <cstdlib>
+#include <cstdint>
 #include <array>
 
 #include "CONFIG.hpp"
 #include "rcu_config.hpp"
 
 namespace usart {
-
 
 ///////////////////////////// BASE ADDRESS /////////////////////////////
 
@@ -40,15 +39,13 @@ enum class USART_Base : uint8_t {
     INVALID
 };
 
-static inline constexpr uintptr_t USART_baseAddress[] = {
-    0x40013800U,    // USART0
-    0x40004400U,    // USART1
-    0x40004800U,    // USART2
-    0x40004C00U,    // UART3
-    0x40005000U,    // UART4
-    0x00000000U     // INVALID placeholder
+static inline constexpr std::array<uintptr_t, 5> USART_baseAddress = {
+    0x4001'3800U,    // USART0
+    0x4000'4400U,    // USART1
+    0x4000'4800U,    // USART2
+    0x4000'4C00U,    // UART3
+    0x4000'5000U     // UART4
 };
-
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
@@ -65,20 +62,19 @@ enum class USART_Regs : uint8_t {
     STAT1 = 0x88U
 };
 
-
 ///////////////////////////// REGISTER BITS /////////////////////////////
 
 enum class STAT0_Bits : uint8_t {
-    PERR = 0,
-    FERR = 1,
-    NERR = 2,
-    ORERR = 3,
-    IDLEF = 4,
-    RBNE = 5,
-    TC = 6,
-    TBE = 7,
-    LBDF = 8,
-    CTSF = 9
+    PERR,
+    FERR,
+    NERR,
+    ORERR,
+    IDLEF,
+    RBNE,
+    TC,
+    TBE,
+    LBDF,
+    CTSF
 };
 
 enum class DATA_Bits : uint32_t {
@@ -122,17 +118,17 @@ enum class CTL1_Bits : uint32_t {
 };
 
 enum class CTL2_Bits : uint8_t {
-    ERRIE = 0,
-    IREN = 1,
-    IRLP = 2,
-    HDEN = 3,
-    NKEN = 4,
-    SCEN = 5,
-    DENR = 6,
-    DENT = 7,
-    RTSEN = 8,
-    CTSEN = 9,
-    CTSIE = 10
+    ERRIE,
+    IREN,
+    IRLP,
+    HDEN,
+    NKEN,
+    SCEN,
+    DENR,
+    DENT,
+    RTSEN,
+    CTSEN,
+    CTSIE
 };
 
 enum class GP_Bits : uint32_t {
@@ -161,7 +157,6 @@ enum class STAT1_Bits : uint8_t {
     EBF = 12,
     BSY = 16
 };
-
 
 ///////////////////////////// ENUMS /////////////////////////////
 
@@ -315,7 +310,6 @@ enum class USART_Error_Type : uint8_t {
     TIMEOUT
 };
 
-
 ///////////////////////////// STRUCTURES /////////////////////////////
 
 struct USART_Clock_Config {
@@ -323,7 +317,7 @@ struct USART_Clock_Config {
     rcu::RCU_PCLK_Reset reset_reg : 6;
 };
 
-static inline constexpr std::array<USART_Clock_Config, 5> USART_pclk_index {{
+inline constexpr std::array<USART_Clock_Config, 5> USART_pclk_index {{
     {rcu::RCU_PCLK::PCLK_USART0, rcu::RCU_PCLK_Reset::PCLK_USART0RST},
     {rcu::RCU_PCLK::PCLK_USART1, rcu::RCU_PCLK_Reset::PCLK_USART1RST},
     {rcu::RCU_PCLK::PCLK_USART2, rcu::RCU_PCLK_Reset::PCLK_USART2RST},
@@ -336,7 +330,7 @@ struct Status_Config {
     uint8_t bit : 5;
 };
 
-static inline constexpr std::array<Status_Config, 13> status_config {{
+inline constexpr std::array<Status_Config, 13> status_config {{
     {USART_Regs::STAT0, 0},
     {USART_Regs::STAT0, 1},
     {USART_Regs::STAT0, 2},
@@ -360,7 +354,7 @@ struct Interrupt_Flags_Config {
     uint8_t enable_bit : 4;
 };
 
-static inline constexpr std::array<Interrupt_Flags_Config, 13> interrupt_flags_config {{
+inline constexpr std::array<Interrupt_Flags_Config, 13> interrupt_flags_config {{
     {USART_Regs::STAT0, USART_Regs::CTL0, false, 0, 8},
     {USART_Regs::STAT0, USART_Regs::CTL0, false, 7, 7},
     {USART_Regs::STAT0, USART_Regs::CTL0, false, 6, 6},
@@ -382,7 +376,7 @@ struct Interrupt_Config {
     uint8_t bit_info : 4;
 };
 
-static inline constexpr std::array<Interrupt_Config, 10> interrupt_config {{
+inline constexpr std::array<Interrupt_Config, 10> interrupt_config {{
     {USART_Regs::CTL0, false, 8},
     {USART_Regs::CTL0, false, 7},
     {USART_Regs::CTL0, false, 6},
@@ -413,51 +407,49 @@ struct USART_irda_params {
 };
 
 struct USART_Config {
-    uint32_t baudrate;          // Must never be 0
-    USART_DMA_Config dma_ops;   // DMA pin usage flag: off, RX pin, TX pin, or both pins
-    Parity_Mode parity;
-    Word_Length word_length;
-    Stop_Bits stop_bits;
-    Direction_Mode direction;
-    USART_State state;
-    uint8_t interrupt_prepriority;
-    uint8_t interrupt_subpriority;
+    uint32_t baudrate;              // Must never be 0
+    USART_DMA_Config dma_ops : 2;   // DMA pin usage flag: off, RX pin, TX pin, or both pins
+    Parity_Mode parity : 2;
+    Word_Length word_length : 1;
+    Stop_Bits stop_bits : 2;
+    Direction_Mode direction : 2;
+    USART_State state : 3;
+    uint8_t interrupt_prepriority : 4;
+    uint8_t interrupt_subpriority : 4;
     uint8_t last_data;
 };
 
-
 ///////////////////////////// CONSTANTS /////////////////////////////
 
-static inline constexpr uint8_t defaultIrqPreemptPriority = 1U;
-static inline constexpr uint8_t defaultIrqSubPriority = 0U;
+inline constexpr uint8_t defaultIrqPreemptPriority = 1U;
+inline constexpr uint8_t defaultIrqSubPriority = 0U;
 
 // Allow user to set buffer sizes
 #ifdef USART_RX_BUFFER_SIZE
-    static inline constexpr uint32_t RxBufferSize = USART_RX_BUFFER_SIZE;
+    inline constexpr uint32_t RxBufferSize = USART_RX_BUFFER_SIZE;
 #else
-    static inline constexpr uint32_t RxBufferSize = 128;
+    inline constexpr uint32_t RxBufferSize = 128;
 #endif
 
 #ifdef USART_TX_BUFFER_SIZE
-    static inline constexpr uint32_t TxBufferSize = USART_TX_BUFFER_SIZE;
+    inline constexpr uint32_t TxBufferSize = USART_TX_BUFFER_SIZE;
 #else
-    static inline constexpr uint32_t TxBufferSize = 64;
+    inline constexpr uint32_t TxBufferSize = 64;
 #endif
-
 
 ///////////////////////////// INITIALIZATION DEFAULTS /////////////////////////////
 
-static inline const USART_Config default_config = {
-    115200U,
-    USART_DMA_Config::DMA_NONE,
-    Parity_Mode::PM_NONE,
-    Word_Length::WL_8BITS,
-    Stop_Bits::STB_1BIT,
-    Direction_Mode::RXTX_MODE,
-    USART_State::IDLE,
-    defaultIrqPreemptPriority,
-    defaultIrqSubPriority,
-    0U,
+inline constexpr USART_Config default_config = {
+    .baudrate = 115'200U,
+    .dma_ops = USART_DMA_Config::DMA_NONE,
+    .parity = Parity_Mode::PM_NONE,
+    .word_length = Word_Length::WL_8BITS,
+    .stop_bits = Stop_Bits::STB_1BIT,
+    .direction = Direction_Mode::RXTX_MODE,
+    .state = USART_State::IDLE,
+    .interrupt_prepriority = defaultIrqPreemptPriority,
+    .interrupt_subpriority = defaultIrqSubPriority,
+    .last_data = 0U,
 };
 
 } // namespace usart

@@ -24,12 +24,14 @@
 
 namespace pmu {
 
-PMU& PMU::get_instance() {
+auto PMU::get_instance() -> PMU& {
     static PMU instance;
     return instance;
 }
 
-PMU::PMU() : is_clock_enabled_(false) {
+PMU::PMU() :
+    is_clock_enabled_(false)
+{
     if (!is_clock_enabled_) {
         RCU_I.set_pclk_enable(rcu::RCU_PCLK::PCLK_PMU, true);
         RCU_I.set_pclk_reset_enable(rcu::RCU_PCLK_Reset::PCLK_PMURST, true);
@@ -283,7 +285,7 @@ void PMU::set_backup_write_enable(bool enable) {
  * @param flag The flag to retrieve, as a Status_Flags enumeration value.
  * @return true if the flag is set, false otherwise.
  */
-bool PMU::get_flag(Status_Flags flag) {
+auto PMU::get_flag(Status_Flags flag) -> bool {
     return read_bit(*this, PMU_Regs::CS, static_cast<uint32_t>(flag));
 }
 
@@ -405,7 +407,7 @@ void PMU::set_deep_sleep_mode_command(uint8_t value) {
  * and the WAKEUP bit in the SYSTICK Control and Status Register
  * (SYSTICK_CTRL) is set.
  */
-void PMU::set_standby_mode(void) {
+void PMU::set_standby_mode() {
     // Set sleepdeep bit of Cortex-M4 SCR
     SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
 
@@ -422,7 +424,6 @@ void PMU::set_standby_mode(void) {
 
     __WFI();
 }
-
 
 } // namespace pmu
 

@@ -21,12 +21,15 @@
 
 namespace rcu {
 
-RCU& RCU::get_instance() {
+auto RCU::get_instance() -> RCU& {
     static RCU instance;
     return instance;
 }
 
-RCU::RCU() : SystemCoreClock(static_cast<uint32_t>(IRC8M_VALUE)) {}
+RCU::RCU() :
+    SystemCoreClock(static_cast<uint32_t>(IRC8M_VALUE))
+{
+}
 
 /**
  * @brief Reset RCU to its initial state after power-on reset.
@@ -93,7 +96,7 @@ void RCU::set_pclk_enable(RCU_PCLK pclk, bool enable) {
  * @param[in] pclk Peripheral clock identifier.
  * @return true if the peripheral clock is enabled, false otherwise.
  */
-bool RCU::get_pclk(RCU_PCLK pclk) {
+auto RCU::get_pclk(RCU_PCLK pclk) -> bool {
     const auto& config = pclk_index[static_cast<size_t>(pclk)];
     return read_bit(*this, config.register_offset, static_cast<uint32_t>(config.bit_info));
 }
@@ -158,7 +161,7 @@ void RCU::set_system_source(System_Clock_Source source) {
  *
  * @return The current system clock source as a System_Clock_Source enumeration.
  */
-System_Clock_Source RCU::get_system_source() {
+auto RCU::get_system_source() -> System_Clock_Source {
     uint32_t clock = read_bit_range(*this, RCU_Regs::CFG0, static_cast<uint32_t>(CFG0_Bits::SCSS));
     // Find the corresponding enum value using the lookup table
     for (const auto& mapping : source_mapping) {
@@ -195,7 +198,7 @@ void RCU::set_ahb_prescaler(AHB_Prescaler prescaler) {
  *
  * @return The current AHB prescaler as an AHB_Prescaler enumeration.
  */
-AHB_Prescaler RCU::get_ahb_prescaler() {
+auto RCU::get_ahb_prescaler() -> AHB_Prescaler {
     uint32_t prescaler = read_bit_range(*this, RCU_Regs::CFG0, static_cast<uint32_t>(CFG0_Bits::AHBPSC));
     return static_cast<AHB_Prescaler>(prescaler);
 }
@@ -225,7 +228,7 @@ void RCU::set_apb1_prescaler(APB_Prescaler prescaler) {
  *
  * @return The current APB1 prescaler as an APB_Prescaler enumeration.
  */
-APB_Prescaler RCU::get_apb1_prescaler() {
+auto RCU::get_apb1_prescaler() -> APB_Prescaler {
     uint32_t prescaler = read_bit_range(*this, RCU_Regs::CFG0, static_cast<uint32_t>(CFG0_Bits::APB1PSC));
     return static_cast<APB_Prescaler>(prescaler);
 }
@@ -255,7 +258,7 @@ void RCU::set_apb2_prescaler(APB_Prescaler prescaler) {
  *
  * @return The current APB2 prescaler as an APB_Prescaler enumeration.
  */
-APB_Prescaler RCU::get_apb2_prescaler() {
+auto RCU::get_apb2_prescaler() -> APB_Prescaler {
     uint32_t prescaler = read_bit_range(*this, RCU_Regs::CFG0, static_cast<uint32_t>(CFG0_Bits::APB2PSC));
     return static_cast<APB_Prescaler>(prescaler);
 }
@@ -290,7 +293,7 @@ void RCU::set_pll_config(PLL_Source source, PLLMF_Select multiplier) {
 
     // Set PLL source
     write_bit(*this, RCU_Regs::CFG0, static_cast<uint32_t>(CFG0_Bits::PLLSEL), (source == PLL_Source::PLLSRC_HXTAL_IRC48M));
-    uint32_t bits = static_cast<uint32_t>(multiplier);
+    auto bits = static_cast<uint32_t>(multiplier);
     write_bit_range(*this, RCU_Regs::CFG0, static_cast<uint32_t>(CFG0_Bits::PLLMF), bits & 0xFU);
     write_bits_sequence(*this, RCU_Regs::CFG0,
                         static_cast<uint32_t>(CFG0_Bits::PLLMF_4), (bits & 0x10U) >> 4U == 1U,
@@ -306,7 +309,7 @@ void RCU::set_pll_config(PLL_Source source, PLLMF_Select multiplier) {
  *
  * @return The current PLL source as a PLL_Source enumeration.
  */
-PLL_Source RCU::get_pll_source() {
+auto RCU::get_pll_source() -> PLL_Source {
     bool clock = read_bit(*this, RCU_Regs::CFG0, static_cast<uint32_t>(CFG0_Bits::PLLSEL));
     for (const auto& mapping : pll_mapping) {
         if (mapping.value == clock) {
@@ -342,7 +345,7 @@ void RCU::set_pll_presel(PLL_Presel presel) {
  *
  * @return The current PLL prescaler as a PLL_Presel enumeration.
  */
-PLL_Presel RCU::get_pll_presel() {
+auto RCU::get_pll_presel() -> PLL_Presel {
     bool clock = read_bit(*this, RCU_Regs::CFG1, static_cast<uint32_t>(CFG1_Bits::PLLPRESEL));
     for (const auto& mapping : pll_presel_mapping) {
         if (mapping.value == clock) {
@@ -391,7 +394,7 @@ void RCU::set_adc_prescaler(ADC_Prescaler prescaler) {
     write_bit(*this, RCU_Regs::CFG0, static_cast<uint32_t>(CFG0_Bits::ADCPSC_2), false);
     write_bit(*this, RCU_Regs::CFG1, static_cast<uint32_t>(CFG1_Bits::ADCPSC_3), false);
 
-    uint32_t bits = static_cast<uint32_t>(prescaler);
+    auto bits = static_cast<uint32_t>(prescaler);
 
     // Write bit 0 and 1 to ADCPSC and bit 2 to ADCPSC_2
     write_bit_range(*this, RCU_Regs::CFG0, static_cast<uint32_t>(CFG0_Bits::ADCPSC), (bits & 0x3U));
@@ -409,10 +412,10 @@ void RCU::set_adc_prescaler(ADC_Prescaler prescaler) {
  *
  * @return The current ADC prescaler as an ADC_Prescaler enumeration.
  */
-ADC_Prescaler RCU::get_adc_prescaler() {
+auto RCU::get_adc_prescaler() -> ADC_Prescaler {
     uint32_t bits = read_bit_range(*this, RCU_Regs::CFG0, static_cast<uint32_t>(CFG0_Bits::ADCPSC));
-    bits |= (2U << (read_bit(*this, RCU_Regs::CFG0, static_cast<uint32_t>(CFG0_Bits::ADCPSC_2))) == true ? 1U : 0U);
-    bits |= (3U << (read_bit(*this, RCU_Regs::CFG1, static_cast<uint32_t>(CFG1_Bits::ADCPSC_3))) == true ? 1U : 0U);
+    bits |= (2U << static_cast<uint32_t>(read_bit(*this, RCU_Regs::CFG0, static_cast<uint32_t>(CFG0_Bits::ADCPSC_2))));
+    bits |= (3U << static_cast<uint32_t>(read_bit(*this, RCU_Regs::CFG1, static_cast<uint32_t>(CFG1_Bits::ADCPSC_3))));
     return static_cast<ADC_Prescaler>(bits);
 }
 
@@ -428,7 +431,7 @@ ADC_Prescaler RCU::get_adc_prescaler() {
  *                      will not modify any registers.
  */
 void RCU::set_usb_prescaler(USB_Prescaler prescaler) {
-    uint32_t bits = static_cast<uint32_t>(prescaler);
+    auto bits = static_cast<uint32_t>(prescaler);
     // Write the lower bits (0, 1) to USBDPSC and bit 2 to USBDPSC_2
     write_bit_range(*this, RCU_Regs::CFG0, static_cast<uint32_t>(CFG0_Bits::USBDPSC), bits & 0x3U);
     write_bit(*this, RCU_Regs::CFG0, static_cast<uint32_t>(CFG0_Bits::USBDPSC_2), ((bits & 0x4U) >> 2U));
@@ -509,7 +512,7 @@ void RCU::set_osci_enable(OSCI_Select osci, bool enable) {
  *                 the OSCI_Select enumeration.
  * @return true if the oscillator is stable within the timeout period, false otherwise.
  */
-bool RCU::is_osci_stable(OSCI_Select osci) {
+auto RCU::is_osci_stable(OSCI_Select osci) -> bool {
     volatile uint32_t count = 0U;
     bool osci_stable = false;
 
@@ -545,7 +548,7 @@ bool RCU::is_osci_stable(OSCI_Select osci) {
  *                   by the System_Clock_Source enumeration.
  * @return The frequency of the specified system clock source in Hz.
  */
-uint32_t RCU::get_clock_source_frequency(System_Clock_Source source) {
+auto RCU::get_clock_source_frequency(System_Clock_Source source) -> uint32_t {
     switch (source) {
         case System_Clock_Source::SOURCE_IRC8M: return IRC8M_VALUE;
         case System_Clock_Source::SOURCE_HXTAL: return HXTAL_VALUE;
@@ -567,7 +570,7 @@ uint32_t RCU::get_clock_source_frequency(System_Clock_Source source) {
  * @return The frequency of the PLL clock in Hz. If the PLL source is invalid or
  *         cannot be determined, the function returns 0.
  */
-uint32_t RCU::calculate_pll_frequency() {
+auto RCU::calculate_pll_frequency() -> uint32_t {
     // Determine PLL source (HXTAL or IRC8M/IRC48M)
     PLL_Source pll_source = get_pll_source();
     if (pll_source == PLL_Source::PLLSRC_INVALID) {
@@ -582,10 +585,10 @@ uint32_t RCU::calculate_pll_frequency() {
         }
         osci_source = (pll_presel == PLL_Presel::PLLPRESRC_HXTAL) ? HXTAL_VALUE : IRC48M_VALUE;
         if (read_bit(*this, RCU_Regs::CFG0, static_cast<uint32_t>(CFG0_Bits::PREDV0))) {
-            osci_source /= 2U;
+            osci_source >>= 1;
         }
     } else {
-        osci_source = IRC8M_VALUE / 2U;  // PLL source is IRC8M/2
+        osci_source = IRC8M_VALUE >> 1;  // PLL source is IRC8M / 2
     }
 
     // Calculated PLL multiplier
@@ -602,7 +605,7 @@ uint32_t RCU::calculate_pll_frequency() {
  *
  * @return The PLL multiplier calculated from the PLLMF and PLLMF_4/_5 bits in the CFG0 register.
  */
-uint32_t RCU::get_pll_multiplier() {
+auto RCU::get_pll_multiplier() -> uint32_t {
     uint32_t multiplier = read_bit_range(*this, RCU_Regs::CFG0, static_cast<uint32_t>(CFG0_Bits::PLLMF));
     if (read_bit(*this, RCU_Regs::CFG0, static_cast<uint32_t>(CFG0_Bits::PLLMF_4))) {
         multiplier |= 0x10U;
@@ -623,7 +626,7 @@ uint32_t RCU::get_pll_multiplier() {
  * @note The returned frequency is based on the current system clock source and its prescaler settings.
  * @note If the specified clock source is invalid (i.e. the clock source is not enabled), the function returns 0.
  */
-uint32_t RCU::get_clock_frequency(Clock_Frequency clock) {
+auto RCU::get_clock_frequency(Clock_Frequency clock) -> uint32_t {
     System_Clock_Source current_source = get_system_source();
 
     if (current_source == System_Clock_Source::SOURCE_INVALID) { return 0; }
@@ -635,11 +638,11 @@ uint32_t RCU::get_clock_frequency(Clock_Frequency clock) {
 
     // Calculate APB1 frequency
     uint32_t apb1_prescaler_idx = read_bit_range(*this, RCU_Regs::CFG0, static_cast<uint32_t>(CFG0_Bits::APB1PSC));
-    uint32_t apb1_freq = ahb_freq >> APB1_EXP[apb1_prescaler_idx];
+    uint32_t apb1_freq = ahb_freq >> APB_EXP[apb1_prescaler_idx];
 
     // Calculate APB2 frequency
     uint32_t apb2_prescaler_idx = read_bit_range(*this, RCU_Regs::CFG0, static_cast<uint32_t>(CFG0_Bits::APB2PSC));
-    uint32_t apb2_freq = ahb_freq >> APB2_EXP[apb2_prescaler_idx];
+    uint32_t apb2_freq = ahb_freq >> APB_EXP[apb2_prescaler_idx];
 
     // Return requested clock frequency
     switch (clock) {
@@ -726,7 +729,7 @@ void RCU::set_deep_sleep_voltage(DeepSleep_Voltage voltage) {
  * @param flag The flag to retrieve, as a Status_Flags enumeration value.
  * @return true if the flag is set, false otherwise.
  */
-bool RCU::get_flag(Status_Flags flag) {
+auto RCU::get_flag(Status_Flags flag) -> bool {
     const auto& config = status_flag_index[static_cast<size_t>(flag)];
     return read_bit(*this, config.register_offset, static_cast<uint32_t>(config.bit_info));
 }
@@ -753,7 +756,7 @@ void RCU::clear_all_reset_flags() {
  *             enumeration value.
  * @return true if the specified interrupt flag is set, false otherwise.
  */
-bool RCU::get_interrupt_flag(Interrupt_Flags flag) {
+auto RCU::get_interrupt_flag(Interrupt_Flags flag) -> bool {
     const auto& config = interrupt_flag_index[static_cast<size_t>(flag)];
     return read_bit(*this, config.register_offset, static_cast<uint32_t>(config.bit_info));
 }
@@ -821,7 +824,6 @@ void RCU::update_system_clock() {
     uint32_t ahb_bit = read_bit_range(*this, RCU_Regs::CFG0, static_cast<uint32_t>(CFG0_Bits::AHBPSC));
     SystemCoreClock >>= AHBPrescaler[static_cast<size_t>(ahb_bit)];
 }
-
 
 } // namespace rcu
 

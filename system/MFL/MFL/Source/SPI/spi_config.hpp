@@ -19,15 +19,14 @@
 
 #pragma once
 
-#include <stdlib.h>
-#include <stdint.h>
+#include <cstdlib>
+#include <cstdint>
 #include <array>
 
 #include "CONFIG.hpp"
 #include "rcu_config.hpp"
 
 namespace spi {
-
 
 ///////////////////////////// BASE ADDRESS /////////////////////////////
 
@@ -38,12 +37,11 @@ enum class SPI_Base : uint8_t {
     INVALID
 };
 
-static inline constexpr uintptr_t SPI_baseAddress[] = {
-    0x40013000, // SPI0
-    0x40003800, // SPI1
-    0x40003C00  // SPI2
+static inline constexpr std::array<uintptr_t, 3> SPI_baseAddress = {
+    0x4001'3000, // SPI0
+    0x4000'3800, // SPI1
+    0x4000'3C00  // SPI2
 };
-
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
@@ -59,7 +57,6 @@ enum class SPI_Regs : uint8_t {
     I2SPSC = 0x20,
     QCTL = 0x80
 };
-
 
 ///////////////////////////// REGISTER BITS /////////////////////////////
 
@@ -142,7 +139,6 @@ enum class Status_Flags : uint8_t {
     FLAG_TRANS = 7,
     FLAG_FERR = 8
 };
-
 
 ///////////////////////////// ENUMS /////////////////////////////
 
@@ -239,7 +235,6 @@ enum class SPI_Error_Type : uint8_t {
     INVALID_SELECTION
 };
 
-
 ///////////////////////////// STRUCTURES /////////////////////////////
 
 struct Interrupt_Flags_Config {
@@ -249,7 +244,7 @@ struct Interrupt_Flags_Config {
     uint8_t ctl_bit : 3;
 };
 
-static inline constexpr std::array<Interrupt_Flags_Config, 7> interrupt_flags_config {{
+inline constexpr std::array<Interrupt_Flags_Config, 7> interrupt_flags_config {{
     {SPI_Regs::STAT, SPI_Regs::CTL1, 1, 7},
     {SPI_Regs::STAT, SPI_Regs::CTL1, 0, 6},
     {SPI_Regs::STAT, SPI_Regs::CTL1, 6, 5},
@@ -264,7 +259,7 @@ struct SPI_Clock_Config {
     rcu::RCU_PCLK_Reset reset_reg : 6;
 };
 
-static inline constexpr std::array<SPI_Clock_Config, 3> SPI_pclk_index {{
+inline constexpr std::array<SPI_Clock_Config, 3> SPI_pclk_index {{
     {rcu::RCU_PCLK::PCLK_SPI0, rcu::RCU_PCLK_Reset::PCLK_SPI0RST},
     {rcu::RCU_PCLK::PCLK_SPI1, rcu::RCU_PCLK_Reset::PCLK_SPI1RST},
     {rcu::RCU_PCLK::PCLK_SPI2, rcu::RCU_PCLK_Reset::PCLK_SPI2RST}
@@ -272,25 +267,24 @@ static inline constexpr std::array<SPI_Clock_Config, 3> SPI_pclk_index {{
 
 struct SPI_Config {
     Operational_Mode operational_mode;
-    Frame_Format frame_format;
-    NSS_Type nss_type;
-    PCLK_Divider pclk_divider;
-    Endian_Type msbf;
-    Clock_Polarity polarity_pull;
-    Clock_Phase clock_phase;
+    Frame_Format frame_format : 4;
+    NSS_Type nss_type : 1;
+    PCLK_Divider pclk_divider : 3;
+    Endian_Type msbf : 1;
+    Clock_Polarity polarity_pull : 1;
+    Clock_Phase clock_phase : 1;
 };
-
 
 ///////////////////////////// INITIALIZATION DEFAULTS /////////////////////////////
 
-static inline const SPI_Config default_config = {
-    Operational_Mode::SFD_MODE,
-    Frame_Format::FF_8BIT,
-    NSS_Type::HARDWARE_NSS,
-    PCLK_Divider::PCLK_2,
-    Endian_Type::MSBF,
-    Clock_Polarity::PULL_LOW,
-    Clock_Phase::PHASE_FIRST_EDGE,
+inline constexpr SPI_Config default_config = {
+    .operational_mode = Operational_Mode::SFD_MODE,
+    .frame_format = Frame_Format::FF_8BIT,
+    .nss_type = NSS_Type::HARDWARE_NSS,
+    .pclk_divider = PCLK_Divider::PCLK_2,
+    .msbf = Endian_Type::MSBF,
+    .polarity_pull = Clock_Polarity::PULL_LOW,
+    .clock_phase = Clock_Phase::PHASE_FIRST_EDGE,
 };
 
 } // namespace spi

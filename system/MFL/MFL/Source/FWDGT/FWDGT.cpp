@@ -22,12 +22,12 @@
 
 namespace fwdgt {
 
-FWDGT& FWDGT::get_instance() {
+auto FWDGT::get_instance() -> FWDGT& {
     static FWDGT instance;
     return instance;
 }
 
-FWDGT::FWDGT() {}
+FWDGT::FWDGT() = default;
 
 /**
  * @brief Enable watchdog
@@ -86,7 +86,7 @@ void FWDGT::set_write_enable(bool enable) {
  * @param value The prescaler value to set.
  * @return true on success, false on failure.
  */
-bool FWDGT::set_prescaler(Prescaler_Value value) {
+auto FWDGT::set_prescaler(Prescaler_Value value) -> bool {
     // Enable write access
     write_register(*this, FWDGT_Regs::CTL, WriteEnable);
 
@@ -114,7 +114,7 @@ bool FWDGT::set_prescaler(Prescaler_Value value) {
  * @return The current prescaler value of the FWDGT as an unsigned 32-bit
  *         integer.
  */
-uint32_t FWDGT::get_prescaler() {
+auto FWDGT::get_prescaler() -> uint32_t {
     return read_bit_range(*this, FWDGT_Regs::PSC, static_cast<uint32_t>(PSC_Bits::PSC));
 }
 
@@ -129,10 +129,11 @@ uint32_t FWDGT::get_prescaler() {
  * @param reload The reload value to set.
  * @return true on success, false on failure.
  */
-bool FWDGT::set_reload(uint32_t reload) {
+auto FWDGT::set_reload(uint32_t reload) -> bool {
     // Enable write access
     write_register(*this, FWDGT_Regs::CTL, WriteEnable);
 
+    // Wait for RUD flag to clear, but bail out on timeout
     uint32_t cycles = 0;
     while (read_bit(*this, FWDGT_Regs::STAT, static_cast<uint32_t>(STAT_Bits::RUD))) {
         if (++cycles >= TimeoutCycles) {
@@ -156,7 +157,7 @@ bool FWDGT::set_reload(uint32_t reload) {
  * @return The current reload value of the FWDGT as an unsigned 32-bit
  *         integer.
  */
-uint32_t FWDGT::get_reload() {
+auto FWDGT::get_reload() -> uint32_t {
     return read_register<uint32_t>(*this, FWDGT_Regs::RLD);
 }
 
@@ -182,9 +183,8 @@ void FWDGT::reload_counter() {
  *             Status_Flags enumeration.
  * @return true if the flag is set, false otherwise.
  */
-bool FWDGT::get_flag(Status_Flags flag) {
+auto FWDGT::get_flag(Status_Flags flag) -> bool {
     return read_bit(*this, FWDGT_Regs::STAT, static_cast<uint32_t>(flag));
 }
-
 
 } // namespace fwdgt

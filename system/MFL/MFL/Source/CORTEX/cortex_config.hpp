@@ -19,27 +19,25 @@
 
 #pragma once
 
-#include <stdlib.h>
-#include <stdint.h>
+#include <cstdlib>
+#include <cstdint>
 
 namespace cortex {
 
-
 ///////////////////////////// ADDRESS MAPS /////////////////////////////
 
-static inline constexpr uintptr_t NVIC_vectorTable[] = {
-    0x20000000,
-    0x08000000
+inline constexpr uintptr_t NVIC_vectorTable[] = {
+    0x2000'0000,
+    0x0800'0000
 };
 
-static inline constexpr uint32_t NVIC_priorityGroup[] = {
-    0x00000300U,
-    0x00000400U,
-    0x00000500U,
-    0x00000600U,
-    0x00000700U
+inline constexpr uint32_t NVIC_priorityGroup[] = {
+    0x300U,
+    0x400U,
+    0x500U,
+    0x600U,
+    0x700U
 };
-
 
 ///////////////////////////// ENUMS /////////////////////////////
 
@@ -67,22 +65,20 @@ enum class Systick_Source : uint8_t {
     SYSTICK_SOURCE_HCLK_DIV8
 };
 
-
 ///////////////////////////// CONSTANTS /////////////////////////////
 
-static inline constexpr uint32_t VectorTableSram = 0x20000000U;
-static inline constexpr uint32_t VectorTableFlash = 0x08000000U;
-static inline constexpr uint32_t SysTickSourceHClkDiv8 = 0xFFFFFFFBU;
-static inline constexpr uint32_t SysTickSourceHClk = 0x00000004U;
-static inline constexpr uint32_t VectorTableOffsetMask = 0x1FFFFF80U;
-static inline constexpr uint32_t AIRCRRegisterMask = 0x00000700U;
-static inline constexpr uint32_t VectKeyMask = 0x05FA0000U;
-static inline constexpr uint32_t Pre0Sub4 = 0x00000700U;
-static inline constexpr uint32_t Pre1Sub3 = 0x00000600U;
-static inline constexpr uint32_t Pre2Sub2 = 0x00000500U;
-static inline constexpr uint32_t Pre3Sub1 = 0x00000400U;
-static inline constexpr uint32_t Pre4Sub0 = 0x00000300U;
-static inline constexpr uint32_t SysTickCountFlagMask = 0x00010000U;
-
+inline constexpr uint32_t VectorTableSram = 0x2000'0000U;
+inline constexpr uint32_t VectorTableFlash = 0x0800'0000U;
+inline constexpr uint32_t SysTickSourceHClkDiv8 = 0xFFFF'FFFBU;
+inline constexpr uint32_t SysTickSourceHClk = 0x4U;
+inline constexpr uint32_t VectorTableOffsetMask = 0x1FFF'FF80U;
+inline constexpr uint32_t AIRCRRegisterMask = 0x700U;
+inline constexpr uint32_t VectKeyMask = 0x05FA'0000U;
+inline constexpr uint32_t Pre0Sub4 = 0x700U;
+inline constexpr uint32_t Pre1Sub3 = 0x600U;
+inline constexpr uint32_t Pre2Sub2 = 0x500U;
+inline constexpr uint32_t Pre3Sub1 = 0x400U;
+inline constexpr uint32_t Pre4Sub0 = 0x300U;
+inline constexpr uint32_t SysTickCountFlagMask = 0x0001'0000U;
 
 } // namespace cortex

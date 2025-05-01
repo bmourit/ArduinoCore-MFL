@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 
 // Constants for bit operations
 inline constexpr uint32_t Clear = 0;
@@ -36,7 +36,7 @@ inline constexpr uint32_t Set = 1;
  * @return bool The value of the bit at the given position.
  */
 template <typename RegType, typename Instance>
-inline bool read_bit(const Instance& instance, RegType reg, uint32_t bitno) {
+inline auto read_bit(const Instance& instance, RegType reg, uint32_t bitno) -> bool {
     return (*instance.reg_address(reg) & (1U << bitno)) != 0;
 }
 
@@ -128,7 +128,7 @@ inline void atomic_write_bit(const Instance& instance, RegType reg, uint32_t bit
  * @return size_t The value of the specified bit range.
  */
 template <typename RegType, typename Instance>
-inline uint32_t read_bit_range(const Instance& instance, RegType reg, uint32_t bits) {
+inline auto read_bit_range(const Instance& instance, RegType reg, uint32_t bits) -> uint32_t {
     const uint32_t width = bits & 0xFFU;
     const uint32_t bitno = bits >> 16U;
     return (*instance.reg_address(reg) >> bitno) & ((1U << width) - 1);
@@ -145,8 +145,8 @@ inline uint32_t read_bit_range(const Instance& instance, RegType reg, uint32_t b
  * @return uint16_t The 16-bit value of the specified bit range.
  */
 template <typename RegType, typename Instance>
-inline uint16_t read_bit16_range(const Instance& instance, RegType reg, uint32_t bits) {
-    return static_cast<uint16_t>(read_bit_range<RegType, Instance>(instance, reg, bits) & 0x0000FFFFU);
+inline auto read_bit16_range(const Instance& instance, RegType reg, uint32_t bits) -> uint16_t {
+    return static_cast<uint16_t>(read_bit_range<RegType, Instance>(instance, reg, bits) & 0xFFFFU);
 }
 
 /**
@@ -160,8 +160,8 @@ inline uint16_t read_bit16_range(const Instance& instance, RegType reg, uint32_t
  * @return uint8_t The 8-bit value of the specified bit range.
  */
 template <typename RegType, typename Instance>
-inline uint8_t read_bit8_range(const Instance& instance, RegType reg, uint32_t bits) {
-    return static_cast<uint8_t>(read_bit_range<RegType, Instance>(instance, reg, bits) & 0x000000FFU);
+inline auto read_bit8_range(const Instance& instance, RegType reg, uint32_t bits) -> uint8_t {
+    return static_cast<uint8_t>(read_bit_range<RegType, Instance>(instance, reg, bits) & 0xFFU);
 }
 
 /**

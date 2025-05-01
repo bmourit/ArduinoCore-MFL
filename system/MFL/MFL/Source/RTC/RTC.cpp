@@ -24,7 +24,7 @@
 
 namespace rtc {
 
-RTC& RTC::get_instance() {
+auto RTC::get_instance() -> RTC& {
     static RTC instance;
     return instance;
 }
@@ -104,9 +104,9 @@ void RTC::sync_register_wait() {
  *
  * @return The current counter value as a 32-bit unsigned integer.
  */
-uint32_t RTC::get_counter() {
-    return ((read_bit_range(*this, RTC_Regs::CNTH, static_cast<uint32_t>(CNTH_Bits::HIGH_CNT)) << 16) |
-            read_bit_range(*this, RTC_Regs::CNTL, static_cast<uint32_t>(CNTL_Bits::LOW_CNT)));
+auto RTC::get_counter() -> uint32_t {
+    return (read_bit_range(*this, RTC_Regs::CNTH, static_cast<uint32_t>(CNTH_Bits::HIGH_CNT)) << 16) |
+            read_bit_range(*this, RTC_Regs::CNTL, static_cast<uint32_t>(CNTL_Bits::LOW_CNT));
 }
 
 /**
@@ -122,9 +122,9 @@ uint32_t RTC::get_counter() {
 void RTC::set_counter(uint32_t counter) {
     write_bit(*this, RTC_Regs::CTL, static_cast<uint32_t>(CTL_Bits::CMF), true);
     // Set CNTH
-    write_bit_range(*this, RTC_Regs::CNTH, static_cast<uint32_t>(CNTH_Bits::HIGH_CNT), counter >> 16U);
+    write_bit_range(*this, RTC_Regs::CNTH, static_cast<uint32_t>(CNTH_Bits::HIGH_CNT), counter >> 16);
     // Set CNTL
-    write_bit_range(*this, RTC_Regs::CNTL, static_cast<uint32_t>(CNTL_Bits::LOW_CNT), counter & 0x0000FFFF);
+    write_bit_range(*this, RTC_Regs::CNTL, static_cast<uint32_t>(CNTL_Bits::LOW_CNT), counter & 0x0000'FFFF);
     write_bit(*this, RTC_Regs::CTL, static_cast<uint32_t>(CTL_Bits::CMF), false);
 }
 
@@ -142,9 +142,9 @@ void RTC::set_counter(uint32_t counter) {
 void RTC::set_prescaler(uint32_t prescaler) {
     write_bit(*this, RTC_Regs::CTL, static_cast<uint32_t>(CTL_Bits::CMF), true);
     // Set PSCH
-    write_bit_range(*this, RTC_Regs::PSCH, static_cast<uint32_t>(PSCH_Bits::HIGH_PSC), (prescaler & 0x000F0000U) >> 16U);
+    write_bit_range(*this, RTC_Regs::PSCH, static_cast<uint32_t>(PSCH_Bits::HIGH_PSC), (prescaler & 0x000F'0000U) >> 16U);
     // Set PSCL
-    write_bit_range(*this, RTC_Regs::PSCL, static_cast<uint32_t>(PSCL_Bits::LOW_PSC), prescaler & 0x0000FFFFU);
+    write_bit_range(*this, RTC_Regs::PSCL, static_cast<uint32_t>(PSCL_Bits::LOW_PSC), prescaler & 0x0000'FFFFU);
     write_bit(*this, RTC_Regs::CTL, static_cast<uint32_t>(CTL_Bits::CMF), false);
 }
 
@@ -174,7 +174,7 @@ void RTC::set_alarm(uint32_t alarm) {
  *
  * @return The current divider value as a 32-bit unsigned integer.
  */
-uint32_t RTC::get_divider() {
+auto RTC::get_divider() -> uint32_t {
     return ((read_bit_range(*this, RTC_Regs::DIVH, static_cast<uint32_t>(DIVH_Bits::HIGH_DIV)) << 16) |
             read_bit_range(*this, RTC_Regs::DIVL, static_cast<uint32_t>(DIVL_Bits::LOW_DIV)));
 }
@@ -190,7 +190,7 @@ uint32_t RTC::get_divider() {
  *                 Status_Flags enumeration.
  * @return true if the flag is set, false otherwise.
  */
-bool RTC::get_flag(Status_Flags flag) {
+auto RTC::get_flag(Status_Flags flag) -> bool {
     return read_bit(*this, RTC_Regs::CTL, static_cast<uint32_t>(flag));
 }
 
@@ -221,6 +221,5 @@ void RTC::clear_flag(Status_Flags flag) {
 void RTC::set_interrupt_enable(Interrupt_Type type, bool enable) {
     write_bit(*this, RTC_Regs::INTEN, static_cast<uint32_t>(type), enable);
 }
-
 
 } // namespace rtc

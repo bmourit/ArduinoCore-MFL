@@ -19,13 +19,12 @@
 
 #pragma once
 
-#include <stdlib.h>
-#include <stdint.h>
+#include <cstdlib>
+#include <cstdint>
 
 #include "CONFIG.hpp"
 
 namespace dac {
-
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
@@ -44,7 +43,6 @@ enum class DAC_Regs : uint8_t {
     DAC0_DO = 0x2CU,
     DAC1_DO = 0x30U
 };
-
 
 ///////////////////////////// REGISTER BITS /////////////////////////////
 
@@ -66,8 +64,8 @@ enum class CTL_Bits : uint32_t {
 };
 
 enum class SWT_Bits : uint8_t {
-    SWTR0 = 0U,
-    SWTR1 = 1U
+    SWTR0,
+    SWTR1
 };
 
 enum class DAC0_R12DH_Bits : uint32_t {
@@ -116,7 +114,6 @@ enum class DAC0_DO_Bits : uint32_t {
 enum class DAC1_DO_Bits : uint32_t {
     DAC1_DO = REG_BIT_DEF(0, 11)
 };
-
 
 ///////////////////////////// ENUMS /////////////////////////////
 

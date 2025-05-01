@@ -19,13 +19,12 @@
 
 #pragma once
 
-#include <stdlib.h>
-#include <stdint.h>
+#include <cstdlib>
+#include <cstdint>
 
 #include "CONFIG.hpp"
 
 namespace pmu {
-
 
 ///////////////////////////// REGISTER OFFSETS /////////////////////////////
 
@@ -33,7 +32,6 @@ enum class PMU_Regs : uint8_t {
     CTL = 0x00U,
     CS = 0x04U
 };
-
 
 ///////////////////////////// REGISTER BITS /////////////////////////////
 
@@ -63,7 +61,6 @@ enum class CS_Bits : uint32_t {
     HDSRF = 17,
     LDRF = REG_BIT_DEF(18, 19)
 };
-
 
 ///////////////////////////// ENUMS /////////////////////////////
 

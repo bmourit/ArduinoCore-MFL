@@ -19,34 +19,41 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <cstdint>
 
 #include "fwdgt_config.hpp"
 #include "RegRW.hpp"
 
 namespace fwdgt {
 
-class RCU;
-
 class FWDGT {
 public:
-    static FWDGT& get_instance();
+    static auto get_instance() -> FWDGT&;
 
+    // Enable
     void enable();
+
+    // Write
     void write_enable();
     void write_disable();
     void set_write_enable(bool enable);
-    bool set_prescaler(Prescaler_Value value);
-    uint32_t get_prescaler();
-    bool set_reload_prescaler(uint32_t reload, Prescaler_Value value);
-    bool set_reload(uint32_t reload);
-    uint32_t get_reload();
+
+    // Prescaler
+    auto set_prescaler(Prescaler_Value value) -> bool;
+    auto get_prescaler() -> uint32_t;
+    auto set_reload_prescaler(uint32_t reload, Prescaler_Value value) -> bool;
+
+    // Reload
+    auto set_reload(uint32_t reload) -> bool;
+    auto get_reload() -> uint32_t;
     void reload_counter();
-    bool get_flag(Status_Flags flag);
 
-    static inline constexpr uintptr_t FWDGT_baseAddress = 0x40003000U;
+    // Flags
+    auto get_flag(Status_Flags flag) -> bool;
 
-    inline volatile uint32_t* reg_address(FWDGT_Regs reg) const {
+    static inline constexpr uintptr_t FWDGT_baseAddress = 0x4000'3000U;
+
+    [[nodiscard]] inline auto reg_address(FWDGT_Regs reg) const -> volatile uint32_t* {
         return reinterpret_cast<volatile uint32_t*>(FWDGT_baseAddress + static_cast<uint32_t>(reg));
     }
 
@@ -55,7 +62,7 @@ private:
 
     // Prevent copying or assigning
     FWDGT(const FWDGT&) = delete;
-    FWDGT& operator=(const FWDGT&) = delete;
+    auto operator=(const FWDGT&) -> FWDGT& = delete;
 };
 
 } // namespace fwdgt
