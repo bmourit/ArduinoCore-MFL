@@ -98,7 +98,6 @@ extern "C" {
      * @param radix The radix to use for the conversion (2 to 36).
      * @return A pointer to the beginning of the resulting string.
      */
-
     char* ultoa(unsigned long value, char* string, int radix) {
         if (string == nullptr || radix > 36 || radix <= 1) {
             return nullptr;

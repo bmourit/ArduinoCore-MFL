@@ -87,12 +87,14 @@ void RealTimeClock::getTime(Time_Set& time) {
     time = time_;
 
     const uint32_t timestamp = rtc_.get_counter() + SecondsPerHour * 8;
-    const uint32_t daySeconds = timestamp % SecondsPerDay;
+    const uint32_t days = timestamp / SecondsPerDay;
+    const uint32_t daySeconds = timestamp - (days * SecondsPerDay);
 
     // Calculate time components
     time.hour = daySeconds / SecondsPerHour;
-    time.minute = (daySeconds % SecondsPerHour) / SecondsPerMinute;
-    time.second = daySeconds % SecondsPerMinute;
+    const uint32_t remAfterHours = daySeconds - (time.hour * SecondsPerHour);
+    time.minute = remAfterHours / SecondsPerMinute;
+    time.second = remAfterHours - (time.minute * SecondsPerMinute);
 
     // Calculate date components
     uint32_t remainingDays = timestamp / SecondsPerDay;

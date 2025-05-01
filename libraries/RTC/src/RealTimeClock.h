@@ -76,7 +76,7 @@ private:
     }
 
     inline auto isLeapYear(uint16_t year) -> bool {
-        return (!((year) % 400) || (((year) & 100) && !((year) % 4)));
+        return ((year & 3U) == 0) && ((year % 100U != 0) || (year % 400U == 0));
     }
 
     inline uint32_t getYearLength(uint16_t year) {
