@@ -1,15 +1,16 @@
 #pragma once
 
 #include "Arduino.h"
+#include "variant.h"
 
 struct PinOps {
     gpio::GPIO_Base port;
     gpio::Pin_Number pin;
     uint32_t packedPinOps;
-    bool operator==(const PinOps& other) const {
+    auto operator==(const PinOps& other) const -> bool {
         return (port == other.port) && (pin == other.pin) && (packedPinOps == other.packedPinOps);
     }
-    bool operator!=(const PinOps& other) const {
+    auto operator!=(const PinOps& other) const -> bool {
         return !(*this == other);
     }
 };
@@ -49,27 +50,33 @@ struct SDIOPinOps {
     PinOps pinOps;
 };
 
-enum class ConfigBits : uint32_t {
+enum class ConfigBits : uint8_t {
     MODE_SHIFT = 0U,
     MODE_MASK = 0x7U,
     SPEED_SHIFT = 3U,
-    SPEED_MASK = 0x7U << SPEED_SHIFT,
+    SPEED_MASK = 0x7U,
     REMAP_SHIFT = 6U,
-    REMAP_MASK = 0x3FU << REMAP_SHIFT,
+    REMAP_MASK = 0x3FU,
     CHANNEL_SHIFT = 12U,
-    CHANNEL_MASK = 0xFU << CHANNEL_SHIFT,
+    CHANNEL_MASK = 0xFU,
     CHON_SHIFT = 16U,
-    CHON_MASK = 0x1U << CHON_SHIFT
+    CHON_MASK = 0x1U
 };
 
+//////////////////////////// DEPRECATED ////////////////////////////
+// These two functions are now deprecated
+inline constexpr auto getPortFromPin(pin_size_t pin) -> gpio::GPIO_Base;
+inline constexpr auto getPinInPort(pin_size_t pin) -> gpio::Pin_Number;
+////////////////////////////////////////////////////////////////////
+
+// Set PinOps
 void setPinOp(pin_size_t pin, uint32_t packedPinOps);
 void setPinOp(gpio::GPIO_Base port, gpio::Pin_Number pin, uint32_t packedPinOps);
-inline constexpr gpio::GPIO_Base getPortFromPin(pin_size_t pin);
-inline constexpr gpio::Pin_Number getPinInPort(pin_size_t pin);
-inline constexpr uint32_t createPackedPinOps(gpio::Pin_Mode mode, gpio::Output_Speed speed,
-        gpio::Pin_Remap_Select remap = gpio::Pin_Remap_Select::NO_REMAP,
-        uint8_t channel = 0U, uint8_t chon = 0U);
 
+// Pack PinOps
+inline constexpr auto createPackedPinOps(gpio::Pin_Mode mode, gpio::Output_Speed speed,
+        gpio::Pin_Remap_Select remap = gpio::Pin_Remap_Select::NO_REMAP,
+        uint8_t channel = 0U, uint8_t chon = 0U) -> uint32_t;
 
 /////////////////////////////// PIN IN PINOPS ///////////////////////////////
 
@@ -85,15 +92,15 @@ inline constexpr uint32_t createPackedPinOps(gpio::Pin_Mode mode, gpio::Output_S
  * @return true if the pin is found in the array, false otherwise.
  */
 template<typename T>
-inline bool isPinInPinOps(const T* pinOpsArray, pin_size_t pin) {
+inline auto isPinInPinOps(const T* pinOpsArray, pin_size_t pin) -> bool {
     for (const T* ops = pinOpsArray; ops->pinOps.pin != gpio::Pin_Number::INVALID; ++ops) {
-        if ((ops->pinOps.port == getPortFromPin(pin)) && (ops->pinOps.pin == getPinInPort(pin))) {
+        const PortPinPair& pp = port_pin_map[pin];
+        if (ops->pinOps.port == pp.port && ops->pinOps.pin == pp.pin) {
             return true;
         }
     }
     return false;
 }
-
 
 /////////////////////////////// CREATE PACKED PINOPS ///////////////////////////////
 
@@ -114,22 +121,21 @@ inline bool isPinInPinOps(const T* pinOpsArray, pin_size_t pin) {
  * @param[in] chon The timer channel companion to set.
  * @return A packed 32-bit word representing the PinOps.
  */
-inline constexpr uint32_t createPackedPinOps(gpio::Pin_Mode mode, gpio::Output_Speed speed, gpio::Pin_Remap_Select remap, uint8_t channel, uint8_t chon) {
-    return (static_cast<uint32_t>(mode) & 0x7U) |
-           ((static_cast<uint32_t>(speed) & 0x7U) << static_cast<uint32_t>(ConfigBits::SPEED_SHIFT)) |
-           ((static_cast<uint32_t>(remap) & 0x3FU) << static_cast<uint32_t>(ConfigBits::REMAP_SHIFT)) |
-           ((static_cast<uint32_t>(channel) & 0xFU) << static_cast<uint32_t>(ConfigBits::CHANNEL_SHIFT)) |
-           ((static_cast<uint32_t>(chon) & 0x1U) << static_cast<uint32_t>(ConfigBits::CHON_SHIFT));
+inline constexpr auto createPackedPinOps(gpio::Pin_Mode mode, gpio::Output_Speed speed, gpio::Pin_Remap_Select remap, uint8_t channel, uint8_t chon) -> uint32_t {
+    return (static_cast<uint32_t>(mode) & static_cast<uint32_t>(ConfigBits::MODE_MASK)) |
+           ((static_cast<uint32_t>(speed) & static_cast<uint32_t>(ConfigBits::SPEED_MASK)) << static_cast<uint32_t>(ConfigBits::SPEED_SHIFT)) |
+           ((static_cast<uint32_t>(remap) & static_cast<uint32_t>(ConfigBits::REMAP_MASK)) << static_cast<uint32_t>(ConfigBits::REMAP_SHIFT)) |
+           ((static_cast<uint32_t>(channel) & static_cast<uint32_t>(ConfigBits::CHANNEL_MASK)) << static_cast<uint32_t>(ConfigBits::CHANNEL_SHIFT)) |
+           ((static_cast<uint32_t>(chon) & static_cast<uint32_t>(ConfigBits::CHON_MASK)) << static_cast<uint32_t>(ConfigBits::CHON_SHIFT));
 }
 
-static inline constexpr uint32_t invalidValue = 0U;
+inline constexpr uint32_t invalidValue = 0U;
 
-static inline constexpr PinOps invalidPinOps = {
+inline constexpr PinOps invalidPinOps = {
     .port = gpio::GPIO_Base::INVALID,
     .pin = gpio::Pin_Number::INVALID,
     .packedPinOps = createPackedPinOps(gpio::Pin_Mode::INVALID, gpio::Output_Speed::INVALID, gpio::Pin_Remap_Select::NO_REMAP, 0, 0)
 };
-
 
 /////////////////////////////// PINOPS BY PERIPHERAL ///////////////////////////////
 
@@ -146,7 +152,7 @@ static inline constexpr PinOps invalidPinOps = {
  *         PinOps if no matching PinOps is found.
  */
 template<typename T, typename P>
-inline constexpr PinOps getPinOpsByPeripheral(const T* pinOpsArray, P base) {
+inline constexpr auto getPinOpsByPeripheral(const T* pinOpsArray, P base) -> PinOps {
     for (const T* ops = pinOpsArray; ops->pinOps.pin != gpio::Pin_Number::INVALID; ++ops) {
         if (ops->peripheral == base) {
             return ops->pinOps;
@@ -154,7 +160,6 @@ inline constexpr PinOps getPinOpsByPeripheral(const T* pinOpsArray, P base) {
     }
     return invalidPinOps;
 }
-
 
 /////////////////////////////// PINOPS PERIPHERAL BASE ///////////////////////////////
 
@@ -171,15 +176,15 @@ inline constexpr PinOps getPinOpsByPeripheral(const T* pinOpsArray, P base) {
  *         value of the peripheral base type if no matching PinOps is found.
  */
 template<typename T, typename P>
-inline constexpr P getPinOpsPeripheralBase(const T* pinOpsArray, pin_size_t pin) {
+inline constexpr auto getPinOpsPeripheralBase(const T* pinOpsArray, pin_size_t pin) -> P {
     for (const T* ops = pinOpsArray; ops->pinOps.pin != gpio::Pin_Number::INVALID; ++ops) {
-        if ((ops->pinOps.port == getPortFromPin(pin)) && (ops->pinOps.pin == getPinInPort(pin))) {
+        const PortPinPair& pp = port_pin_map[pin];
+        if ((ops->pinOps.port == pp.port) && (ops->pinOps.pin == pp.pin)) {
             return ops->peripheral;
         }
     }
     return P::INVALID;
 }
-
 
 /////////////////////////////// PINOPS BY PIN ///////////////////////////////
 
@@ -196,15 +201,15 @@ inline constexpr P getPinOpsPeripheralBase(const T* pinOpsArray, pin_size_t pin)
  *         matching PinOps is found.
  */
 template<typename T>
-inline constexpr PinOps getPinOpsByPin(const T* pinOpsArray, pin_size_t pin) {
+inline constexpr auto getPinOpsByPin(const T* pinOpsArray, pin_size_t pin) -> PinOps {
     for (const T* ops = pinOpsArray; ops->pinOps.pin != gpio::Pin_Number::INVALID; ++ops) {
-        if ((ops->pinOps.port == getPortFromPin(pin)) && (ops->pinOps.pin == getPinInPort(pin))) {
+        const PortPinPair& pp = port_pin_map[pin];
+        if ((ops->pinOps.port == pp.port) && (ops->pinOps.pin == pp.pin)) {
             return ops->pinOps;
         }
     }
     return invalidPinOps;
 }
-
 
 /////////////////////////////// PACKED PINOPS BY PERIPHERL ///////////////////////////////
 
@@ -223,15 +228,15 @@ inline constexpr PinOps getPinOpsByPin(const T* pinOpsArray, pin_size_t pin) {
  *         or the invalid value if no matching PinOps is found.
  */
 template<typename T, typename P>
-inline constexpr uint32_t getPackedPinOps(const T* pinOpsArray, P base, pin_size_t pin) {
+inline constexpr auto getPackedPinOps(const T* pinOpsArray, P base, pin_size_t pin) -> uint32_t {
     for (const T* ops = pinOpsArray; ops->pinOps.pin != gpio::Pin_Number::INVALID; ++ops) {
-        if ((ops->peripheral == base) && (ops->pinOps.port == getPortFromPin(pin)) && (ops->pinOps.pin == getPinInPort(pin))) {
+        const PortPinPair& pp = port_pin_map[pin];
+        if (ops->peripheral == base && ops->pinOps.port == pp.port && ops->pinOps.pin == pp.pin) {
             return ops->pinOps.packedPinOps;
         }
     }
     return invalidValue;
 }
-
 
 /////////////////////////////// PACKED PINOPS BY PIN ONLY ///////////////////////////////
 
@@ -248,15 +253,15 @@ inline constexpr uint32_t getPackedPinOps(const T* pinOpsArray, P base, pin_size
  *         if no matching PinOps is found.
  */
 template<typename T>
-inline constexpr uint32_t getPackedPinOps(const T* pinOpsArray, pin_size_t pin) {
+inline constexpr auto getPackedPinOps(const T* pinOpsArray, pin_size_t pin) -> uint32_t {
     for (const T* ops = pinOpsArray; ops->pinOps.pin != gpio::Pin_Number::INVALID; ++ops) {
-        if ((ops->pinOps.port == getPortFromPin(pin)) && (ops->pinOps.pin == getPinInPort(pin))) {
+        const PortPinPair& pp = port_pin_map[pin];
+        if (ops->pinOps.port == pp.port && ops->pinOps.pin == pp.pin) {
             return ops->pinOps.packedPinOps;
         }
     }
     return invalidValue;
 }
-
 
 /////////////////////////////// PINOPS PINOUT ///////////////////////////////
 
@@ -273,7 +278,8 @@ inline constexpr uint32_t getPackedPinOps(const T* pinOpsArray, pin_size_t pin) 
 template<typename T>
 inline constexpr void pinOpsPinout(const T* pinOpsArray, pin_size_t pin) {
     for (const T* ops = pinOpsArray; ops->pinOps.pin != gpio::Pin_Number::INVALID; ++ops) {
-        if ((ops->pinOps.port == getPortFromPin(pin)) && (ops->pinOps.pin == getPinInPort(pin))) {
+        const PortPinPair& pp = port_pin_map[pin];
+        if (ops->pinOps.port == pp.port && ops->pinOps.pin == pp.pin) {
             setPinOp(pin, ops->pinOps.packedPinOps);
         }
     }
@@ -289,8 +295,9 @@ inline constexpr void pinOpsPinout(const T* pinOpsArray, pin_size_t pin) {
  * @param packedPinOps The packed 32-bit pin operations value containing the channel information.
  * @return The channel number extracted from the packed pin operations.
  */
-inline constexpr uint8_t getPackedPinChannel(uint32_t packedPinOps) {
-    return static_cast<uint8_t>((packedPinOps & static_cast<uint32_t>(ConfigBits::CHANNEL_MASK)) >> static_cast<uint32_t>(ConfigBits::CHANNEL_SHIFT));
+inline constexpr auto getPackedPinChannel(uint32_t packedPinOps) -> uint8_t {
+    const uint32_t channelShift = static_cast<uint32_t>(ConfigBits::CHANNEL_SHIFT);
+    return static_cast<uint8_t>((packedPinOps & (static_cast<uint32_t>(ConfigBits::CHANNEL_MASK) << channelShift)) >> channelShift);
 }
 
 /**
@@ -303,8 +310,9 @@ inline constexpr uint8_t getPackedPinChannel(uint32_t packedPinOps) {
  * @param packedPinOps The packed 32-bit pin operations value containing the channel-on information.
  * @return The channel-on number extracted from the packed pin operations.
  */
-inline constexpr uint8_t getPackedPinChOn(uint32_t packedPinOps) {
-    return static_cast<uint8_t>((packedPinOps & static_cast<uint32_t>(ConfigBits::CHON_MASK)) >> static_cast<uint32_t>(ConfigBits::CHON_SHIFT));
+inline constexpr auto getPackedPinChOn(uint32_t packedPinOps) -> uint8_t {
+    const uint32_t chonShift = static_cast<uint32_t>(ConfigBits::CHON_SHIFT);
+    return static_cast<uint8_t>((packedPinOps & (static_cast<uint32_t>(ConfigBits::CHON_MASK) << chonShift)) >> chonShift);
 }
 
 /**
@@ -318,8 +326,8 @@ inline constexpr uint8_t getPackedPinChOn(uint32_t packedPinOps) {
  *                     information.
  * @return The pin mode extracted from the packed PinOps value.
  */
-inline constexpr gpio::Pin_Mode getPackedPinMode(uint32_t packedPinOps) {
-    uint32_t pinMode = (packedPinOps & static_cast<uint32_t>(ConfigBits::MODE_MASK));
+inline constexpr auto getPackedPinMode(uint32_t packedPinOps) -> gpio::Pin_Mode {
+    uint32_t pinMode = packedPinOps & static_cast<uint32_t>(ConfigBits::MODE_MASK);
     return static_cast<gpio::Pin_Mode>(pinMode);
 }
 
@@ -335,8 +343,9 @@ inline constexpr gpio::Pin_Mode getPackedPinMode(uint32_t packedPinOps) {
  *                     speed information.
  * @return The output speed extracted from the packed PinOps value.
  */
-inline constexpr gpio::Output_Speed getPackedPinSpeed(uint32_t packedPinOps) {
-    uint32_t pinSpeed = ((packedPinOps & static_cast<size_t>(ConfigBits::SPEED_MASK)) >> static_cast<size_t>(ConfigBits::SPEED_SHIFT));
+inline constexpr auto getPackedPinSpeed(uint32_t packedPinOps) -> gpio::Output_Speed {
+    const uint32_t speedShift = static_cast<uint32_t>(ConfigBits::SPEED_SHIFT);
+    uint32_t pinSpeed = (packedPinOps & (static_cast<uint32_t>(ConfigBits::SPEED_MASK) << speedShift)) >> speedShift;
     return static_cast<gpio::Output_Speed>(pinSpeed);
 }
 
@@ -352,8 +361,9 @@ inline constexpr gpio::Output_Speed getPackedPinSpeed(uint32_t packedPinOps) {
  *                     information.
  * @return The pin remap extracted from the packed PinOps value.
  */
-inline constexpr gpio::Pin_Remap_Select getPackedPinRemap(uint32_t packedPinOps) {
-    uint32_t remap = ((packedPinOps & static_cast<uint32_t>(ConfigBits::REMAP_MASK)) >> static_cast<uint32_t>(ConfigBits::REMAP_SHIFT));
+inline constexpr auto getPackedPinRemap(uint32_t packedPinOps) -> gpio::Pin_Remap_Select {
+    const uint32_t remapShift = static_cast<uint32_t>(ConfigBits::REMAP_SHIFT);
+    uint32_t remap = (packedPinOps & (static_cast<uint32_t>(ConfigBits::REMAP_MASK) << remapShift)) >> remapShift;
     return static_cast<gpio::Pin_Remap_Select>(remap);
 }
 
@@ -368,7 +378,7 @@ inline constexpr gpio::Pin_Remap_Select getPackedPinRemap(uint32_t packedPinOps)
  * @return The GPIO instance associated with the given base address, or the invalid
  *         instance if the base address is invalid.
  */
-inline gpio::GPIO portToInstance(gpio::GPIO_Base port) {
+inline auto portToInstance(gpio::GPIO_Base port) -> gpio::GPIO {
     auto result = gpio::GPIO::get_instance(port);
     if (result.error() != gpio::GPIO_Error_Type::OK) {
         core_debug("Invalid gpio instance!");
@@ -377,6 +387,8 @@ inline gpio::GPIO portToInstance(gpio::GPIO_Base port) {
 }
 
 /**
+ * //////////////////////////// DEPRECATED ////////////////////////////
+ * 
  * @brief Converts a pin number to its corresponding GPIO base address.
  *
  * This function takes a pin number as input and extracts the GPIO base address
@@ -387,15 +399,17 @@ inline gpio::GPIO portToInstance(gpio::GPIO_Base port) {
  * @return The GPIO base address associated with the given pin number, or
  *         GPIO_Base::INVALID if the pin number is invalid.
  */
-inline constexpr gpio::GPIO_Base getPortFromPin(pin_size_t pin) {
-    uint32_t portIndex = static_cast<uint32_t>(pin >> 4U);
-    if (portIndex >= static_cast<uint32_t>(gpio::GPIO_Base::INVALID)) {
+inline constexpr auto getPortFromPin(pin_size_t pin) -> gpio::GPIO_Base {
+    auto portIndex = static_cast<uint8_t>(pin >> 4U);
+    if (portIndex >= static_cast<uint8_t>(gpio::GPIO_Base::INVALID)) {
         return gpio::GPIO_Base::INVALID;
     }
     return static_cast<gpio::GPIO_Base>(portIndex);
 }
 
 /**
+ * //////////////////////////// DEPRECATED ////////////////////////////
+ * 
  * @brief Retrieves the pin number in the port for the given pin number.
  *
  * This function takes a pin number as input and extracts the pin number in the
@@ -406,8 +420,8 @@ inline constexpr gpio::GPIO_Base getPortFromPin(pin_size_t pin) {
  * @return The pin number in the port associated with the given pin number, or
  *         Pin_Number::INVALID if the pin number is invalid.
  */
-inline constexpr gpio::Pin_Number getPinInPort(pin_size_t pin) {
-    uint8_t pinInPort = static_cast<uint8_t>(pin & 0xF);
+inline constexpr auto getPinInPort(pin_size_t pin) -> gpio::Pin_Number {
+    auto pinInPort = static_cast<uint8_t>(pin & 0xF);
     if (pinInPort <= 15U) {
         return static_cast<gpio::Pin_Number>(pinInPort);
     }
@@ -424,7 +438,7 @@ inline constexpr gpio::Pin_Number getPinInPort(pin_size_t pin) {
  * @param pin The pin number to compute the bit mask value for.
  * @return The bit mask value for the given pin number in its port.
  */
-inline constexpr uint32_t getPinBitMaskValueInPort(pin_size_t pin) {
+inline constexpr auto getPinBitMaskValueInPort(pin_size_t pin) -> uint32_t {
     return static_cast<uint32_t>(1U << (pin & 0xF));
 }
 
@@ -445,7 +459,7 @@ inline void setPinOpsFast(gpio::GPIO_Base port, gpio::Pin_Number pin, gpio::Pin_
     instance.set_pin_mode(pin, mode);
 }
 
-// C++ wrappers called from C compatable functions
+// Wrappers for C function compatability
 inline uint32_t getPortOutputRegister(gpio::GPIO_Base port) {
     return reinterpret_cast<uint32_t>(portToInstance(port).reg_address(gpio::GPIO_Regs::OCTL));
 }
@@ -462,7 +476,7 @@ inline uint32_t getPortClearRegister(gpio::GPIO_Base port) {
     return reinterpret_cast<uint32_t>(portToInstance(port).reg_address(gpio::GPIO_Regs::BC));
 }
 
-inline pin_size_t digitalPinToInterrupt(pin_size_t pin) {
+inline pin_size_t digitalPinToInterrupt(pin_size_t pin)  {
     return pin;
 }
 

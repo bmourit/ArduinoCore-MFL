@@ -30,7 +30,7 @@
  * @param size The number of bytes to allocate.
  * @return A pointer to the start of the allocated memory block.
  */
-void* operator new(size_t size) {
+auto operator new(size_t size) -> void* {
     return malloc(size);
 }
 
@@ -77,7 +77,7 @@ void operator delete(void* ptr, size_t) {
  * @param size The number of bytes to allocate.
  * @return A pointer to the start of the allocated memory block.
  */
-void* operator new[](size_t size) {
+auto operator new[](size_t size) -> void* {
     return malloc(size);
 }
 

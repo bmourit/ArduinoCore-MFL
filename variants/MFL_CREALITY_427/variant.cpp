@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2025 Arduino. All rights reserved.
+  Copyright (c) 2025 Arduino LLC.  All rights reserved.
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -16,19 +16,4 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-#include <stdlib.h>
-
-extern "C" void __cxa_pure_virtual(void) __attribute__((__noreturn__));
-extern "C" void __cxa_deleted_virtual(void) __attribute__((__noreturn__));
-
-void __cxa_pure_virtual(void) {
-    // We might want to write some diagnostics to uart in this case
-    //std::terminate();
-    while (true);
-}
-
-void __cxa_deleted_virtual(void) {
-    // We might want to write some diagnostics to uart in this case
-    //std::terminate();
-    while (true);
-}
+#include "variant.h"

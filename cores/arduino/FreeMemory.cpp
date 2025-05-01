@@ -27,9 +27,9 @@ extern "C" {
      * stack size is not maintained, the function sets errno to ENOMEM and
      * returns -1.
      *
-     * @param[in]  incr  The number of bytes to increment the heap.
-     * @return          The address of the new heap end, or -1 if the heap
-     *                  allocation fails.
+     * @param  incr  The number of bytes to increment the heap.
+     * @return The address of the new heap end, or -1 if the heap
+     *         allocation fails.
      */
     __attribute__((weak)) void* _sbrk(int incr) {
         extern char _estack;          // Defined in the linker script

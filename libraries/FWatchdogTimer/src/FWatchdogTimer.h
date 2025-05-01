@@ -23,14 +23,14 @@
 
 class FWatchdogTimer {
 public:
-    static FWatchdogTimer& get_instance();
+    static auto get_instance() -> FWatchdogTimer&;
 
-    bool begin(uint32_t timeout);
-    bool set(uint32_t timeout);
+    auto begin(uint32_t timeout) -> bool;
+    auto set(uint32_t timeout) -> bool;
     void get(uint32_t* timeout);
     void reload();
-    bool isEnabled() { return enabled_; }
-    bool isReset(bool clear = false);
+    auto isEnabled() -> bool { return enabled_; }
+    auto isReset(bool clear = false) -> bool;
     void clearReset();
 
 private:
@@ -39,5 +39,5 @@ private:
     fwdgt::FWDGT& fwdgt_;
     bool enabled_;
 
-    bool isTimeout(uint32_t timeout);
+    auto isTimeout(uint32_t timeout) -> bool;
 };

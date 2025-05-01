@@ -209,9 +209,9 @@ env.ProcessFlags(board_config.get("build.framework_extra_flags.arduino", ""))
 #
 
 if not board_config.get("build.ldscript", ""):
-	if not isfile(join(env.subst(variant_dir), "MFL_422.ld")):
+	if not isfile(join(env.subst(variant_dir), "MFL_LINK.ld")):
 		print("Warning! Cannot find linker script for the current target!\n")
-	env.Replace(LDSCRIPT_PATH=join(variant_dir, "MFL_422.ld"))
+	env.Replace(LDSCRIPT_PATH=join(variant_dir, "MFL_LINK.ld"))
 
 #
 # Process configuration flags

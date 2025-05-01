@@ -16,6 +16,8 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
+#include <utility>
+
 #include "Arduino.h"
 #include "ExtiManager.h"
 
@@ -51,7 +53,7 @@ static void staticInterruptHandler() {
  * return type and one parameter.
  */
 void callbackWrapper(void* param) {
-    voidFuncPtr func = reinterpret_cast<voidFuncPtr>(param);
+    auto func = reinterpret_cast<voidFuncPtr>(param);
     func();
 }
 
@@ -74,7 +76,7 @@ void callbackWrapper(void* param) {
 void attachInterruptParam(pin_size_t pin, voidFuncPtrParam callback, PinStatus mode, void* param) {
     // Find a free slot
     int slotIndex = -1;
-    for (int i = 0; i < static_cast<int>(maxExtiLines_); i++) {
+    for (int i = 0; std::cmp_less(i ,maxExtiLines_); i++) {
         if (!usedSlots[i]) {
             slotIndex = i;
             break;
@@ -103,7 +105,7 @@ void attachInterruptParam(pin_size_t pin, voidFuncPtrParam callback, PinStatus m
             break;
     }
 
-    callbackStorage[slotIndex] = CallbackWrapper{callback, param};
+    callbackStorage[slotIndex] = CallbackWrapper{.callback=callback, .param=param};
     usedSlots[slotIndex] = true;
     currentSlot = static_cast<uint8_t>(slotIndex);
 
@@ -138,9 +140,9 @@ void detachInterrupt(pin_size_t pin) {
     ExtiManager::get_instance().disablePinExtiInterrupt(pin);
 
     // Free the used slot
-    for (int i = 0; i < static_cast<int>(maxExtiLines_); i++) {
-        if (usedSlots[i]) {
-            usedSlots[i] = false;
+    for (bool & usedSlot : usedSlots) {
+        if (usedSlot) {
+            usedSlot = false;
             break;
         }
     }

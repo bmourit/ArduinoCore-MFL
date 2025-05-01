@@ -24,7 +24,7 @@ constexpr uint32_t maxPrescaler = 256U;
 constexpr uint32_t minTimeout = ((minPrescaler * 1'000'000U) / rcu::IRC40K_VALUE);       // microseconds
 constexpr uint32_t maxTimeoutBase = ((maxPrescaler * 1'000'000U) / rcu::IRC40K_VALUE);   // microseconds
 
-FWatchdogTimer& FWatchdogTimer::get_instance() {
+auto FWatchdogTimer::get_instance() -> FWatchdogTimer& {
     static FWatchdogTimer instance;
     return instance;
 }
@@ -53,7 +53,7 @@ FWatchdogTimer::FWatchdogTimer() :
  *
  * @note This function will only return false if the given timeout value is invalid.
  */
-bool FWatchdogTimer::begin(uint32_t timeout) {
+auto FWatchdogTimer::begin(uint32_t timeout) -> bool {
     if (!isTimeout(timeout)) {
         core_debug("Invalid timeout value");
         return false;
@@ -85,7 +85,7 @@ bool FWatchdogTimer::begin(uint32_t timeout) {
  * @note This function will only return false if the given timeout value is invalid or if the
  * FWDGT hardware block is not enabled.
  */
-bool FWatchdogTimer::set(uint32_t timeout) {
+auto FWatchdogTimer::set(uint32_t timeout) -> bool {
     if (!isEnabled() || !isTimeout(timeout)) {
         return false;
     }
@@ -170,7 +170,7 @@ void FWatchdogTimer::reload() {
  *
  * @note This function will return false if the FWDGT reset flag is cleared.
  */
-bool FWatchdogTimer::isReset(bool clear) {
+auto FWatchdogTimer::isReset(bool clear) -> bool {
     bool status = RCU_I.get_flag(rcu::Status_Flags::FLAG_FWDGTRST);
     if (status && clear) clearReset();
     return status;
@@ -195,6 +195,6 @@ void FWatchdogTimer::clearReset() {
  * The minimum valid timeout value is 125us and the maximum valid timeout value
  * is 32,768s (~32.8 seconds). The precision depends of the IRC40K clock value.
  */
-inline bool FWatchdogTimer::isTimeout(uint32_t timeout) {
+inline auto FWatchdogTimer::isTimeout(uint32_t timeout) -> bool {
     return (((timeout) >= minTimeout) && ((timeout) <= (maxTimeoutBase * fwdgt_.get_reload())));
 }

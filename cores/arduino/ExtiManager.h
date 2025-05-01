@@ -13,7 +13,9 @@
     #define EXTI_IRQ_SUBPRIORITY    0U
 #endif
 
-#define MAX_EXTI_LINES  16
+enum {
+    MAX_EXTI_LINES = 16
+};
 
 inline constexpr uint8_t maxExtiLines_ = MAX_EXTI_LINES;
 
@@ -24,9 +26,9 @@ struct exti_to_irq {
 
 class ExtiManager {
 public:
-    static ExtiManager& get_instance();
+    static auto get_instance() -> ExtiManager&;
 
-    using EXTICallback = void (*)(void);
+    using EXTICallback = void (*)();
 
     void enablePinExtiInterrupt(pin_size_t pin, EXTICallback callback, exti::EXTI_Trigger type);
     void disablePinExtiInterrupt(pin_size_t pin);
@@ -40,7 +42,7 @@ private:
     exti::EXTI& exti_;
     EXTICallback callbacks_[maxExtiLines_];
 
-    inline IRQn_Type extiToIrq(uint8_t extiIndex) {
+    inline auto extiToIrq(uint8_t extiIndex) -> IRQn_Type {
         if (extiIndex < maxExtiLines_) {
             return irq_index[extiIndex].irq_type;
         }

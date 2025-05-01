@@ -9,7 +9,7 @@ constexpr const uint32_t SecondsPerMinute = 60U;
 constexpr const uint32_t SecondsPerHour = 3600U;
 constexpr const uint32_t SecondsPerDay = 86400U;
 
-RealTimeClock& RealTimeClock::get_instance() {
+auto RealTimeClock::get_instance() -> RealTimeClock& {
     static RealTimeClock instance;
     return instance;
 }

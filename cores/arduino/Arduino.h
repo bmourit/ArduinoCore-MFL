@@ -7,10 +7,20 @@
 #include "CoreHandler.h"
 #include "variant.h"
 
+// libc porting layers for GCC
+#if defined(__GNUC__)
+    #define WEAK  __attribute__((weak))
+#endif
+
 #ifdef __cplusplus
     #include "mfl_api.h"
     using namespace arduino;
 #endif  // __cplusplus
+
+// Arduino core version number
+#define VERSION_MAJOR   1   // Major version
+#define VERSION_MINOR   0   // Minor version
+#define VERSION_PATCH   5   // Patch version
 
 #define interrupts()      __enable_irq()
 #define noInterrupts()    __disable_irq()
@@ -21,10 +31,12 @@
     // Arduino API extensions
     inline constexpr PinMode INPUT_ANALOG = static_cast<PinMode>(0x5);
     inline constexpr IRQn_Type INVALID_IRQ = static_cast<IRQn_Type>(99);
+    inline constexpr uint32_t CORE_VERSION = (VERSION_MAJOR << 16) | (VERSION_MINOR << 8) | (VERSION_PATCH);
 #else
     #define NO_PIN  70
     #define INPUT_ANALOG    ((PinMode)0x5)
     #define INVALID_IRQ     ((IRQn_Type)99)
+    #define CORE_VERSION    (VERSION_MAJOR << 16) | (VERSION_MINOR << 8) | (VERSION_PATCH)
 #endif  // __cplusplus
 
 #ifdef __cplusplus

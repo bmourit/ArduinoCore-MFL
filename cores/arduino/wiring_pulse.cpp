@@ -19,6 +19,7 @@
 #include "Arduino.h"
 #include "PinOpsMap.hpp"
 #include "PinOps.hpp"
+#include "variant.h"
 
 /**
  * @brief Measures the length (in microseconds) of a pulse on the pin; state is
@@ -37,12 +38,10 @@
  * This function relies on micros() so cannot be used in noInterrupt() context
  */
 unsigned long pulseIn(uint8_t pin, uint8_t state, unsigned long timeout) {
-    // Cache the port and pinInPort of the pin in order to speed up the
-    // pulse width measuring loop and achieve finer resolution.
-    // Calling digitalRead() instead yields much coarser resolution.
-    gpio::GPIO_Base port = getPortFromPin(static_cast<pin_size_t>(pin));
-    gpio::Pin_Number pinInPort = getPinInPort(static_cast<pin_size_t>(pin));
-    if (port == gpio::GPIO_Base::INVALID || pinInPort == gpio::Pin_Number::INVALID) {
+    // Use PortPinPair map to speed up the pulse width measuring loop and
+    // achieve finer resolution vs calling digitalRead()
+    const PortPinPair& pp = port_pin_map[pin];
+    if (pp.port == gpio::GPIO_Base::INVALID || pp.pin == gpio::Pin_Number::INVALID) {
         return 0;
     }
 
@@ -50,14 +49,14 @@ unsigned long pulseIn(uint8_t pin, uint8_t state, unsigned long timeout) {
     uint32_t startMicros = micros();
 
     // Wait for any previous pulse to end
-    while (gpio::fast_read_pin(port, pinInPort) == level) {
+    while (gpio::fast_read_pin(pp.port, pp.pin) == level) {
         if ((micros() - startMicros) > timeout) {
             return 0;
         }
     }
 
     // Wait for the pulse to start
-    while (gpio::fast_read_pin(port, pinInPort) != level) {
+    while (gpio::fast_read_pin(pp.port, pp.pin) != level) {
         if ((micros() - startMicros) > timeout) {
             return 0;
         }
@@ -65,7 +64,7 @@ unsigned long pulseIn(uint8_t pin, uint8_t state, unsigned long timeout) {
     uint32_t start = micros();
 
     // Wait for the pulse to stop
-    while (gpio::fast_read_pin(port, pinInPort) == level) {
+    while (gpio::fast_read_pin(pp.port, pp.pin) == level) {
         if ((micros() - startMicros) > timeout) {
             return 0;
         }

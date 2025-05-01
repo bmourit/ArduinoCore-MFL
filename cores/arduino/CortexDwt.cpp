@@ -1,12 +1,12 @@
 
 #include "CortexDwt.h"
 
-CortexDWT& CortexDWT::get_instance() {
+auto CortexDWT::get_instance() -> CortexDWT& {
     static CortexDWT instance;
     return instance;
 }
 
-CortexDWT::CortexDWT() {}
+CortexDWT::CortexDWT() = default;
 
 /**
  * @brief Initializes the DWT to be used as a cycle counter.

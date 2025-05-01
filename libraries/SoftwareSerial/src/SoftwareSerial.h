@@ -59,10 +59,10 @@ public:
     virtual ~SoftwareSerial();
 
     // Stream implementation
-    virtual int read() override;
+    int read();
     virtual size_t write(uint8_t data) override;
-    virtual int available() override;
-    virtual void flush() override;
+    int available() override;
+    void flush() override;
     int peek() override;
     operator bool() { return true; }
     using Print::write;
@@ -106,9 +106,9 @@ private:
 
     inline void setTX() {
         if (inverseLogic_) {
-            gpio::fast_clear_pin(txPort_, txPinNumber_);
+            gpio::fast_write_pin(txPort_, txPinNumber_, false);
         } else {
-            gpio::fast_set_pin(txPort_, txPinNumber_);
+            gpio::fast_write_pin(txPort_, txPinNumber_, true);
         }
         setPinOpsFast(txPort_, txPinNumber_, gpio::Pin_Mode::OUTPUT_PUSHPULL);
     }
@@ -149,9 +149,9 @@ private:
         if (txBitCount < 10) {  // Transmission not finished (10 = 1 start + 8 bits + 1 stop)
             // Send data (including start and stop bits)
             if (txBuffer & 1) {
-                gpio::fast_set_pin(txPort_, txPinNumber_);
+                gpio::fast_write_pin(txPort_, txPinNumber_, true);
             } else {
-                gpio::fast_clear_pin(txPort_, txPinNumber_);
+                gpio::fast_write_pin(txPort_, txPinNumber_, false);
             }
 
             txBuffer >>= 1;

@@ -51,7 +51,7 @@ __attribute__((constructor)) void premain() {
  * serialEvent() function. The serialEvent() function is a placeholder for a
  * user-provided function that is called when there is serial data available.
  */
-int main(void) {
+int main() {
 #ifdef ENABLE_DWT
     armDWT::get_instance().init();
 #endif

@@ -20,7 +20,7 @@
 
 extern "C" {
 
-    constexpr int MAX_BUFFER_SIZE = 33;
+    #define MAX_BUFFER_SIZE 33
 
     /**
      * @brief Converts a signed long integer to a string in a specified radix.

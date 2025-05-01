@@ -4,9 +4,9 @@
 constexpr uint16_t MAX_PERIOD = 0xFFFFU;
 constexpr uint8_t maxNumTimers_ = TIMER_COUNT;
 
-timer::TIMER& GeneralTimer::get_timer_instance(timer::TIMER_Base Base) {
+auto GeneralTimer::get_timer_instance(timer::TIMER_Base Base) -> timer::TIMER& {
     static timer::TIMER* timer_instances[TIMER_COUNT] = {nullptr};
-    size_t index = static_cast<size_t>(Base);
+    const auto index = static_cast<size_t>(Base);
 
     if (timer_instances[index] == nullptr) {
         auto result = timer::TIMER::get_instance(Base);
@@ -18,10 +18,11 @@ timer::TIMER& GeneralTimer::get_timer_instance(timer::TIMER_Base Base) {
         }
         timer_instances[index] = &result.value();
     }
+
     return *timer_instances[index];
 }
 
-GeneralTimer& GeneralTimer::get_instance(timer::TIMER_Base Base) {
+auto GeneralTimer::get_instance(timer::TIMER_Base Base) -> GeneralTimer& {
     switch (Base) {
         case timer::TIMER_Base::TIMER0_BASE: { static GeneralTimer GTimer0(Base); return GTimer0; }
         case timer::TIMER_Base::TIMER1_BASE: { static GeneralTimer GTimer1(Base); return GTimer1; }
@@ -42,14 +43,14 @@ GeneralTimer& GeneralTimer::get_instance(timer::TIMER_Base Base) {
 }
 
 std::array<timer_to_irq, maxNumTimers_> GeneralTimer::timer_up_irq {{
-        {0U, TIMER0_UP_IRQn}, {1U, TIMER1_IRQn}, {2U, TIMER2_IRQn}, {3U, TIMER3_IRQn},
-        {4U, TIMER4_IRQn}, {5U, TIMER5_IRQn}, {6U, TIMER6_IRQn}, {7U, TIMER7_UP_IRQn}
-    }};
+    {0U, TIMER0_UP_IRQn}, {1U, TIMER1_IRQn}, {2U, TIMER2_IRQn}, {3U, TIMER3_IRQn},
+    {4U, TIMER4_IRQn}, {5U, TIMER5_IRQn}, {6U, TIMER6_IRQn}, {7U, TIMER7_UP_IRQn}
+}};
 
 std::array<timer_to_irq, maxNumTimers_> GeneralTimer::timer_ch_irq {{
-        {0U, TIMER0_Channel_IRQn}, {1U, TIMER1_IRQn}, {2U, TIMER2_IRQn}, {3U, TIMER3_IRQn},
-        {4U, TIMER4_IRQn}, {5U, TIMER5_IRQn}, {6U, TIMER6_IRQn}, {7U, TIMER7_Channel_IRQn}
-    }};
+    {0U, TIMER0_Channel_IRQn}, {1U, TIMER1_IRQn}, {2U, TIMER2_IRQn}, {3U, TIMER3_IRQn},
+    {4U, TIMER4_IRQn}, {5U, TIMER5_IRQn}, {6U, TIMER6_IRQn}, {7U, TIMER7_Channel_IRQn}
+}};
 
 GeneralTimer::GeneralTimer(timer::TIMER_Base Base) :
     base_(Base),
@@ -57,29 +58,29 @@ GeneralTimer::GeneralTimer(timer::TIMER_Base Base) :
     config_(timer::default_config),
     capture_config_(timer::default_capture),
     compare_config_(timer::default_compare),
-    callbacks_{0, nullptr, {nullptr}},
+    callbacks_{.active_callbacks = 0, .up_callback = nullptr, .channel_callbacks = {nullptr}},
     preemptPriority_(12U),
     subPriority_(0U)
 {
     // Initialize channel modes array
-    for (int i = 0; i < TIMER_CHANNELS; i++) {
-        channel_modes_[i] = InputOutputMode::INVALID;
+    for (auto & channel_mode : channel_modes_) {
+        channel_mode = InputOutputMode::INVALID;
     }
 
     // Initialize companion channels array
-    for (int i = 0; i < TIMER_CHANNELS; i++) {
-        companionChannel[i] = false;
+    for (bool & i : companionChannel) {
+        i = false;
     }
 
-    IRQn_Type upIrq = timerToUpIrq();
-    IRQn_Type ccIrq = timerToChIrq();
+    auto upIrq = timerToUpIrq();
+    auto chIrq = timerToChIrq();
 
-    if (upIrq != INVALID_IRQ && ccIrq != INVALID_IRQ) {
+    if (upIrq != INVALID_IRQ && chIrq != INVALID_IRQ) {
         NVIC_SetPriority(upIrq, preemptPriority_);
         NVIC_EnableIRQ(upIrq);
-        if (ccIrq != upIrq) {
-            NVIC_SetPriority(ccIrq, preemptPriority_);
-            NVIC_EnableIRQ(ccIrq);
+        if (chIrq != upIrq) {
+            NVIC_SetPriority(chIrq, preemptPriority_);
+            NVIC_EnableIRQ(chIrq);
         }
     }
 }
@@ -146,20 +147,35 @@ void GeneralTimer::refresh() {
     timer_.generate_software_event(timer::Event_Source::EVENT_SRC_UPG);
 }
 
+/**
+ * @brief Starts the specified timer channel.
+ *
+ * This function is used to start the specified timer channel. It clears the
+ * interrupt flag and enables the interrupt for the specified channel if the
+ * callback for the channel is set. Then, it sets the channel output enable
+ * based on the channel mode and enables the timer.
+ *
+ * For compare mode, it also enables the companion channel if the channel
+ * callback is set.
+ *
+ * @param channel The timer channel to start.
+ */
 void GeneralTimer::startTimerChannel(timer::Timer_Channel channel) {
+    const auto channelIndex = static_cast<size_t>(channel);
+
     // Clear flag and enable interrupt
-    if (callbacks_.channel_callbacks[static_cast<size_t>(channel)]) {
-        timer::Interrupt_Flags flag = convertToInterruptFlag(channel);
+    if (callbacks_.channel_callbacks[channelIndex]) {
+        auto flag = convertToInterruptFlag(channel);
         if (flag != timer::Interrupt_Flags::INVALID) {
             timer_.clear_interrupt_flag(flag);
         }
-        timer::Interrupt_Type type = convertToInterrupt(channel);
+        auto type = convertToInterrupt(channel);
         if (type != timer::Interrupt_Type::INVALID) {
             timer_.set_interrupt_enable(type, true);
         }
     }
 
-    InputOutputMode mode = channel_modes_[static_cast<size_t>(channel)];
+    InputOutputMode mode = channel_modes_[channelIndex];
 
     switch (mode) {
         case InputOutputMode::COMPARE:
@@ -169,7 +185,7 @@ void GeneralTimer::startTimerChannel(timer::Timer_Channel channel) {
                 // enable companion channel
                 timer::Timer_Channel companion = getCompanionChannel(channel);
                 timer_.set_compliment_output_enable(companion, true);
-                if (callbacks_.channel_callbacks[static_cast<size_t>(channel)]) {
+                if (callbacks_.channel_callbacks[channelIndex]) {
                     timer_.clear_interrupt_flag(convertToInterruptFlag(companion));
                     timer_.set_interrupt_enable(convertToInterrupt(companion), true);
                 }
@@ -183,7 +199,7 @@ void GeneralTimer::startTimerChannel(timer::Timer_Channel channel) {
         case InputOutputMode::CLEAR: case InputOutputMode::TOGGLE:
         case InputOutputMode::FORCE_LOW: case InputOutputMode::FORCE_HIGH:
         case InputOutputMode::PWM0: case InputOutputMode::PWM1:
-            if (companionChannel[static_cast<size_t>(channel)]) {
+            if (companionChannel[channelIndex]) {
                 timer_.set_compliment_output_enable(channel, true);
             } else {
                 timer_.set_channel_output_enable(channel, true);
@@ -205,8 +221,8 @@ void GeneralTimer::startTimerChannel(timer::Timer_Channel channel) {
  * @param channel The timer channel to disable. Valid values are Timer_Channel::CH0, Timer_Channel::CH1, Timer_Channel::CH2, or Timer_Channel::CH3.
  */
 void GeneralTimer::stopTimerChannel(timer::Timer_Channel channel) {
-    timer::Interrupt_Flags flag = convertToInterruptFlag(channel);
-    timer::Interrupt_Type type = convertToInterrupt(channel);
+    auto flag = convertToInterruptFlag(channel);
+    auto type = convertToInterrupt(channel);
 
     if (flag != timer::Interrupt_Flags::INVALID && type != timer::Interrupt_Type::INVALID) {
         timer_.clear_interrupt_flag(flag);
@@ -235,7 +251,7 @@ void GeneralTimer::stopTimerChannel(timer::Timer_Channel channel) {
  * The reload event is generated when the counter reaches the auto-reload
  * value or when the counter is cleared.
  *
- * @param[in] prescaler The 16-bit prescaler value to set.
+ * @param prescaler The 16-bit prescaler value to set.
  */
 void GeneralTimer::setPrescaler(uint16_t prescaler) {
     timer_.set_prescaler_reload(prescaler - 1U, timer::PSC_Reload::RELOAD_NOW);
@@ -249,7 +265,7 @@ void GeneralTimer::setPrescaler(uint16_t prescaler) {
  *
  * @return The current prescaler value of the timer.
  */
-uint16_t GeneralTimer::getPrescaler() {
+auto GeneralTimer::getPrescaler() -> uint16_t {
     return timer_.get_prescaler() + 1U;
 }
 
@@ -261,25 +277,26 @@ uint16_t GeneralTimer::getPrescaler() {
  * to before it resets to 0. The format parameter determines the unit of the
  * rollover value. The unit can be microseconds, hertz, or timer ticks.
  *
- * @param[in] value The value to set as the rollover value.
- * @param[in] format The unit of the value parameter.
+ * @param value The value to set as the rollover value.
+ * @param format The unit of the value parameter.
  */
 void GeneralTimer::setRolloverValue(uint32_t value, TimerFormat format) {
     // TICK format
     if (format == TimerFormat::TICK) {
         timer_.set_auto_reload((value > 0U) ? value - 1U : 0U);
-    } else {
-        // US and HERTZ formats
-        const uint32_t timerClock = getTimerClockFrequency();
-        uint32_t cycle = (format == TimerFormat::US) ?
-                          value * (timerClock / 1'000'000U) :
-                          timerClock / value;
-        const uint32_t prescalerValue = (cycle / 0x10000U) + 1U;
-        const uint32_t tickValue = cycle / prescalerValue;
-
-        timer_.set_prescaler_reload(static_cast<uint16_t>(prescalerValue - 1U), timer::PSC_Reload::RELOAD_UPDATE);
-        timer_.set_auto_reload((tickValue > 0U) ? tickValue - 1U : 0U);
+        return;
     }
+
+    // US and HERTZ formats
+    const uint32_t timerClock = getTimerClockFrequency();
+    uint32_t cycle = (format == TimerFormat::US) ?
+                      value * (timerClock / 1'000'000U) :
+                      timerClock / value;
+    const uint32_t prescalerValue = (cycle / 0x10000U) + 1U;
+    const uint32_t tickValue = cycle / prescalerValue;
+
+    timer_.set_prescaler_reload(static_cast<uint16_t>(prescalerValue - 1U), timer::PSC_Reload::RELOAD_UPDATE);
+    timer_.set_auto_reload((tickValue > 0U) ? tickValue - 1U : 0U);
 }
 
 /**
@@ -290,18 +307,26 @@ void GeneralTimer::setRolloverValue(uint32_t value, TimerFormat format) {
  * it resets to 0. The format parameter determines the unit of the rollover
  * value. The unit can be microseconds, hertz, or timer ticks.
  *
- * @param[in] format The unit of the value to return.
+ * @param format The unit of the value to return.
  * @return The rollover value in the specified format.
  */
-uint32_t GeneralTimer::getRolloverValue(TimerFormat format) {
-    const uint32_t prescalerValue = static_cast<uint32_t>(timer_.get_prescaler()) + 1U;
+auto GeneralTimer::getRolloverValue(TimerFormat format) -> uint32_t {
     const uint16_t value = timer_.get_auto_reload();
+
+    // TICK format
+    if (format == TimerFormat::TICK) {
+        return value + 1U;
+    }
+
+    // US and HERTZ formats
+    const uint32_t prescalerValue = static_cast<uint32_t>(timer_.get_prescaler()) + 1U;
     const uint32_t timerClock = getTimerClockFrequency();
 
     return (format == TimerFormat::US) ?
            ((value + 1U) * prescalerValue * 1'000'000U) / timerClock :
            (format == TimerFormat::HERTZ) ?
-           timerClock / ((value + 1U) * prescalerValue) : value + 1U;
+           timerClock / ((value + 1U) * prescalerValue) :
+           value + 1U; // Fallback
 }
 
 /**
@@ -312,17 +337,25 @@ uint32_t GeneralTimer::getRolloverValue(TimerFormat format) {
  * counts up from. The format parameter determines the unit of the counter
  * value. The unit can be microseconds, hertz, or timer ticks.
  *
- * @param[in] count The value to set as the counter value.
- * @param[in] format The unit of the value parameter.
+ * @param count The value to set as the counter value.
+ * @param format The unit of the value parameter.
  */
 void GeneralTimer::setCounter(uint16_t count, TimerFormat format) {
+    // TICK format
+    if (format == TimerFormat::TICK) {
+        timer_.set_counter_value(count);
+        return;
+    }
+
+    // US and HERTZ formats
     const uint32_t prescalerValue = static_cast<uint32_t>(timer_.get_prescaler()) + 1U;
     const uint32_t timerClock = getTimerClockFrequency();
 
     uint16_t counterValue = (format == TimerFormat::US) ?
-                            ((count * (timerClock / 1'000'000U)) / prescalerValue) :
+                            (count * (timerClock / 1'000'000U)) / prescalerValue :
                             (format == TimerFormat::HERTZ) ?
-                            (timerClock / (count * prescalerValue)) : count;
+                            (timerClock / (count * prescalerValue)) :
+                            count;  // Fallback
 
     timer_.set_counter_value(counterValue);
 }
@@ -335,18 +368,26 @@ void GeneralTimer::setCounter(uint16_t count, TimerFormat format) {
  * from. The format parameter determines the unit of the counter value. The
  * unit can be microseconds, hertz, or timer ticks.
  *
- * @param[in] format The unit of the value to return.
+ * @param format The unit of the value to return.
  * @return The current counter value in the specified format.
  */
-uint32_t GeneralTimer::getCounter(TimerFormat format) {
+auto GeneralTimer::getCounter(TimerFormat format) -> uint32_t {
     const uint32_t counterValue = timer_.get_counter();
+
+    // TICK format
+    if (format == TimerFormat::TICK) {
+        return counterValue;
+    }
+
+    // US and HERTZ formats
     const uint32_t prescalerValue = static_cast<uint32_t>(timer_.get_prescaler()) + 1U;
     const uint32_t timerClock = getTimerClockFrequency();
 
     return (format == TimerFormat::US) ?
-           ((counterValue * prescalerValue * 1'000'000U) / timerClock) :
+           (counterValue * prescalerValue * 1'000'000U) / timerClock :
            (format == TimerFormat::HERTZ) ?
-           (timerClock / (counterValue * prescalerValue)) : counterValue;
+           (timerClock / (counterValue * prescalerValue)) :
+           counterValue;    // Fallback
 }
 
 /**
@@ -357,18 +398,18 @@ uint32_t GeneralTimer::getCounter(TimerFormat format) {
  * FORCE_HIGH, PWM0, PWM1, RISING, FALLING, or COMPARE. The mode setting
  * determines how the timer channel behaves.
  *
- * @param[in] channel The timer channel to configure. Valid values are
+ * @param channel The timer channel to configure. Valid values are
  *                     Timer_Channel::CH0, Timer_Channel::CH1, Timer_Channel::CH2, or
  *                     Timer_Channel::CH3.
- * @param[in] mode The mode to set for the specified timer channel.
- * @param[in] pin The pin number associated with the specified timer channel.
+ * @param mode The mode to set for the specified timer channel.
+ * @param pin The pin number associated with the specified timer channel.
  */
 void GeneralTimer::setChannelMode(timer::Timer_Channel channel, InputOutputMode mode, pin_size_t pin) {
     if (static_cast<uint8_t>(channel) > static_cast<uint8_t>(TIMER_CHANNELS)) {
         return;
     }
 
-    const size_t channelIndex = static_cast<size_t>(channel);
+    const auto channelIndex = static_cast<size_t>(channel);
     channel_modes_[channelIndex] = mode;
 
     // Directly set capture values
@@ -445,8 +486,8 @@ void GeneralTimer::setChannelMode(timer::Timer_Channel channel, InputOutputMode 
         case InputOutputMode::COMPARE: {
             timer_.input_capture_init(channel, capture_config_);
             // Configure companion channel
-            const timer::Timer_Channel companionCh = getCompanionChannel(channel);
-            channel_modes_[static_cast<size_t>(companionCh)] = mode;
+            const auto companionCh = getCompanionChannel(channel);
+            channel_modes_[channelIndex] = mode;
             capture_config_.polarity = timer::Polarity_Select::LOW_FALLING;
             capture_config_.source_select = timer::Input_Capture_Select::IO_INPUT_CI1FE0;
             timer_.input_capture_init(companionCh, capture_config_);
@@ -473,7 +514,7 @@ void GeneralTimer::setChannelMode(timer::Timer_Channel channel, InputOutputMode 
  * @param channel The timer channel to query. Valid values are Timer_Channel::CH0, Timer_Channel::CH1, Timer_Channel::CH2, or Timer_Channel::CH3.
  * @return The current output compare mode of the specified timer channel.
  */
-InputOutputMode GeneralTimer::getChannelMode(timer::Timer_Channel channel) {
+auto GeneralTimer::getChannelMode(timer::Timer_Channel channel) -> InputOutputMode {
     if (channel >= timer::Timer_Channel::CH0 && channel < timer::Timer_Channel::INVALID) {
         return channel_modes_[static_cast<size_t>(channel)];
     }
@@ -524,6 +565,18 @@ void GeneralTimer::setCaptureCompare(timer::Timer_Channel channel, uint32_t valu
         return;
     }
 
+    // Avoid multiple calls
+    const auto autoReloadValue = timer_.get_auto_reload();
+
+    // TICK format
+    if (format == CCFormat::TICK) {
+        if (autoReloadValue == MAX_PERIOD && value == (MAX_PERIOD + 1U)) {
+            value = MAX_PERIOD;
+        }
+        timer_.set_capture_compare(channel, value);
+        return;
+    }
+
     const uint32_t prescalerValue = static_cast<uint32_t>(timer_.get_prescaler()) + 1U;
     uint32_t ccValue = 0U;
 
@@ -535,21 +588,21 @@ void GeneralTimer::setCaptureCompare(timer::Timer_Channel channel, uint32_t valu
             ccValue = getTimerClockFrequency() / (value * prescalerValue);
             break;
         case CCFormat::PERCENT:
-            ccValue = ((timer_.get_auto_reload() + 1U) * value) / 100U;
+            ccValue = ((autoReloadValue + 1U) * value) / 100U;
             break;
         case CCFormat::B1: case CCFormat::B2: case CCFormat::B3: case CCFormat::B4:
         case CCFormat::B5: case CCFormat::B6: case CCFormat::B7: case CCFormat::B8:
         case CCFormat::B9: case CCFormat::B10: case CCFormat::B11: case CCFormat::B12:
         case CCFormat::B13: case CCFormat::B14: case CCFormat::B15: case CCFormat::B16:
-            ccValue = ((timer_.get_auto_reload() + 1U) * value) / ((1U << static_cast<size_t>(format)) - 1U);
+            ccValue = ((autoReloadValue + 1U) * value) / ((1U << static_cast<uint32_t>(format)) - 1U);
             break;
-        case CCFormat::TICK:
+        case CCFormat::TICK:    // Already handled
         default:
-            ccValue = value;
+            ccValue = value;    // Fallback
             break;
     }
 
-    if ((timer_.get_auto_reload() == MAX_PERIOD) && (ccValue == MAX_PERIOD + 1U)) {
+    if ((autoReloadValue == MAX_PERIOD) && (ccValue == MAX_PERIOD + 1U)) {
         ccValue = MAX_PERIOD;
     }
 
@@ -580,7 +633,7 @@ void GeneralTimer::setCaptureCompare(timer::Timer_Channel channel, uint32_t valu
  * @param format The format of the compare value. Defaults to CCFormat::TICK.
  * @return The capture compare value in the specified format.
  */
-uint32_t GeneralTimer::getCaptureCompare(timer::Timer_Channel channel, CCFormat format) {
+auto GeneralTimer::getCaptureCompare(timer::Timer_Channel channel, CCFormat format) -> uint32_t {
     if (channel == timer::Timer_Channel::INVALID || format == CCFormat::INVALID) {
         return 0U;
     }
@@ -593,9 +646,9 @@ uint32_t GeneralTimer::getCaptureCompare(timer::Timer_Channel channel, CCFormat 
     }
 
     // Handle bit resolution formats efficiently (B1-B16)
-    uint8_t formatValue = static_cast<size_t>(format);
-    if (formatValue >= static_cast<size_t>(CCFormat::B1) &&
-            formatValue <= static_cast<size_t>(CCFormat::B16)) {
+    uint8_t formatValue = static_cast<uint8_t>(format);
+    if (formatValue >= static_cast<uint8_t>(CCFormat::B1) &&
+            formatValue <= static_cast<uint8_t>(CCFormat::B16)) {
         uint16_t autoReload = timer_.get_auto_reload();
         return (ccValue * ((1U << formatValue) - 1U)) / autoReload;
     }
@@ -620,17 +673,17 @@ uint32_t GeneralTimer::getCaptureCompare(timer::Timer_Channel channel, CCFormat 
  * @param pin Pin number to output PWM signal
  * @param frequency PWM frequency in Hz
  * @param dutycycle PWM dutycycle in percent (0-100)
- * @param UPCallback Timer update callback (optional)
- * @param CCCallback Timer channel callback (optional)
+ * @param UpCallback Timer update callback (optional)
+ * @param ChCallback Timer channel callback (optional)
  *
  * @note If pin is not PWM capable or invalid, function returns without effect
  */
-void GeneralTimer::setPWM(timer::Timer_Channel channel, pin_size_t pin, uint32_t frequency, uint32_t dutycycle, TimerCallback UPCallback, TimerCallback CCCallback) {
+void GeneralTimer::setPWM(timer::Timer_Channel channel, pin_size_t pin, uint32_t frequency, uint32_t dutycycle, TimerCallback UpCallback, TimerCallback ChCallback) {
     setChannelMode(channel, InputOutputMode::PWM0, pin);
     setRolloverValue(frequency, TimerFormat::HERTZ);
     setCaptureCompare(channel, dutycycle, CCFormat::PERCENT);
-    if (UPCallback) { attachInterrupt(UPCallback); }
-    if (CCCallback) { attachInterrupt(CCCallback, channel); }
+    if (UpCallback) { attachInterrupt(UpCallback); }
+    if (ChCallback) { attachInterrupt(ChCallback, channel); }
     start();
 }
 
@@ -649,14 +702,14 @@ void GeneralTimer::setPWM(timer::Timer_Channel channel, pin_size_t pin, uint32_t
  * @param subPriority The subpriority of the interrupt.
  */
 void GeneralTimer::setInterruptPriority(uint8_t preemptPriority, uint8_t subPriority) {
-    IRQn_Type upIrq = timerToUpIrq();
-    IRQn_Type ccIrq = timerToChIrq();
+    auto upIrq = timerToUpIrq();
+    auto chIrq = timerToChIrq();
 
-    if (upIrq == INVALID_IRQ || ccIrq == INVALID_IRQ) return;
+    if (upIrq == INVALID_IRQ || chIrq == INVALID_IRQ) return;
 
     NVIC_SetPriority(upIrq, preemptPriority);
-    if (ccIrq != upIrq) {
-        NVIC_SetPriority(ccIrq, preemptPriority);
+    if (chIrq != upIrq) {
+        NVIC_SetPriority(chIrq, preemptPriority);
     }
 
     preemptPriority_ = preemptPriority;
@@ -699,8 +752,8 @@ void GeneralTimer::attachInterrupt(TimerCallback callback) {
  * @note If channel is invalid or out of range, function returns without action.
  */
 void GeneralTimer::attachInterrupt(TimerCallback callback, timer::Timer_Channel channel) {
-    const size_t channelIndex = static_cast<size_t>(channel);
-    if (channelIndex < 0 || channelIndex > TIMER_CHANNELS) return;
+    const auto channelIndex = static_cast<size_t>(channel);
+    if (channelIndex < 0 || channelIndex > static_cast<size_t>(TIMER_CHANNELS)) return;
 
     if (callbacks_.channel_callbacks[channelIndex]) {
         callbacks_.channel_callbacks[channelIndex] = callback;
@@ -721,7 +774,7 @@ void GeneralTimer::attachInterrupt(TimerCallback callback, timer::Timer_Channel 
  * This function disables the update interrupt and clears the associated callback.
  */
 void GeneralTimer::detachInterrupt() {
-    IRQn_Type upIrq = timerToUpIrq();
+    auto upIrq = timerToUpIrq();
     if (upIrq == INVALID_IRQ) return;
     timer_.set_interrupt_enable(timer::Interrupt_Type::INTR_UPIE, false);
     callbacks_.up_callback = nullptr;
@@ -737,11 +790,11 @@ void GeneralTimer::detachInterrupt() {
  * @param channel The timer channel to detach the interrupt from (CH0-CH3).
  */
 void GeneralTimer::detachInterrupt(timer::Timer_Channel channel) {
-    const size_t channelIndex = static_cast<size_t>(channel);
+    const auto channelIndex = static_cast<size_t>(channel);
     if (channelIndex >= static_cast<size_t>(TIMER_CHANNELS)) return;
 
-    IRQn_Type ccIrq = timerToChIrq();
-    if (ccIrq == INVALID_IRQ) return;
+    auto chIrq = timerToChIrq();
+    if (chIrq == INVALID_IRQ) return;
 
     timer_.set_interrupt_enable(convertToInterrupt(channel), false);
     callbacks_.channel_callbacks[channelIndex] = nullptr;
@@ -751,7 +804,7 @@ void GeneralTimer::detachInterrupt(timer::Timer_Channel channel) {
  * @brief Checks if an interrupt callback is registered for the timer update interrupt.
  * @return true if an interrupt callback exists, false if no callback
  */
-bool GeneralTimer::hasInterrupt() {
+auto GeneralTimer::hasInterrupt() -> bool {
     return callbacks_.up_callback != nullptr;
 }
 
@@ -760,8 +813,8 @@ bool GeneralTimer::hasInterrupt() {
  * @param channel The timer channel to check for an interrupt callback (CH0-CH3).
  * @return true if an interrupt callback exists, false if no callback
  */
-bool GeneralTimer::hasInterrupt(timer::Timer_Channel channel) {
-    const size_t channelIndex = static_cast<size_t>(channel);
+auto GeneralTimer::hasInterrupt(timer::Timer_Channel channel) -> bool {
+    const auto channelIndex = static_cast<size_t>(channel);
     if (channelIndex < 0 || channelIndex > static_cast<size_t>(TIMER_CHANNELS)) {
         return false;
     }
@@ -777,7 +830,7 @@ bool GeneralTimer::hasInterrupt(timer::Timer_Channel channel) {
  *
  * @return The clock frequency of the timer in Hz.
  */
-uint32_t GeneralTimer::getTimerClockFrequency() {
+auto GeneralTimer::getTimerClockFrequency() -> uint32_t {
     if (base_ == timer::TIMER_Base::INVALID) return 0U;
 
     const bool apb2_bus = (base_ == timer::TIMER_Base::TIMER0_BASE || base_ == timer::TIMER_Base::TIMER7_BASE);
@@ -835,7 +888,6 @@ void GeneralTimer::timerInterruptHandler() {
         }
     }
 }
-
 
 // Interrupt handlers
 extern "C" {

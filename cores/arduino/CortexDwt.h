@@ -1,14 +1,13 @@
 
 #pragma once
 
-#include <stdbool.h>
 #include <limits>
 
 #include "mfl_api.h"
 
 class CortexDWT {
 public:
-    static CortexDWT& get_instance();
+    static auto get_instance() -> CortexDWT&;
 
     uint32_t init();
     inline uint32_t getCycleCount() {
@@ -26,4 +25,8 @@ public:
 
 private:
     CortexDWT();
+
+    // Prevent copying or assigning
+    CortexDWT(const CortexDWT&) = delete;
+    auto operator=(const CortexDWT&) -> CortexDWT& = delete;
 };

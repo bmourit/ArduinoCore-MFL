@@ -178,6 +178,9 @@
 // C++ only
 #ifdef __cplusplus
 
+    #include <array>
+    #include "GPIO.hpp"
+
     // These serial port names are intended to allow libraries and architecture-neutral
     // sketches to automatically default to the correct port name for a particular type
     // of use.  For example, a GPS module would normally connect to SERIAL_PORT_HARDWARE_OPEN,
@@ -199,5 +202,57 @@
     #ifndef SERIAL_PORT_HARDWARE
         #define SERIAL_PORT_HARDWARE  Serial0
     #endif
+
+    // Ultra-compact port/pin pair structure
+    struct PortPinPair {
+      gpio::GPIO_Base port : 3;
+      gpio::Pin_Number pin : 5;
+    };
+
+    // Ports
+    inline constexpr gpio::GPIO_Base GPIO_A = gpio::GPIO_Base::GPIOA_BASE;
+    inline constexpr gpio::GPIO_Base GPIO_B = gpio::GPIO_Base::GPIOB_BASE;
+    inline constexpr gpio::GPIO_Base GPIO_C = gpio::GPIO_Base::GPIOC_BASE;
+    inline constexpr gpio::GPIO_Base GPIO_D = gpio::GPIO_Base::GPIOD_BASE;
+
+    // Pins
+    inline constexpr gpio::Pin_Number PN0 = gpio::Pin_Number::PIN_0;
+    inline constexpr gpio::Pin_Number PN1 = gpio::Pin_Number::PIN_1;
+    inline constexpr gpio::Pin_Number PN2 = gpio::Pin_Number::PIN_2;
+    inline constexpr gpio::Pin_Number PN3 = gpio::Pin_Number::PIN_3;
+    inline constexpr gpio::Pin_Number PN4 = gpio::Pin_Number::PIN_4;
+    inline constexpr gpio::Pin_Number PN5 = gpio::Pin_Number::PIN_5;
+    inline constexpr gpio::Pin_Number PN6 = gpio::Pin_Number::PIN_6;
+    inline constexpr gpio::Pin_Number PN7 = gpio::Pin_Number::PIN_7;
+    inline constexpr gpio::Pin_Number PN8 = gpio::Pin_Number::PIN_8;
+    inline constexpr gpio::Pin_Number PN9 = gpio::Pin_Number::PIN_9;
+    inline constexpr gpio::Pin_Number PN10 = gpio::Pin_Number::PIN_10;
+    inline constexpr gpio::Pin_Number PN11 = gpio::Pin_Number::PIN_11;
+    inline constexpr gpio::Pin_Number PN12 = gpio::Pin_Number::PIN_12;
+    inline constexpr gpio::Pin_Number PN13 = gpio::Pin_Number::PIN_13;
+    inline constexpr gpio::Pin_Number PN14 = gpio::Pin_Number::PIN_14;
+    inline constexpr gpio::Pin_Number PN15 = gpio::Pin_Number::PIN_15;
+
+    // Pre-computed port/pin map for all possible pins
+    // Maximum possible pins: TOTAL_PIN_COUNT
+    inline constexpr std::array<PortPinPair, TOTAL_PIN_COUNT> port_pin_map = {{
+      // Port A pins (0-15)
+      {GPIO_A, PN0},  {GPIO_A, PN1},  {GPIO_A, PN2},  {GPIO_A, PN3},
+      {GPIO_A, PN4},  {GPIO_A, PN5},  {GPIO_A, PN6},  {GPIO_A, PN7},
+      {GPIO_A, PN8},  {GPIO_A, PN9},  {GPIO_A, PN10}, {GPIO_A, PN11},
+      {GPIO_A, PN12}, {GPIO_A, PN13}, {GPIO_A, PN14}, {GPIO_A, PN15},
+      // Port B pins (16-31)
+      {GPIO_B, PN0},  {GPIO_B, PN1},  {GPIO_B, PN2},  {GPIO_B, PN3},
+      {GPIO_B, PN4},  {GPIO_B, PN5},  {GPIO_B, PN6},  {GPIO_B, PN7},
+      {GPIO_B, PN8},  {GPIO_B, PN9},  {GPIO_B, PN10}, {GPIO_B, PN11},
+      {GPIO_B, PN12}, {GPIO_B, PN13}, {GPIO_B, PN14}, {GPIO_B, PN15},
+      // Port C pins (32-47)
+      {GPIO_C, PN0},  {GPIO_C, PN1},  {GPIO_C, PN2},  {GPIO_C, PN3},
+      {GPIO_C, PN4},  {GPIO_C, PN5},  {GPIO_C, PN6},  {GPIO_C, PN7},
+      {GPIO_C, PN8},  {GPIO_C, PN9},  {GPIO_C, PN10}, {GPIO_C, PN11},
+      {GPIO_C, PN12}, {GPIO_C, PN13}, {GPIO_C, PN14}, {GPIO_C, PN15},
+      // Port D pins (48-50)
+      {GPIO_D, PN0},  {GPIO_D, PN1},  {GPIO_D, PN2}
+    }};
 
 #endif  // __cplusplus

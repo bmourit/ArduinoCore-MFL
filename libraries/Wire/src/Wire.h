@@ -32,7 +32,7 @@ namespace arduino {
 
 class TwoWire : public HardwareI2C {
 public:
-    static TwoWire& get_instance(i2c::I2C_Base Base, pin_size_t sdaPin = NO_PIN, pin_size_t sclPin = NO_PIN);
+    static auto get_instance(i2c::I2C_Base Base, pin_size_t sdaPin = NO_PIN, pin_size_t sclPin = NO_PIN) -> TwoWire&;
 
     void begin() override;
     void begin(uint8_t address) override;
@@ -44,7 +44,7 @@ public:
     size_t requestFrom(uint8_t address, size_t len, bool stopBit) override;
     size_t requestFrom(uint8_t address, size_t len) override;
     void onReceive(void(*)(int)) override;
-    void onRequest(void(*)(void)) override;
+    void onRequest(void(*)()) override;
 
     size_t write(uint8_t data);
     size_t write(const uint8_t* buffer, size_t len);
@@ -98,7 +98,7 @@ private:
     // Interrupt helpers
     void setSlaveInterruptEnable();
     void (*onReceiveCallback)(int);
-    void (*onRequestCallback)(void);
+    void (*onRequestCallback)();
 };
 
 } // namespace arduino

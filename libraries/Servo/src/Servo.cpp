@@ -24,6 +24,8 @@
 
 #include <Arduino.h>
 #include <GeneralTimer.h>
+
+#include <utility>
 #include "Servo.h"
 
 static ServoConfig servos[MAX_SERVOS];
@@ -42,12 +44,12 @@ volatile uint32_t TotalCount = 0;
 
 static void Servo_PeriodElapsedCallback() {
     constexpr Timers16Bit timerId = Timers16Bit::timer1;
-    const uint8_t idx = static_cast<uint8_t>(timerId);
+    const auto idx = static_cast<uint8_t>(timerId);
     int8_t channel = timerChannel[idx];
 
     if (channel < 0) {
         TotalCount = 0;
-    } else if (channel < ServoCount && servos[channel].pinNumber.isActive == true) {
+    } else if (std::cmp_less(channel , ServoCount) && servos[channel].pinNumber.isActive == true) {
         digitalWrite(servos[channel].pinNumber.pin, LOW);   // Pulse LOW if active
     }
 
@@ -55,7 +57,7 @@ static void Servo_PeriodElapsedCallback() {
     ++channel;
     timerChannel[idx] = channel;
 
-    if (channel < ServoCount && channel < SERVOS_PER_TIMER) {
+    if (std::cmp_less(channel , ServoCount) && std::cmp_less(channel , SERVOS_PER_TIMER)) {
         const auto& servo = servos[channel];
         servoTimer.setRolloverValue(servo.ticks, TimerFormat::TICK);
         TotalCount = TotalCount + servo.ticks;
@@ -84,9 +86,9 @@ static void TimerServoInit() {
 }
 
 // Check active status
-static bool isTimerActive() {
-    for (uint8_t channel = 0U; channel < SERVOS_PER_TIMER; channel++) {
-        if (servos[channel].pinNumber.isActive) {
+static auto isTimerActive() -> bool {
+    for (auto & servo : servos) {
+        if (servo.pinNumber.isActive) {
             return true;
         }
     }
@@ -106,11 +108,11 @@ Servo::Servo() :
     }
 }
 
-uint8_t Servo::attach(int pin) {
+auto Servo::attach(int pin) -> uint8_t {
     return this->attach(pin, MIN_PULSE_WIDTH, MAX_PULSE_WIDTH);
 }
 
-uint8_t Servo::attach(int pin, int min, int max) {
+auto Servo::attach(int pin, int min, int max) -> uint8_t {
     if (this->servoIndex < MAX_SERVOS) {
         pinMode(static_cast<pin_size_t>(pin), OUTPUT);
         servos[this->servoIndex].pinNumber.pin = pin;
@@ -164,11 +166,11 @@ void Servo::writeMicroseconds(int value) {
     }
 }
 
-int Servo::read() {
+auto Servo::read() -> int {
     return map(readMicroseconds() + 1, SERVO_MIN(), SERVO_MAX(), 0, 180);
 }
 
-int Servo::readMicroseconds() {
+auto Servo::readMicroseconds() -> int {
     unsigned int pulsewidth;
     if (this->servoIndex != INVALID_SERVO) {
         pulsewidth = servos[this->servoIndex].ticks;
@@ -179,6 +181,6 @@ int Servo::readMicroseconds() {
     return pulsewidth;
 }
 
-bool Servo::attached() {
+auto Servo::attached() -> bool {
     return servos[this->servoIndex].pinNumber.isActive;
 }

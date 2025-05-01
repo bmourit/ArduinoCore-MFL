@@ -18,15 +18,16 @@
  */
 
 #include <Arduino.h>
-#include <assert.h>
+#include <cassert>
 #include <PinOpsMap.hpp>
 #include <PinOps.hpp>
 #include "SPI.h"
 
 namespace arduino {
 
-SPIClassMFL& SPIClassMFL::get_instance(spi::SPI_Base Base, pin_size_t mosiPin,
-                                       pin_size_t misoPin, pin_size_t sclkPin, pin_size_t sselPin)
+auto SPIClassMFL::get_instance(spi::SPI_Base Base,
+                pin_size_t mosiPin, pin_size_t misoPin,
+                pin_size_t sclkPin, pin_size_t sselPin) -> SPIClassMFL&
 {
     switch (Base) {
         case spi::SPI_Base::SPI0_BASE: {
@@ -53,8 +54,9 @@ SPIClassMFL& SPIClassMFL::get_instance(spi::SPI_Base Base, pin_size_t mosiPin,
     }
 }
 
-SPIClassMFL::SPIClassMFL(spi::SPI_Base Base, pin_size_t mosiPin,
-                         pin_size_t misoPin, pin_size_t sclkPin, pin_size_t sselPin) :
+SPIClassMFL::SPIClassMFL(spi::SPI_Base Base,
+                         pin_size_t mosiPin, pin_size_t misoPin,
+                         pin_size_t sclkPin, pin_size_t sselPin) :
     base_(Base),
     spi_(spi::SPI::get_instance(Base).value()),
     customMosiPin_(mosiPin),
@@ -90,17 +92,21 @@ SPIClassMFL::SPIClassMFL(spi::SPI_Base Base, pin_size_t mosiPin,
  */
 void SPIClassMFL::begin() {
     configurePins();
-    spi_.init({
-        spi::Operational_Mode::MFD_MODE,
-        spi::Frame_Format::FF_8BIT,
-        spi::NSS_Type::SOFTWARE_NSS,
-        spi::PCLK_Divider::PCLK_2,
-        spi::Endian_Type::MSBF,
-        spi::Clock_Polarity::PULL_LOW,
-        spi::Clock_Phase::PHASE_FIRST_EDGE
+
+    spi_.init(spi::SPI_Config{
+        .operational_mode = spi::Operational_Mode::MFD_MODE,
+        .frame_format = spi::Frame_Format::FF_8BIT,
+        .nss_type = spi::NSS_Type::SOFTWARE_NSS,
+        .pclk_divider = spi::PCLK_Divider::PCLK_2,
+        .msbf = spi::Endian_Type::MSBF,
+        .polarity_pull = spi::Clock_Polarity::PULL_LOW,
+        .clock_phase = spi::Clock_Phase::PHASE_FIRST_EDGE
     });
+
     updateSettings(DEFAULT_SPI_SETTINGS);
+
     spi_.set_enable(true);
+
     initialized_ = true;
 }
 
@@ -192,7 +198,7 @@ uint16_t SPIClassMFL::transfer16(uint16_t data) {
  * @param count The number of bytes in the buffer
  */
 void SPIClassMFL::transfer(void* buf, size_t count) {
-    uint8_t* buffer = static_cast<uint8_t*>(buf);
+    auto* buffer = static_cast<uint8_t*>(buf);
     for (size_t i = 0; i < count; i++) {
         buffer[i] = transfer(buffer[i]);
     }
@@ -315,15 +321,6 @@ void SPIClassMFL::setClockDivider(uint32_t clock) {
                            (div <= 128) ? spi::PCLK_Divider::PCLK_128 :
                            spi::PCLK_Divider::PCLK_256;
 
-    /*if (div <= 2) config_.pclk_divider = spi::PCLK_Divider::PCLK_2;
-    else if (div <= 4) config_.pclk_divider = spi::PCLK_Divider::PCLK_4;
-    else if (div <= 8) config_.pclk_divider = spi::PCLK_Divider::PCLK_8;
-    else if (div <= 16) config_.pclk_divider = spi::PCLK_Divider::PCLK_16;
-    else if (div <= 32) config_.pclk_divider = spi::PCLK_Divider::PCLK_32;
-    else if (div <= 64) config_.pclk_divider = spi::PCLK_Divider::PCLK_64;
-    else if (div <= 128) config_.pclk_divider = spi::PCLK_Divider::PCLK_128;
-    else config_.pclk_divider = spi::PCLK_Divider::PCLK_256;*/
-
     spi_.init(config_);
 }
 
@@ -367,11 +364,9 @@ void SPIClassMFL::configurePins() {
         // Initialize pin
         auto& mosiPort = gpio::GPIO::get_instance(mosiPinOps.port).value();
         mosiPort.set_pin_mode(mosiPinOps.pin, mosiMode, mosiSpeed);
-        // Check remap
+        // Set remap
         auto mosiRemap = getPackedPinRemap(mosiPinOps.packedPinOps);
-        if (mosiRemap != gpio::Pin_Remap_Select::NO_REMAP) {
-            AFIO_I.set_remap(mosiRemap);
-        }
+        AFIO_I.set_remap(mosiRemap);
     }
 
     // MISO pin
@@ -387,11 +382,9 @@ void SPIClassMFL::configurePins() {
         // Initialize pin
         auto& misoPort = gpio::GPIO::get_instance(misoPinOps.port).value();
         misoPort.set_pin_mode(misoPinOps.pin, misoMode, misoSpeed);
-        // Check remap
+        // Set remap
         auto misoRemap = getPackedPinRemap(misoPinOps.packedPinOps);
-        if (misoRemap != gpio::Pin_Remap_Select::NO_REMAP) {
-            AFIO_I.set_remap(misoRemap);
-        }
+        AFIO_I.set_remap(misoRemap);
     }
 
     // SCLK pin
@@ -407,11 +400,9 @@ void SPIClassMFL::configurePins() {
         // Initialize pin
         auto& sclkPort = gpio::GPIO::get_instance(sclkPinOps.port).value();
         sclkPort.set_pin_mode(sclkPinOps.pin, sclkMode, sclkSpeed);
-        // Check remap
+        // Set remap
         auto sclkRemap = getPackedPinRemap(sclkPinOps.packedPinOps);
-        if (sclkRemap != gpio::Pin_Remap_Select::NO_REMAP) {
-            AFIO_I.set_remap(sclkRemap);
-        }
+        AFIO_I.set_remap(sclkRemap);
     }
 
     // SSEL pin (optional)

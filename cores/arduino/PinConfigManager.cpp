@@ -17,10 +17,9 @@ inline constexpr uint8_t Max_Pins_Per_Port = 16U;
  * @return true if the pin has been configured, false if it has not been
  *         configured.
  */
-bool PinConfigManager::isPinConfigured(pin_size_t pin) {
-    gpio::GPIO_Base port = getPortFromPin(pin);
-    gpio::Pin_Number pinInPort = getPinInPort(pin);
-    return (pinIsConfig[static_cast<size_t>(port)] & (1U << static_cast<size_t>(pinInPort))) != 0U;
+auto PinConfigManager::isPinConfigured(pin_size_t pin) -> bool {
+    const PortPinPair& pp = port_pin_map[pin];
+    return (pinIsConfig[static_cast<size_t>(pp.port)] & (1U << static_cast<size_t>(pp.pin))) != 0U;
 }
 
 /**
@@ -33,9 +32,8 @@ bool PinConfigManager::isPinConfigured(pin_size_t pin) {
  * @param pin The pin number to set as configured.
  */
 void PinConfigManager::setPinConfigured(pin_size_t pin) {
-    gpio::GPIO_Base port = getPortFromPin(pin);
-    gpio::Pin_Number pinInPort = getPinInPort(pin);
-    pinIsConfig[static_cast<size_t>(port)] |= (1U << static_cast<size_t>(pinInPort));
+    const PortPinPair& pp = port_pin_map[pin];
+    pinIsConfig[static_cast<size_t>(pp.port)] |= (1U << static_cast<size_t>(pp.pin));
 }
 
 /**
@@ -48,9 +46,8 @@ void PinConfigManager::setPinConfigured(pin_size_t pin) {
  * @param pin The pin number to reset as unconfigured.
  */
 void PinConfigManager::resetPinConfigured(pin_size_t pin) {
-    gpio::GPIO_Base port = getPortFromPin(pin);
-    gpio::Pin_Number pinInPort = getPinInPort(pin);
-    pinIsConfig[static_cast<size_t>(port)] &= (~(1U << static_cast<size_t>(pinInPort)));
+    const PortPinPair& pp = port_pin_map[pin];
+    pinIsConfig[static_cast<size_t>(pp.port)] &= (~(1U << static_cast<size_t>(pp.pin)));
 }
 
 PinConfigManager pinConfigManager;

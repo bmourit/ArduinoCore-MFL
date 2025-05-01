@@ -32,9 +32,9 @@ struct Time_Set {
 
 class RealTimeClock {
 public:
-    static RealTimeClock& get_instance();
+    static auto get_instance() -> RealTimeClock&;
 
-    using RTCCallback = void (*)(void);
+    using RTCCallback = void (*)();
 
     void init();
     void setTime(const Time_Set& time);
@@ -75,7 +75,7 @@ private:
         return length;
     }
 
-    inline bool isLeapYear(uint16_t year) {
+    inline auto isLeapYear(uint16_t year) -> bool {
         return (!((year) % 400) || (((year) & 100) && !((year) % 4)));
     }
 

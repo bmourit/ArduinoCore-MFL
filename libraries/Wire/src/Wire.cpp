@@ -29,7 +29,7 @@ inline constexpr uint8_t OWNER_ADDRESS = 0x33U;
 inline constexpr uint32_t DEFAULT_SPEED = 100'000U;
 inline constexpr uint32_t I2C_TIMEOUT_DEFAULT = 0xF0000U;
 
-TwoWire& TwoWire::get_instance(i2c::I2C_Base Base, pin_size_t sdaPin, pin_size_t sclPin) {
+auto TwoWire::get_instance(i2c::I2C_Base Base, pin_size_t sdaPin, pin_size_t sclPin) -> TwoWire& {
     switch (Base) {
         case i2c::I2C_Base::I2C0_BASE: {
             static TwoWire WI2C0(i2c::I2C_Base::I2C0_BASE, sdaPin, sclPin);
@@ -190,16 +190,11 @@ uint8_t TwoWire::endTransmission(bool stopBit) {
 
     // Map error codes to Arduino Wire error codes
     switch (result) {
-        case i2c::I2C_Error_Type::OK:
-            return 0U;
-        case i2c::I2C_Error_Type::DATA_SIZE_ERROR:
-            return 1U;
-        case i2c::I2C_Error_Type::NACK_ADDRESS:
-            return 2U;
-        case i2c::I2C_Error_Type::NACK_DATA:
-            return 3U;
-        default:
-            return 4U;
+        case i2c::I2C_Error_Type::OK: return 0U;
+        case i2c::I2C_Error_Type::DATA_SIZE_ERROR: return 1U;
+        case i2c::I2C_Error_Type::NACK_ADDRESS: return 2U;
+        case i2c::I2C_Error_Type::NACK_DATA: return 3U;
+        default: return 4U;
     }
 }
 
@@ -401,7 +396,7 @@ void TwoWire::onReceive(void(*function)(int)) {
  *
  * @param function Pointer to the callback function to be registered.
  */
-void TwoWire::onRequest(void(*function)(void)) {
+void TwoWire::onRequest(void(*function)()) {
     onRequestCallback = function;
 }
 
@@ -792,11 +787,9 @@ void TwoWire::configurePins() {
         // Initialize pin
         auto& sdaPort = gpio::GPIO::get_instance(sdaPinOps.port).value();
         sdaPort.set_pin_mode(sdaPinOps.pin, sdaMode, sdaSpeed);
-        // Check remap
+        // Set remap
         auto sdaRemap = getPackedPinRemap(sdaPinOps.packedPinOps);
-        if (sdaRemap != gpio::Pin_Remap_Select::NO_REMAP) {
-            AFIO_I.set_remap(sdaRemap);
-        }
+        AFIO_I.set_remap(sdaRemap);
     }
 
     // SCL pin
@@ -812,11 +805,9 @@ void TwoWire::configurePins() {
         // Initialize pin
         auto& sclPort = gpio::GPIO::get_instance(sclPinOps.port).value();
         sclPort.set_pin_mode(sclPinOps.pin, sclMode, sclSpeed);
-        // Check remap
+        // Set remap
         auto sclRemap = getPackedPinRemap(sclPinOps.packedPinOps);
-        if (sclRemap != gpio::Pin_Remap_Select::NO_REMAP) {
-            AFIO_I.set_remap(sclRemap);
-        }
+        AFIO_I.set_remap(sclRemap);
     }
 }
 

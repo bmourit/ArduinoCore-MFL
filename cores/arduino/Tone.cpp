@@ -37,7 +37,7 @@ volatile bool destruct_ = false;
 static void timerTonePinInit(pin_size_t pin, uint32_t frequency, uint32_t duration);
 static void toneHandler();
 
-static GeneralTimer& toneInstance = GeneralTimer::get_instance(static_cast<timer::TIMER_Base>(TIMER_TONE));
+static auto& toneInstance = GeneralTimer::get_instance(static_cast<timer::TIMER_Base>(TIMER_TONE));
 
 /**
  * @brief Initializes the timer for generating a tone on a specified pin.
@@ -62,8 +62,9 @@ static void timerTonePinInit(pin_size_t pin, uint32_t frequency, uint32_t durati
     } else if (frequency <= Max_Frequency) {
         pinInfo.pin = pin;
         pinInfo.count = (duration > 0) ? ((toneFreq * duration) / 1000) : -1;
-        pinInfo.port = getPortFromPin(pinInfo.pin);
-        pinInfo.pinNum = getPinInPort(pinInfo.pin);
+        const PortPinPair& pp = port_pin_map[pin];
+        pinInfo.port = pp.port;
+        pinInfo.pinNum = pp.pin;
         if (pinInfo.port == gpio::GPIO_Base::INVALID || pinInfo.pinNum == gpio::Pin_Number::INVALID) {
             return;
         }

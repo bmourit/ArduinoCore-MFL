@@ -1,11 +1,12 @@
 
 #include "Arduino.h"
 #include "ExtiManager.h"
+#include "variant.h"
 
 constexpr uint8_t extiIRQPriority = EXTI_IRQ_PRIORITY;
 constexpr uint8_t extiIRQSubPriority = EXTI_IRQ_SUBPRIORITY;
 
-ExtiManager& ExtiManager::get_instance() {
+auto ExtiManager::get_instance() -> ExtiManager& {
     static ExtiManager instance;
     return instance;
 }
@@ -33,13 +34,12 @@ ExtiManager::ExtiManager() :
  * @param type The type of EXTI interrupt to enable (RISING, FALLING, or CHANGE).
  */
 void ExtiManager::enablePinExtiInterrupt(pin_size_t pin, EXTICallback callback, exti::EXTI_Trigger type) {
-    gpio::GPIO_Base gpioPort = getPortFromPin(pin);
-    gpio::Pin_Number pinNumber = getPinInPort(pin);
-    if (pinNumber == gpio::Pin_Number::INVALID || gpioPort == gpio::GPIO_Base::INVALID) {
+    const PortPinPair& pp = port_pin_map[pin];
+    if (pp.pin == gpio::Pin_Number::INVALID || pp.port == gpio::GPIO_Base::INVALID) {
         return;
     }
 
-    uint8_t id = static_cast<uint8_t>(pinNumber);
+    auto id = static_cast<uint8_t>(pp.pin);
     if (id >= maxExtiLines_) {
         return;
     }
@@ -48,7 +48,7 @@ void ExtiManager::enablePinExtiInterrupt(pin_size_t pin, EXTICallback callback, 
     callbacks_[id] = callback;
 
     // Get GPIO instance
-    auto portResult = gpio::GPIO::get_instance(gpioPort);
+    auto portResult = gpio::GPIO::get_instance(pp.port);
     if (portResult.error() != gpio::GPIO_Error_Type::OK) {
         return;
     }
@@ -59,16 +59,16 @@ void ExtiManager::enablePinExtiInterrupt(pin_size_t pin, EXTICallback callback, 
     //
     // NOTE:
     //  Only input is valid here as only input pins can have an exti
-    gpio::Pin_Mode currentMode = instance.get_pin_mode(pinNumber);
+    auto currentMode = instance.get_pin_mode(pp.pin);
     if (currentMode != gpio::Pin_Mode::INPUT_FLOATING &&
         currentMode != gpio::Pin_Mode::INPUT_PULLUP &&
         currentMode != gpio::Pin_Mode::INPUT_PULLDOWN) {
-        instance.set_pin_mode(pinNumber, gpio::Pin_Mode::INPUT_FLOATING);
+        instance.set_pin_mode(pp.pin, gpio::Pin_Mode::INPUT_FLOATING);
     }
 
     // Map GPIO port to source port
     gpio::Source_Port sourcePort;
-    switch (gpioPort) {
+    switch (pp.port) {
         case gpio::GPIO_Base::GPIOA_BASE: sourcePort = gpio::Source_Port::SOURCE_IS_GPIOA; break;
         case gpio::GPIO_Base::GPIOB_BASE: sourcePort = gpio::Source_Port::SOURCE_IS_GPIOB; break;
         case gpio::GPIO_Base::GPIOC_BASE: sourcePort = gpio::Source_Port::SOURCE_IS_GPIOC; break;
@@ -78,7 +78,7 @@ void ExtiManager::enablePinExtiInterrupt(pin_size_t pin, EXTICallback callback, 
     }
 
     // Configure EXTI
-    gpio::AFIO::get_instance().set_exti_source(sourcePort, pinNumber);
+    gpio::AFIO::get_instance().set_exti_source(sourcePort, pp.pin);
     exti_.clear_interrupt_flag(static_cast<exti::Interrupt_Flags>(id));
     exti_.init(static_cast<exti::EXTI_Line>(id), exti::EXTI_Mode::EXTI_INTERRUPT, type);
 
@@ -97,12 +97,12 @@ void ExtiManager::enablePinExtiInterrupt(pin_size_t pin, EXTICallback callback, 
  * @param pin The pin to disable the EXTI interrupt for.
  */
 void ExtiManager::disablePinExtiInterrupt(pin_size_t pin) {
-    gpio::Pin_Number pinNum = getPinInPort(pin);
-    if (pinNum == gpio::Pin_Number::INVALID) {
+    const PortPinPair& pp = port_pin_map[pin];
+    if (pp.pin == gpio::Pin_Number::INVALID) {
         return;
     }
 
-    uint8_t id = static_cast<uint8_t>(pinNum);
+    auto id = static_cast<uint8_t>(pp.pin);
     if (id >= maxExtiLines_) {
         return;
     }
@@ -110,7 +110,7 @@ void ExtiManager::disablePinExtiInterrupt(pin_size_t pin) {
     callbacks_[id] = nullptr;
 
     // Get the IRQ for this EXTI line
-    IRQn_Type irq = extiToIrq(id);
+    auto irq = extiToIrq(id);
 
     // Check for unhandled callbacks
     bool disableIRQ = true;
@@ -136,7 +136,7 @@ void ExtiManager::disablePinExtiInterrupt(pin_size_t pin) {
  * @param pin The pin number of the interrupt source.
  */
 void ExtiManager::handleCallback(gpio::Pin_Number pin) {
-    uint8_t id = static_cast<uint8_t>(pin);
+    auto id = static_cast<uint8_t>(pin);
     if (id >= maxExtiLines_) {
         return;
     }

@@ -23,9 +23,9 @@ struct timer_to_irq {
 
 class GeneralTimer {
 public:
-    static GeneralTimer& get_instance(timer::TIMER_Base Base);
+    static auto get_instance(timer::TIMER_Base Base) -> GeneralTimer&;
 
-    using TimerCallback = void (*)(void);
+    using TimerCallback = void (*)();
 
     struct CallbackState {
         uint8_t active_callbacks;
@@ -37,6 +37,8 @@ public:
     void start();
     void stop();
     void refresh();
+
+    // Channel
     void startTimerChannel(timer::Timer_Channel channel);
     void startTimerChannel(uint8_t channel) {
         startTimerChannel(convertToChannel(channel));
@@ -45,37 +47,50 @@ public:
     void stopTimerChannel(uint8_t channel) {
         stopTimerChannel(convertToChannel(channel));
     }
-    void setPrescaler(uint16_t prescaler);
-    uint16_t getPrescaler();
-    void setRolloverValue(uint32_t value, TimerFormat format = TimerFormat::TICK);
-    uint32_t getRolloverValue(TimerFormat format = TimerFormat::TICK);
-    void setCounter(uint16_t count, TimerFormat format = TimerFormat::TICK);
-    uint32_t getCounter(TimerFormat format = TimerFormat::TICK);
     void setChannelMode(timer::Timer_Channel channel, InputOutputMode mode, pin_size_t pin);
     inline void setChannelMode(uint8_t channel, InputOutputMode mode, pin_size_t pin) {
         setChannelMode(convertToChannel(channel), mode, pin);
     }
-    InputOutputMode getChannelMode(timer::Timer_Channel channel);
-    inline InputOutputMode getChannelMode(uint8_t channel) {
+    auto getChannelMode(timer::Timer_Channel channel) -> InputOutputMode;
+    inline auto getChannelMode(uint8_t channel) -> InputOutputMode {
         return getChannelMode(convertToChannel(channel));
     }
+
+    // Prescaler
+    void setPrescaler(uint16_t prescaler);
+    auto getPrescaler() -> uint16_t;
+
+    // Rollover
+    void setRolloverValue(uint32_t value, TimerFormat format = TimerFormat::TICK);
+    auto getRolloverValue(TimerFormat format = TimerFormat::TICK) -> uint32_t;
+
+    // Counter
+    void setCounter(uint16_t count, TimerFormat format = TimerFormat::TICK);
+    auto getCounter(TimerFormat format = TimerFormat::TICK) -> uint32_t;
+
+    // Auto-reload
     void setAutoReloadEnable(bool enable);
+
+    // Capture/compare
     void setCaptureCompare(timer::Timer_Channel channel, uint32_t value, CCFormat format = CCFormat::TICK);
     inline void setCaptureCompare(uint8_t channel, uint32_t value, CCFormat format = CCFormat::TICK) {
         setCaptureCompare(convertToChannel(channel), value, format);
     }
-    uint32_t getCaptureCompare(timer::Timer_Channel channel, CCFormat format = CCFormat::TICK);
-    inline uint32_t getCaptureCompare(uint8_t channel, CCFormat format = CCFormat::TICK) {
+    auto getCaptureCompare(timer::Timer_Channel channel, CCFormat format = CCFormat::TICK) -> uint32_t;
+    inline auto getCaptureCompare(uint8_t channel, CCFormat format = CCFormat::TICK) -> uint32_t {
         return getCaptureCompare(convertToChannel(channel), format);
     }
+
+    // PWM
     void setPWM(timer::Timer_Channel channel, pin_size_t pin, uint32_t frequency,
-                uint32_t dutycycle, TimerCallback UPCallback = nullptr,
-                TimerCallback CCCallback = nullptr);
+                uint32_t dutycycle, TimerCallback UpCallback = nullptr,
+                TimerCallback ChCallback = nullptr);
     inline void setPWM(uint8_t channel, pin_size_t pin, uint32_t frequency,
-                       uint32_t dutycycle, TimerCallback UPCallback = nullptr,
-                       TimerCallback CCCallback = nullptr) {
-        setPWM(convertToChannel(channel), pin, frequency, dutycycle, UPCallback, CCCallback);
+                       uint32_t dutycycle, TimerCallback UpCallback = nullptr,
+                       TimerCallback ChCallback = nullptr) {
+        setPWM(convertToChannel(channel), pin, frequency, dutycycle, UpCallback, ChCallback);
     }
+
     // Interrupts
     void setInterruptPriority(uint8_t preemptPriority, uint8_t subPriority);
     void attachInterrupt(TimerCallback callback);
@@ -88,33 +103,35 @@ public:
     inline void detachInterrupt(uint8_t channel) {
         detachInterrupt(convertToChannel(channel));
     }
-    bool hasInterrupt();
-    bool hasInterrupt(timer::Timer_Channel channel);
-    inline bool hasInterrupt(uint8_t channel) {
+    auto hasInterrupt() -> bool;
+    auto hasInterrupt(timer::Timer_Channel channel) -> bool;
+    inline auto hasInterrupt(uint8_t channel) -> bool {
         return hasInterrupt(convertToChannel(channel));
     }
 
     void timerInterruptHandler();
 
-    void UPCallback() {
+    inline void UpCallback() {
         if (callbacks_.active_callbacks & 0x01) {
             callbacks_.up_callback();
         }
     }
-    void CCCallback(timer::Timer_Channel channel) {
-        uint8_t ch = static_cast<size_t>(channel);
+
+    inline void ChCallback(timer::Timer_Channel channel) {
+        uint8_t ch = static_cast<uint8_t>(channel);
         if (callbacks_.active_callbacks & (1 << (ch + 1))) {
             callbacks_.channel_callbacks[ch]();
         }
     }
-    void CCCallback(uint8_t channel) {
-        CCCallback(convertToChannel(channel));
+
+    inline void ChCallback(uint8_t channel) {
+        ChCallback(convertToChannel(channel));
     }
 
-    uint32_t getTimerClockFrequency();
+    inline auto getTimerUpIRQ() -> IRQn_Type { return timerToUpIrq(); }
+    inline auto getTimerChIRQ() -> IRQn_Type { return timerToChIrq(); }
 
-    inline IRQn_Type getTimerUpIRQ() { return timerToUpIrq(); }
-    inline IRQn_Type getTimerChIRQ() { return timerToChIrq(); }
+    auto getTimerClockFrequency() -> uint32_t;
 
 protected:
     explicit GeneralTimer(timer::TIMER_Base Base);
@@ -130,37 +147,37 @@ protected:
     InputOutputMode channel_modes_[TIMER_CHANNELS];
     bool companionChannel[TIMER_CHANNELS];
 
-    static timer::TIMER& get_timer_instance(timer::TIMER_Base Base);
+    static auto get_timer_instance(timer::TIMER_Base Base) -> timer::TIMER&;
 
-    inline timer::Timer_Channel getChannelFromPin(pin_size_t pin) {
+    inline auto getChannelFromPin(pin_size_t pin) -> timer::Timer_Channel {
         auto instanceBase = getPinOpsPeripheralBase<TIMERPinOps, timer::TIMER_Base>(TIMER_PinOps, pin);
         if (instanceBase == timer::TIMER_Base::INVALID) {
             return timer::Timer_Channel::INVALID;
         }
 
-        uint32_t packedPinOps = getPackedPinOps(TIMER_PinOps, instanceBase, pin);
+        auto packedPinOps = getPackedPinOps(TIMER_PinOps, instanceBase, pin);
         if (packedPinOps == invalidValue) {
             return timer::Timer_Channel::INVALID;
         }
-        uint8_t channel_num = getPackedPinChannel(packedPinOps);
+        auto channel_num = getPackedPinChannel(packedPinOps);
         return static_cast<timer::Timer_Channel>(channel_num);
     }
 
-    inline timer::Timer_Channel getCompanionChannelFromPin(pin_size_t pin) {
+    inline auto getCompanionChannelFromPin(pin_size_t pin) -> timer::Timer_Channel {
         auto instanceBase = getPinOpsPeripheralBase<TIMERPinOps, timer::TIMER_Base>(TIMER_PinOps, pin);
         if (instanceBase == timer::TIMER_Base::INVALID) {
             return timer::Timer_Channel::INVALID;
         }
 
-        uint32_t packedPinOps = getPackedPinOps(TIMER_PinOps, instanceBase, pin);
+        auto packedPinOps = getPackedPinOps(TIMER_PinOps, instanceBase, pin);
         if (packedPinOps == invalidValue) {
             return timer::Timer_Channel::INVALID;
         }
-        uint8_t channel_num = getPackedPinChOn(packedPinOps);
+        auto channel_num = getPackedPinChOn(packedPinOps);
         return static_cast<timer::Timer_Channel>(channel_num);
     }
 
-    inline timer::Timer_Channel getCompanionChannel(timer::Timer_Channel channel) {
+    inline auto getCompanionChannel(timer::Timer_Channel channel) -> timer::Timer_Channel {
         switch (channel) {
             case timer::Timer_Channel::CH0: return timer::Timer_Channel::CH1;
             case timer::Timer_Channel::CH1: return timer::Timer_Channel::CH0;
@@ -171,7 +188,7 @@ protected:
         }
     }
 
-    inline timer::Status_Flags convertToFlag(timer::Timer_Channel channel) {
+    inline auto convertToFlag(timer::Timer_Channel channel) -> timer::Status_Flags {
         switch (channel) {
             case timer::Timer_Channel::CH0: return timer::Status_Flags::FLAG_CH0;
             case timer::Timer_Channel::CH1: return timer::Status_Flags::FLAG_CH1;
@@ -182,7 +199,7 @@ protected:
         }
     }
 
-    inline timer::Interrupt_Flags convertToInterruptFlag(timer::Timer_Channel channel) {
+    inline auto convertToInterruptFlag(timer::Timer_Channel channel) -> timer::Interrupt_Flags {
         switch (channel) {
             case timer::Timer_Channel::CH0: return timer::Interrupt_Flags::INTR_FLAG_CH0;
             case timer::Timer_Channel::CH1: return timer::Interrupt_Flags::INTR_FLAG_CH1;
@@ -193,7 +210,7 @@ protected:
         }
     }
 
-    inline timer::Interrupt_Type convertToInterrupt(timer::Timer_Channel channel) {
+    inline auto convertToInterrupt(timer::Timer_Channel channel) -> timer::Interrupt_Type {
         switch (channel) {
             case timer::Timer_Channel::CH0: return timer::Interrupt_Type::INTR_CH0IE;
             case timer::Timer_Channel::CH1: return timer::Interrupt_Type::INTR_CH1IE;
@@ -210,7 +227,7 @@ private:
     static std::array<timer_to_irq, TIMER_COUNT> timer_up_irq;
     static std::array<timer_to_irq, TIMER_COUNT> timer_ch_irq;
 
-    inline IRQn_Type timerToUpIrq() {
+    inline auto timerToUpIrq() -> IRQn_Type {
         uint8_t timerIndex = static_cast<uint8_t>(base_);
         for (const auto& index : timer_up_irq) {
             if (index.timer_index == timerIndex) {
@@ -221,7 +238,7 @@ private:
         return INVALID_IRQ;
     }
 
-    inline IRQn_Type timerToChIrq() {
+    inline auto timerToChIrq() -> IRQn_Type {
         uint8_t timerIndex = static_cast<uint8_t>(base_);
         for (const auto& index : timer_ch_irq) {
             if (index.timer_index == timerIndex) {
@@ -234,7 +251,7 @@ private:
 
     template<timer::Timer_Channel channel>
     inline void processChannelInterrupt() {
-        timer::Status_Flags flag = convertToFlag(channel);
+        auto flag = convertToFlag(channel);
         if (timer_.get_flag(flag)) {
             timer_.clear_interrupt_flag(convertToInterruptFlag(channel));
             callbacks_.channel_callbacks[static_cast<size_t>(channel)]();

@@ -1,6 +1,6 @@
 
 #include <string_view>
-
+#include "Arduino.h"
 #include "CoreHandler.h"
 
 extern void core_debug(const char* format, ...);

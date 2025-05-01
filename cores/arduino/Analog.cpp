@@ -22,7 +22,7 @@ static uint32_t writeFrequency_ = static_cast<uint32_t>(PWM_FREQUENCY);
  * @param resolution The ADC resolution in bits (6, 8, 10, or 12).
  * @return The converted analog value as a 32-bit unsigned integer.
  */
-uint32_t getAdcValue(pin_size_t pin, uint32_t resolution) {
+auto getAdcValue(pin_size_t pin, uint32_t resolution) -> uint32_t {
     if (pin != ADC_TEMP && pin != ADC_VREF) {
         pinOpsPinout(ADC_PinOps, pin);
     }
@@ -36,10 +36,7 @@ uint32_t getAdcValue(pin_size_t pin, uint32_t resolution) {
     adc::ADC_Channel channel = getAdcChannelFromPin(pin);
     adc::ADC_Sample_Time sampleTime = getAdcSampleTime(pin);
 
-    volatile uint32_t convertedData =
-        adcInstance.start_regular_single_conversion(channel, sampleTime, getAdcResolution(resolution), true);
-
-    return convertedData;
+    return adcInstance.start_regular_single_conversion(channel, sampleTime, getAdcResolution(resolution), true);
 }
 
 // DAC
@@ -63,7 +60,7 @@ void setDacValue(pin_size_t pin, uint16_t value, bool is_initialized) {
         return;
     }
 
-    dac::DAC& dac_ = dac::DAC::get_instance();
+    auto& dac_ = dac::DAC::get_instance();
 
     if (is_initialized != true) {
         dac_.reset();
@@ -92,7 +89,7 @@ void dacStop(pin_size_t pin) {
         return;
     }
 
-    dac::DAC& dac_ = dac::DAC::get_instance();
+    auto& dac_ = dac::DAC::get_instance();
     dac_.disable(dacInternal);
     dac_.reset();
 }
@@ -114,17 +111,17 @@ void pwmStart(pin_size_t pin, uint32_t frequency, uint32_t value, CCFormat forma
     if (timer_base == timer::TIMER_Base::INVALID) {
         return;
     }
-    uint32_t packedPinOps = getPackedPinOps(TIMER_PinOps, pin);
+    auto packedPinOps = getPackedPinOps(TIMER_PinOps, pin);
     if (packedPinOps == invalidValue) {
         return;
     }
-    uint8_t channel = getPackedPinChannel(packedPinOps);
+    auto channel = getPackedPinChannel(packedPinOps);
     if (static_cast<timer::Timer_Channel>(channel) == timer::Timer_Channel::INVALID) {
         return;
     }
 
     auto& timerInstance = GeneralTimer::get_instance(timer_base);
-    InputOutputMode previous = timerInstance.getChannelMode(channel);
+    auto previous = timerInstance.getChannelMode(channel);
 
     timerInstance.setRolloverValue(frequency, TimerFormat::HERTZ);
     timerInstance.setCaptureCompare(channel, value, format);
@@ -168,7 +165,7 @@ int analogRead(pin_size_t pin) {
     if (pin == NO_PIN) {
         return 0;
     }
-    uint32_t value = getAdcValue(pin, internalReadResolution_);
+    auto value = getAdcValue(pin, internalReadResolution_);
     return static_cast<int>(mapResolution(value, internalReadResolution_, readResolution_));
 }
 

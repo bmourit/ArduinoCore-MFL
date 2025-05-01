@@ -3,6 +3,7 @@
 #include "PinConfigManager.hpp"
 #include "PinOpsMap.hpp"
 #include "PinOps.hpp"
+#include "variant.h"
 
 /**
  * @brief Configures the specified pin as an input or output.
@@ -58,8 +59,8 @@ void pinMode(pin_size_t pin, PinMode mode) {
             setPinOp(pin, createPackedPinOps(gpio::Pin_Mode::OUTPUT_OPENDRAIN, MAX_SPEED, gpio::Pin_Remap_Select::NO_REMAP, 0, 0));
             break;
         // NOTE: INPUT_ANALOG is deprecated.
-        // Besides not being part of the Arduino API,
-        // it is already handled directly in Analog.cpp
+        // It is not part of the Arduino API and
+        // is already being handled directly in Analog.cpp
         #pragma GCC diagnostic ignored "-Wswitch"
         case INPUT_ANALOG:
             if ((pin != ADC_TEMP) && (pin != ADC_VREF)) {
@@ -83,19 +84,14 @@ void pinMode(pin_size_t pin, PinMode mode) {
  * @param status The PinStatus to write to the pin. Valid values are LOW (0) or HIGH (1).
  */
 void digitalWrite(pin_size_t pin, PinStatus status) {
-    gpio::GPIO_Base port = getPortFromPin(pin);
-    if (port == gpio::GPIO_Base::INVALID) {
+    const PortPinPair& pp = port_pin_map[pin];
+    if (pp.port == gpio::GPIO_Base::INVALID || pp.pin == gpio::Pin_Number::INVALID) {
         return;
     }
 
-    gpio::Pin_Number pinNum = getPinInPort(pin);
-    if (pinNum == gpio::Pin_Number::INVALID) {
-        return;
-    }
-
-    auto result = gpio::GPIO::get_instance(port);
+    auto result = gpio::GPIO::get_instance(pp.port);
     if (result.error() == gpio::GPIO_Error_Type::OK) {
-        result.value().write_pin(pinNum, (status != LOW));
+        result.value().write_pin(pp.pin, (status != LOW));
     }
 }
 
@@ -110,22 +106,17 @@ void digitalWrite(pin_size_t pin, PinStatus status) {
  * @return The current state of the pin as a PinStatus.
  */
 PinStatus digitalRead(pin_size_t pin) {
-    gpio::GPIO_Base port = getPortFromPin(pin);
-    if (port == gpio::GPIO_Base::INVALID) {
-        return LOW; // Return a default value for invalid port
+    const PortPinPair& pp = port_pin_map[pin];
+    if (pp.port == gpio::GPIO_Base::INVALID || pp.pin == gpio::Pin_Number::INVALID) {
+        return LOW; // Return a default value for invalid port or pin
     }
 
-    gpio::Pin_Number pinNum = getPinInPort(pin);
-    if (pinNum == gpio::Pin_Number::INVALID) {
-        return LOW; // Return a default value for invalid pin
-    }
-
-    auto result = gpio::GPIO::get_instance(port);
+    auto result = gpio::GPIO::get_instance(pp.port);
     if (result.error() != gpio::GPIO_Error_Type::OK) {
         return LOW; // Return a default value if instance retrieval fails
     }
 
-    return result.value().read_pin(pinNum) ? HIGH : LOW;
+    return result.value().read_pin(pp.pin) ? HIGH : LOW;
 }
 
 /**
@@ -138,18 +129,13 @@ PinStatus digitalRead(pin_size_t pin) {
  * @param pin The pin number to toggle.
  */
 void digitalToggle(pin_size_t pin) {
-    gpio::GPIO_Base port = getPortFromPin(pin);
-    if (port == gpio::GPIO_Base::INVALID) {
+    const PortPinPair& pp = port_pin_map[pin];
+    if (pp.port == gpio::GPIO_Base::INVALID || pp.pin == gpio::Pin_Number::INVALID) {
         return;
     }
 
-    gpio::Pin_Number pinNum = getPinInPort(pin);
-    if (pinNum == gpio::Pin_Number::INVALID) {
-        return;
-    }
-
-    auto result = gpio::GPIO::get_instance(port);
+    auto result = gpio::GPIO::get_instance(pp.port);
     if (result.error() == gpio::GPIO_Error_Type::OK) {
-        result.value().toggle_pin(pinNum);
+        result.value().toggle_pin(pp.pin);
     }
 }

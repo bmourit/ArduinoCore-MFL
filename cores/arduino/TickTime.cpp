@@ -30,7 +30,7 @@ uint32_t msTickPriority = (1UL << __NVIC_PRIO_BITS);
  *
  * @return The number of milliseconds since the program started.
  */
-unsigned long millis(void) {
+unsigned long millis() {
     // TODO: ensure no interrupts
     return getCurrentMillis();
 }
@@ -45,7 +45,7 @@ unsigned long millis(void) {
  *
  * @return The number of microseconds since the program started.
  */
-unsigned long micros(void) {
+unsigned long micros() {
     return getCurrentMicros();
 }
 
@@ -104,7 +104,7 @@ void tickIncrement() {
  * Initializes the system tick to generate interrupts at a period of 1ms.
  * The priority of the interrupt is set to the provided parameter.
  *
- * @param[in] priority The priority of the system tick interrupt.
+ * @param priority The priority of the system tick interrupt.
  * @return TICK_OK if the initialization was successful, TICK_ERROR otherwise.
  */
 SysTick_Error tickInit(uint32_t priority) {
@@ -169,15 +169,6 @@ uint32_t getCurrentMicros() {
 
 extern "C" {
 
-    /**
-     * @brief Handler for system tick interrupts.
-     *
-     * This function is the interrupt service routine (ISR) for the system tick.
-     * It simply calls the tickIncrement() function to increment the tick count.
-     *
-     * @note This function is called automatically by the MCU when the system tick
-     *       interrupt is triggered.
-     */
     void SysTick_Handler(void) {
         tickIncrement();
     }

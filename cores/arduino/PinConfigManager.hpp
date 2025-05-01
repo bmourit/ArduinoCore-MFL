@@ -6,9 +6,9 @@ inline constexpr uint8_t Max_Ports = 4U;
 
 class PinConfigManager {
 public:
-    PinConfigManager() {}
+    PinConfigManager() = default;
 
-    bool isPinConfigured(pin_size_t pin);
+    auto isPinConfigured(pin_size_t pin) -> bool;
     void setPinConfigured(pin_size_t pin);
     void resetPinConfigured(pin_size_t pin);
 

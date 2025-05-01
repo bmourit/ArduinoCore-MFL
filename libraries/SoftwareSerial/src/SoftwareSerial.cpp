@@ -34,6 +34,7 @@
 #include <Arduino.h>
 #include <GeneralTimer.h>
 #include <PinOps.hpp>
+#include <variant.h>
 #include "SoftwareSerial.h"
 
 constexpr timer::TIMER_Base SoftwareSerial::TIMER_SERIAL_BASE;
@@ -51,13 +52,13 @@ uint32_t SoftwareSerial::currentSpeed = 0;
 SoftwareSerial::SoftwareSerial(pin_size_t rxPin, pin_size_t txPin, bool inverseLogic /* = false */) :
     rxPin_(rxPin),
     txPin_(txPin),
-    rxPort_(getPortFromPin(rxPin)),
-    rxPinNumber_(getPinInPort(rxPin)),
-    txPort_(getPortFromPin(txPin)),
-    txPinNumber_(getPinInPort(txPin)),
+    rxPort_(port_pin_map[rxPin].port),
+    rxPinNumber_(port_pin_map[rxPin].pin),
+    txPort_(port_pin_map[txPin].port),
+    txPinNumber_(port_pin_map[txPin].pin),
     inverseLogic_(inverseLogic),
     halfDuplex_(rxPin == txPin),
-    outputPending_(0),
+    outputPending_(false),
     speed_(0),
     bufferOverflow_(false)
 {
@@ -284,7 +285,7 @@ int SoftwareSerial::available() {
  */
 size_t SoftwareSerial::write(uint8_t data) {
     // Signal that we're preparing to transmit
-    outputPending_ = 1;
+    outputPending_ = true;
 
     // Wait for any previous transmission to complete
     while (txActive) {
@@ -312,7 +313,7 @@ size_t SoftwareSerial::write(uint8_t data) {
     }
 
     // Transmission is ready to start
-    outputPending_ = 0;
+    outputPending_ = false;
     txActive = this;
 
     return 1;   // Always returns 1 byte written

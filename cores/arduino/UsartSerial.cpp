@@ -14,9 +14,9 @@ inline constexpr uint8_t interruptPreemptPriority = 1U;
 inline constexpr uint8_t interruptSubPriority = 0U;
 inline constexpr uint8_t maxNumUsart_ = USART_COUNT;
 
-usart::USART& UsartSerial::get_usart_instance(usart::USART_Base Base) {
+auto UsartSerial::get_usart_instance(usart::USART_Base Base) -> usart::USART& {
     static usart::USART* usart_instances[maxNumUsart_] = {nullptr};
-    size_t index = static_cast<size_t>(Base);
+    const auto index = static_cast<size_t>(Base);
 
     if (usart_instances[index] == nullptr) {
         auto result = usart::USART::get_instance(Base);
@@ -31,7 +31,7 @@ usart::USART& UsartSerial::get_usart_instance(usart::USART_Base Base) {
     return *usart_instances[index];
 }
 
-UsartSerial& UsartSerial::get_instance(usart::USART_Base Base, pin_size_t rxPin, pin_size_t txPin) {
+auto UsartSerial::get_instance(usart::USART_Base Base, pin_size_t rxPin, pin_size_t txPin) -> UsartSerial& {
     switch (Base) {
         case usart::USART_Base::USART0_BASE: {
             static UsartSerial USerial0(Base, rxPin, txPin);
@@ -67,8 +67,8 @@ UsartSerial& UsartSerial::get_instance(usart::USART_Base Base, pin_size_t rxPin,
 std::array<bool, static_cast<size_t>(usart::USART_Base::INVALID)> UsartSerial::dataTransmitted_ = {false};
 
 std::array<usart_to_irq, maxNumUsart_> UsartSerial::usart_irq {{
-        {0U, USART0_IRQn}, {1U, USART1_IRQn}, {2U, USART2_IRQn}, {3U, UART3_IRQn}, {4U, UART4_IRQn}
-    }};
+    {USART0_IRQn, 0U}, {USART1_IRQn, 1U}, {USART2_IRQn, 2U}, {UART3_IRQn, 3U}, {UART4_IRQn, 4U}
+}};
 
 UsartSerial::UsartSerial(usart::USART_Base Base, pin_size_t rxPin, pin_size_t txPin) :
     base_(Base),
@@ -79,7 +79,9 @@ UsartSerial::UsartSerial(usart::USART_Base Base, pin_size_t rxPin, pin_size_t tx
     dmaBase_(get_dma_base()),
     dmaChannel_(get_dma_channel()),
     dma_(dma::DMA::get_instance(dmaBase_, dmaChannel_).value()),
-    dmaConfig_(dma::default_config) {}
+    dmaConfig_(dma::default_config)
+{
+}
 
 /**
  * Initializes the USART instance with the specified baudrate and configuration.
@@ -94,22 +96,33 @@ void UsartSerial::begin(unsigned long baudrate, uint16_t config, bool useDmaRx) 
         end();
     }
 
+    #ifdef SERIAL_PIN_RX
+        if (customRxPin_ == NO_PIN) {
+            customRxPin_ = static_cast<pin_size_t>(SERIAL_PIN_RX);
+        }
+    #endif
+    #ifdef SERIAL_PIN_TX
+        if (customTxPin_ == NO_PIN) {
+            customTxPin_ = static_cast<pin_size_t>(SERIAL_PIN_TX);
+        }
+    #endif
+
     // Configure pins
     configurePins();
 
     usart::USART_DMA_Config dmaMode = useDmaRx ? usart::USART_DMA_Config::DMA_RX : usart::USART_DMA_Config::DMA_NONE;
 
-    usart_.init({
-        static_cast<uint32_t>(baudrate),
-        dmaMode,
-        get_parity_mode(config),
-        get_word_length(config),
-        get_stop_bits(config),
-        usart::Direction_Mode::RXTX_MODE,
-        usart::USART_State::IDLE,
-        interruptPreemptPriority,
-        interruptSubPriority,
-        0U
+    usart_.init(usart::USART_Config{
+        .baudrate = static_cast<uint32_t>(baudrate),
+        .dma_ops = dmaMode,
+        .parity = get_parity_mode(config),
+        .word_length = get_word_length(config),
+        .stop_bits = get_stop_bits(config),
+        .direction = usart::Direction_Mode::RXTX_MODE,
+        .state = usart::USART_State::IDLE,
+        .interrupt_prepriority = interruptPreemptPriority,
+        .interrupt_subpriority = interruptSubPriority,
+        .last_data = 0U
     });
 
     // HWFC not yet_supported
@@ -124,7 +137,7 @@ void UsartSerial::begin(unsigned long baudrate, uint16_t config, bool useDmaRx) 
         usart_.prepare_receive_interrupts();
     }
 
-    IRQn_Type irq = usartToIrq(static_cast<size_t>(base_));
+    auto irq = usartToIrq(static_cast<uint8_t>(base_));
     NVIC_DisableIRQ(irq);
     NVIC_SetPriority(irq, interruptPreemptPriority);
     NVIC_EnableIRQ(irq);
@@ -172,7 +185,9 @@ int UsartSerial::available() {
     while (usart_.get_config().state != usart::USART_State::IDLE) {
         __asm volatile("nop");  // Wait for the USART to become idle
     }
+
     updateRxDmaBuffer();
+
     return usart_.available_for_read(true);
 }
 
@@ -193,12 +208,14 @@ int UsartSerial::peek() {
             __asm volatile("nop");  // Wait for the USART to become idle
         }
     }
+
     updateRxDmaBuffer();
 
-    uint8_t data = 0;
+    uint8_t data;
     if (!usart_.peek_buffer(true, data)) {
         return -1;
     }
+
     return data;
 }
 
@@ -218,12 +235,14 @@ int UsartSerial::read() {
             __asm volatile("nop");  // Wait for the USART to become idle
         }
     }
+
     updateRxDmaBuffer();
 
     uint8_t data;
     if (!usart_.read_rx_buffer(data)) {
         return -1;
     }
+
     return data;
 }
 
@@ -237,9 +256,11 @@ int UsartSerial::read() {
  * sent before the serial connection is closed.
  */
 void UsartSerial::flush() {
+    // Wait for the USART to become idle
     while (usart_.get_config().state != usart::USART_State::IDLE) {
-        __asm volatile("nop");  // Wait for the USART to become idle
+        __asm volatile("nop");
     }
+
     // Wait for any outstanding data to be sent
     while (!usart_.buffer_is_empty(false)) {
     }
@@ -252,18 +273,22 @@ void UsartSerial::flush() {
  * writes the byte to the TX buffer. If the buffer is full, waits until space is
  * available and then triggers transmission.
  *
- * @param[in] byte The byte to transmit.
+ * @param byte The byte to transmit.
  *
  * @return The number of bytes written (always 1).
  */
 size_t UsartSerial::write(uint8_t byte) {
     dataTransmitted_[static_cast<size_t>(base_)] = true;
+
+    // Wait for the USART to become idle
     while (usart_.get_config().state != usart::USART_State::IDLE) {
-        __asm volatile("nop");  // Wait for the USART to become idle
+        __asm volatile("nop");
     }
+
+    // Wait for room in buffer
     while (!usart_.usart_transmit_interrupt(byte)) {
-        // Wait for room in buffer
     }
+
     return 1;
 }
 
@@ -279,9 +304,11 @@ size_t UsartSerial::write(uint8_t byte) {
  *  is skipped in IRQ context.
  */
 void UsartSerial::updateRxDmaBuffer() {
+    // Only update for DMA
     if (usart_.get_config().dma_ops == usart::USART_DMA_Config::DMA_NONE) {
         return;
     }
+
     usart_.modify_rx_buffer_head(USART_RX_BUFFER_SIZE - dma_.get_transfer_count());
 }
 
@@ -291,7 +318,7 @@ void UsartSerial::updateRxDmaBuffer() {
  * If the DMA mode is being changed, updates the DMA configuration of the USART.
  * Otherwise, does nothing.
  *
- * @param[in] mode The DMA mode to set.
+ * @param mode The DMA mode to set.
  */
 void UsartSerial::setDmaMode(usart::USART_DMA_Config mode) {
     if (usart_.get_config().dma_ops == mode) return;
@@ -317,23 +344,19 @@ void UsartSerial::handleInterrupt() {
  */
 void UsartSerial::configurePins() {
     // RX pin
-    auto rxPinOps = getPinOpsByPeripheral(UART_RX_PinOps, base_);
-#ifdef SERIAL_PIN_RX
-    // RX pin override defined in Variant.h
-    rxPinOps = getPinOpsByPin(UART_RX_PinOps, SERIAL_PIN_RX);
-#endif
-    if (customRxPin_ != NO_PIN) {
-        rxPinOps = getPinOpsByPin(UART_RX_PinOps, customRxPin_);
-    }
+    auto rxPinOps = resolveRxPinOps();
     if (rxPinOps == invalidPinOps) {
         return;
     }
+
     gpio::Pin_Mode mode = getPackedPinMode(rxPinOps.packedPinOps);
     gpio::Output_Speed speed = getPackedPinSpeed(rxPinOps.packedPinOps);
+
     // Initialize RX pin using fast path
     auto rxResult = gpio::GPIO::get_instance(rxPinOps.port);
     auto& gpioRxPort = rxResult.value();
     gpioRxPort.set_pin_mode(rxPinOps.pin, mode, speed);
+
     // Check remap
     gpio::Pin_Remap_Select rxRemap = getPackedPinRemap(rxPinOps.packedPinOps);
     if (rxRemap != gpio::Pin_Remap_Select::NO_REMAP) {
@@ -341,23 +364,19 @@ void UsartSerial::configurePins() {
     }
 
     // TX pin
-    auto txPinOps = getPinOpsByPeripheral(UART_TX_PinOps, base_);
-#ifdef SERIAL_PIN_TX
-    // TX pin override defined in Variant.h
-    txPinOps = getPinOpsByPin(UART_TX_PinOps, SERIAL_PIN_TX);
-#endif
-    if (customTxPin_ != NO_PIN) {
-        txPinOps = getPinOpsByPin(UART_TX_PinOps, customTxPin_);
-    }
+    auto txPinOps = resolveTxPinOps();
     if (txPinOps == invalidPinOps) {
         return;
     }
+
     mode = getPackedPinMode(txPinOps.packedPinOps);
     speed = getPackedPinSpeed(txPinOps.packedPinOps);
+
     // Initialize RX pin using fast path
     auto txResult = gpio::GPIO::get_instance(txPinOps.port);
     auto& gpioTxPort = txResult.value();
     gpioTxPort.set_pin_mode(txPinOps.pin, mode, speed);
+
     // Check remap
     gpio::Pin_Remap_Select txRemap = getPackedPinRemap(txPinOps.packedPinOps);
     if (txRemap != gpio::Pin_Remap_Select::NO_REMAP) {
@@ -406,16 +425,16 @@ void UsartSerial::setDmaRxEnable() {
 
     dma_.clear_channel();
 
-    dma_.init({
-        usart::RxBufferSize,
-        reinterpret_cast<uint32_t>(usart_.get_buffer_data(true)),
-        reinterpret_cast<uint32_t>(usart_.reg_address(usart::USART_Regs::DATA)),
-        dma::Bit_Width::WIDTH_8BIT,
-        dma::Bit_Width::WIDTH_8BIT,
-        dma::Increase_Mode::INCREASE_DISABLE,
-        dma::Increase_Mode::INCREASE_ENABLE,
-        dma::Channel_Priority::MEDIUM_PRIORITY,
-        dma::Transfer_Direction::P2M,
+    dma_.init(dma::DMA_Config{
+        .count = usart::RxBufferSize,
+        .memory_address = reinterpret_cast<uint32_t>(usart_.get_buffer_data(true)),
+        .peripheral_address = reinterpret_cast<uint32_t>(usart_.reg_address(usart::USART_Regs::DATA)),
+        .peripheral_bit_width = dma::Bit_Width::WIDTH_8BIT,
+        .memory_bit_width = dma::Bit_Width::WIDTH_8BIT,
+        .peripheral_increase = dma::Increase_Mode::INCREASE_DISABLE,
+        .memory_increase = dma::Increase_Mode::INCREASE_ENABLE,
+        .channel_priority = dma::Channel_Priority::MEDIUM_PRIORITY,
+        .direction = dma::Transfer_Direction::P2M
     });
 
     dma_.set_memory_to_memory_enable(false);
@@ -425,31 +444,31 @@ void UsartSerial::setDmaRxEnable() {
 }
 
 #ifdef USE_HARDWARE_SERIAL0
-    arduino::UsartSerial& Serial0 = arduino::UsartSerial::get_instance(usart::USART_Base::USART0_BASE);
+    UsartSerial& Serial0 = UsartSerial::get_instance(usart::USART_Base::USART0_BASE);
     void serialEvent0() __attribute__((weak));
 #endif
 
 #ifdef USE_HARDWARE_SERIAL1
-    arduino::UsartSerial& Serial1 = arduino::UsartSerial::get_instance(usart::USART_Base::USART1_BASE);
+    UsartSerial& Serial1 = UsartSerial::get_instance(usart::USART_Base::USART1_BASE);
     void serialEvent1() __attribute__((weak));
 #endif
 
 #ifdef USE_HARDWARE_SERIAL2
-    arduino::UsartSerial& Serial2 = arduino::UsartSerial::get_instance(usart::USART_Base::USART2_BASE);
+    UsartSerial& Serial2 = UsartSerial::get_instance(usart::USART_Base::USART2_BASE);
     void serialEvent2() __attribute__((weak));
 #endif
 
 #ifdef USE_HARDWARE_SERIAL3
-    arduino::UsartSerial& Serial3 = arduino::UsartSerial::get_instance(usart::USART_Base::UART3_BASE);
+    UsartSerial& Serial3 = UsartSerial::get_instance(usart::USART_Base::UART3_BASE);
     void serialEvent3() __attribute__((weak));
 #endif
 
 #ifdef USE_HARDWARE_SERIAL4
-    arduino::UsartSerial& Serial4 = arduino::UsartSerial::get_instance(usart::USART_Base::U4ART4_BASE);
+    UsartSerial& Serial4 = UsartSerial::get_instance(usart::USART_Base::U4ART4_BASE);
     void serialEvent4() __attribute__((weak));
 #endif
 
-void serialEventRun(void) {
+void serialEventRun() {
 #if defined(USE_HARDWARE_SERIAL0)
     if (serialEvent0 && Serial0.available()) {
         serialEvent0();
@@ -479,43 +498,42 @@ void serialEventRun(void) {
 
 } // namespace arduino
 
-
 extern "C" {
 
-#ifdef USE_HARDWARE_SERIAL0
-    void USART0_IRQHandler() {
-        NVIC_ClearPendingIRQ(USART0_IRQn);
-        auto& instance = arduino::UsartSerial::get_instance(usart::USART_Base::USART0_BASE);
-        instance.handleInterrupt();
-    }
-#endif
-#ifdef USE_HARDWARE_SERIAL1
-    void USART1_IRQHandler() {
-        NVIC_ClearPendingIRQ(USART1_IRQn);
-        auto& instance = arduino::UsartSerial::get_instance(usart::USART_Base::USART1_BASE);
-        instance.handleInterrupt();
-    }
-#endif
-#ifdef USE_HARDWARE_SERIAL2
-    void USART2_IRQHandler() {
-        NVIC_ClearPendingIRQ(USART2_IRQn);
-        auto& instance = arduino::UsartSerial::get_instance(usart::USART_Base::USART2_BASE);
-        instance.handleInterrupt();
-    }
-#endif
-#ifdef USE_HARDWARE_SERIAL3
-    void UART3_IRQHandler() {
-        NVIC_ClearPendingIRQ(UART3_IRQn);
-        auto& instance = arduino::UsartSerial::get_instance(usart::USART_Base::UART3_BASE);
-        instance.handleInterrupt();
-    }
-#endif
-#ifdef USE_HARDWARE_SERIAL4
-    void UART4_IRQHandler() {
-        NVIC_ClearPendingIRQ(UART4_IRQn);
-        auto& instance = arduino::UsartSerial::get_instance(usart::USART_Base::UART4_BASE);
-        instance.handleInterrupt();
-    }
-#endif
+    #ifdef USE_HARDWARE_SERIAL0
+        void USART0_IRQHandler() {
+            NVIC_ClearPendingIRQ(USART0_IRQn);
+            arduino::UsartSerial& instance = arduino::UsartSerial::get_instance(usart::USART_Base::USART0_BASE);
+            instance.handleInterrupt();
+        }
+    #endif
+    #ifdef USE_HARDWARE_SERIAL1
+        void USART1_IRQHandler() {
+            NVIC_ClearPendingIRQ(USART1_IRQn);
+            arduino::UsartSerial& instance = arduino::UsartSerial::get_instance(usart::USART_Base::USART1_BASE);
+            instance.handleInterrupt();
+        }
+    #endif
+    #ifdef USE_HARDWARE_SERIAL2
+        void USART2_IRQHandler() {
+            NVIC_ClearPendingIRQ(USART2_IRQn);
+            arduino::UsartSerial& instance = arduino::UsartSerial::get_instance(usart::USART_Base::USART2_BASE);
+            instance.handleInterrupt();
+        }
+    #endif
+    #ifdef USE_HARDWARE_SERIAL3
+        void UART3_IRQHandler() {
+            NVIC_ClearPendingIRQ(UART3_IRQn);
+            arduino::UsartSerial& instance = arduino::UsartSerial::get_instance(usart::USART_Base::UART3_BASE);
+            instance.handleInterrupt();
+        }
+    #endif
+    #ifdef USE_HARDWARE_SERIAL4
+        void UART4_IRQHandler() {
+            NVIC_ClearPendingIRQ(UART4_IRQn);
+            arduino::UsartSerial& instance = arduino::UsartSerial::get_instance(usart::USART_Base::UART4_BASE);
+            instance.handleInterrupt();
+        }
+    #endif
 
 } // extern "C"
