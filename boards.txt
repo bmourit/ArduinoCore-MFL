@@ -23,31 +23,21 @@ gd_gd32f30x.build.usb_manufacturer="Arduino"
 
 # create a new entry for each board here
 
-# Creality V4.2.2 GD32F303RE
-gd_gd32f30x.menu.pnum.MFL_CREALITY_422=Creality GD32F303RE
-gd_gd32f30x.menu.pnum.MFL_CREALITY_422.upload.maximum_size=524288
-gd_gd32f30x.menu.pnum.MFL_CREALITY_422.upload.maximum_data_size=65536
-gd_gd32f30x.menu.pnum.MFL_CREALITY_422.build.board=MFL_CREALITY_422
-gd_gd32f30x.menu.pnum.MFL_CREALITY_422.build.series=GD32F30x
-gd_gd32f30x.menu.pnum.MFL_CREALITY_422.build.product_line=GD32F30X_HD
-gd_gd32f30x.menu.pnum.MFL_CREALITY_422.build.variant=MFL_CREALITY_422
-gd_gd32f30x.menu.pnum.MFL_CREALITY_422.upload.openocd_script=target/gd32f3x.cfg
+# Creality V4.x.x GD32F303RE
+gd_gd32f30x.menu.pnum.MFL_CREALITY_V4=Creality GD32F303RE
+gd_gd32f30x.menu.pnum.MFL_CREALITY_V4.upload.maximum_size=524288
+gd_gd32f30x.menu.pnum.MFL_CREALITY_V4.upload.maximum_data_size=65536
+gd_gd32f30x.menu.pnum.MFL_CREALITY_V4.build.board=mfl_creality_v4
+gd_gd32f30x.menu.pnum.MFL_CREALITY_V4.build.series=GD32F30x
+gd_gd32f30x.menu.pnum.MFL_CREALITY_V4.build.product_line=GD32F30X_HD
+gd_gd32f30x.menu.pnum.MFL_CREALITY_V4.build.variant=MFL_CREALITY_V4
+gd_gd32f30x.menu.pnum.MFL_CREALITY_V4.upload.openocd_script=target/gd32f3x.cfg
 
-# Creality V4.2.7 GD32F303RE
-gd_gd32f30x.menu.pnum.MFL_CREALITY_427=Creality GD32F303RE
-gd_gd32f30x.menu.pnum.MFL_CREALITY_427.upload.maximum_size=524288
-gd_gd32f30x.menu.pnum.MFL_CREALITY_427.upload.maximum_data_size=65536
-gd_gd32f30x.menu.pnum.MFL_CREALITY_427.build.board=MFL_CREALITY_427
-gd_gd32f30x.menu.pnum.MFL_CREALITY_427.build.series=GD32F30x
-gd_gd32f30x.menu.pnum.MFL_CREALITY_427.build.product_line=GD32F30X_HD
-gd_gd32f30x.menu.pnum.MFL_CREALITY_427.build.variant=MFL_CREALITY_427
-gd_gd32f30x.menu.pnum.MFL_CREALITY_427.upload.openocd_script=target/gd32f3x.cfg
-
-# Aquila GD32F303RE
-gd_gd32f30x.menu.pnum.MFL_AQUILA=Aquila GD32F303RE
-gd_gd32f30x.menu.pnum.MFL_AQUILA.upload.maximum_size=524288
-gd_gd32f30x.menu.pnum.MFL_AQUILA.upload.maximum_data_size=65536
-gd_gd32f30x.menu.pnum.MFL_AQUILA.build.board=MFL_AQUILA
+# Aquila GD32F303RC
+gd_gd32f30x.menu.pnum.MFL_AQUILA=Aquila GD32F303RC
+gd_gd32f30x.menu.pnum.MFL_AQUILA.upload.maximum_size=262144
+gd_gd32f30x.menu.pnum.MFL_AQUILA.upload.maximum_data_size=49152
+gd_gd32f30x.menu.pnum.MFL_AQUILA.build.board=mfl_aquila
 gd_gd32f30x.menu.pnum.MFL_AQUILA.build.series=GD32F30x
 gd_gd32f30x.menu.pnum.MFL_AQUILA.build.product_line=GD32F30X_HD
 gd_gd32f30x.menu.pnum.MFL_AQUILA.build.variant=MFL_AQUILA
@@ -86,15 +76,15 @@ gd_gd32f10x.build.usb_manufacturer="Arduino"
 
 # create a new entry for each board here
 
-# Creality V4.2.2 Cortex-M3 GD32F103RE
-gd_gd32f10x.menu.pnum.MFL_CREALITY_422_M3=Creality GD32F103RE
-gd_gd32f10x.menu.pnum.MFL_CREALITY_422_M3.upload.maximum_size=524288
-gd_gd32f10x.menu.pnum.MFL_CREALITY_422_M3.upload.maximum_data_size=65536
-gd_gd32f10x.menu.pnum.MFL_CREALITY_422_M3.build.board=MFL_CREALITY_422_M3
-gd_gd32f10x.menu.pnum.MFL_CREALITY_422_M3.build.series=GD32F10x
-gd_gd32f10x.menu.pnum.MFL_CREALITY_422_M3.build.product_line=GD32F10X_HD
-gd_gd32f10x.menu.pnum.MFL_CREALITY_422_M3.build.variant=MFL_CREALITY_V422_M3
-gd_gd32f10x.menu.pnum.MFL_CREALITY_422_M3.upload.openocd_script=target/gd32f1x.cfg
+# Creality V4 Cortex-M3 GD32F103RE
+gd_gd32f10x.menu.pnum.MFL_CREALITY_V4_M3=Creality GD32F103RE
+gd_gd32f10x.menu.pnum.MFL_CREALITY_V4_M3.upload.maximum_size=524288
+gd_gd32f10x.menu.pnum.MFL_CREALITY_V4_M3.upload.maximum_data_size=65536
+gd_gd32f10x.menu.pnum.MFL_CREALITY_V4_M3.build.board=mfl_creality_v4_m3
+gd_gd32f10x.menu.pnum.MFL_CREALITY_V4_M3.build.series=GD32F10x
+gd_gd32f10x.menu.pnum.MFL_CREALITY_V4_M3.build.product_line=GD32F10X_HD
+gd_gd32f10x.menu.pnum.MFL_CREALITY_V4_M3.build.variant=MFL_CREALITY_V4_M3
+gd_gd32f10x.menu.pnum.MFL_CREALITY_V4_M3.upload.openocd_script=target/gd32f1x.cfg
 
 # Optimizations
 gd_gd32f10x.menu.opt.osstd=Smallest (-Os default)
