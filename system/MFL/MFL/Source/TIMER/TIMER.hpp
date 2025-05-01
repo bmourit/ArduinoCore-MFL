@@ -185,6 +185,11 @@ private:
         return (base_ == TIMER_Base::TIMER5_BASE || base_ == TIMER_Base::TIMER6_BASE);
     }
 
+    template <typename E>
+    inline constexpr uint32_t ch_bit(E e) {
+        return static_cast<uint32_t>(e);
+    }
+
     template <TIMER_Base Base>
     friend auto get_instance_for_base() -> TIMER&;
 };

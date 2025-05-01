@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <Arduino.h>
 
 #ifndef RTC_IRQ_PRIORITY
@@ -58,7 +59,7 @@ private:
 
     rtc::RTC& rtc_;
     Time_Set time_;
-    RTCCallback Callbacks_[3];
+    std::array<RTCCallback, 3> Callbacks_;
 
     inline uint8_t getMonthLength(uint8_t leapYear, uint8_t month) {
         uint8_t length = 30U;

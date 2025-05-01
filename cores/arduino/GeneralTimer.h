@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <array>
+
 #include "Arduino.h"
 #include "CoreHandler.h"
 #include "PinOpsMap.hpp"
@@ -30,7 +32,7 @@ public:
     struct CallbackState {
         uint8_t active_callbacks;
         TimerCallback up_callback;
-        TimerCallback channel_callbacks[TIMER_CHANNELS];
+        std::array<TimerCallback, TIMER_CHANNELS> channel_callbacks;
     };
 
     void begin(timer::TIMER_Config config);
@@ -144,8 +146,8 @@ protected:
     CallbackState callbacks_;
     uint8_t preemptPriority_;
     uint8_t subPriority_;
-    InputOutputMode channel_modes_[TIMER_CHANNELS];
-    bool companionChannel[TIMER_CHANNELS];
+    std::array<InputOutputMode, TIMER_CHANNELS> channel_modes_;
+    std::array<bool, TIMER_CHANNELS> companionChannel;
 
     static auto get_timer_instance(timer::TIMER_Base Base) -> timer::TIMER&;
 

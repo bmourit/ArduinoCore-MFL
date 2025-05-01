@@ -5,7 +5,7 @@ constexpr uint16_t MAX_PERIOD = 0xFFFFU;
 constexpr uint8_t maxNumTimers_ = TIMER_COUNT;
 
 auto GeneralTimer::get_timer_instance(timer::TIMER_Base Base) -> timer::TIMER& {
-    static timer::TIMER* timer_instances[TIMER_COUNT] = {nullptr};
+    static std::array<timer::TIMER*, TIMER_COUNT> timer_instances = {nullptr};
     const auto index = static_cast<size_t>(Base);
 
     if (timer_instances[index] == nullptr) {

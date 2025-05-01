@@ -15,7 +15,7 @@ inline constexpr uint8_t interruptSubPriority = 0U;
 inline constexpr uint8_t maxNumUsart_ = USART_COUNT;
 
 auto UsartSerial::get_usart_instance(usart::USART_Base Base) -> usart::USART& {
-    static usart::USART* usart_instances[maxNumUsart_] = {nullptr};
+    static std::array<usart::USART*, maxNumUsart_> usart_instances = {nullptr};
     const auto index = static_cast<size_t>(Base);
 
     if (usart_instances[index] == nullptr) {

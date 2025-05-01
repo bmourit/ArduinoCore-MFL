@@ -668,7 +668,7 @@ void TIMER::output_compare_init(Timer_Channel channel, TIMER_Output_Compare comp
         return;
     }
 
-    static constexpr struct ChannelBits {
+    struct ChannelBits {
         uint32_t ms;
         uint32_t en;
         uint32_t p;
@@ -676,12 +676,14 @@ void TIMER::output_compare_init(Timer_Channel channel, TIMER_Output_Compare comp
         uint32_t np;
         uint32_t iso;
         uint32_t iso_n;
-    } CH_BITS[] = {
-        {.ms = static_cast<uint32_t>(CHCTL0_Bits::CH0MS), .en = static_cast<uint32_t>(CHCTL2_Bits::CH0EN), .p = static_cast<uint32_t>(CHCTL2_Bits::CH0P), .nen = static_cast<uint32_t>(CHCTL2_Bits::CH0NEN), .np = static_cast<uint32_t>(CHCTL2_Bits::CH0NP), .iso = static_cast<uint32_t>(CTL1_Bits::ISO0), .iso_n = static_cast<uint32_t>(CTL1_Bits::ISO0N)},
-        {.ms = static_cast<uint32_t>(CHCTL0_Bits::CH1MS), .en = static_cast<uint32_t>(CHCTL2_Bits::CH1EN), .p = static_cast<uint32_t>(CHCTL2_Bits::CH1P), .nen = static_cast<uint32_t>(CHCTL2_Bits::CH1NEN), .np = static_cast<uint32_t>(CHCTL2_Bits::CH1NP), .iso = static_cast<uint32_t>(CTL1_Bits::ISO1), .iso_n = static_cast<uint32_t>(CTL1_Bits::ISO1N)},
-        {.ms = static_cast<uint32_t>(CHCTL1_Bits::CH2MS), .en = static_cast<uint32_t>(CHCTL2_Bits::CH2EN), .p = static_cast<uint32_t>(CHCTL2_Bits::CH2P), .nen = static_cast<uint32_t>(CHCTL2_Bits::CH2NEN), .np = static_cast<uint32_t>(CHCTL2_Bits::CH2NP), .iso = static_cast<uint32_t>(CTL1_Bits::ISO2), .iso_n = static_cast<uint32_t>(CTL1_Bits::ISO2N)},
-        {.ms = static_cast<uint32_t>(CHCTL1_Bits::CH3MS), .en = static_cast<uint32_t>(CHCTL2_Bits::CH3EN), .p = static_cast<uint32_t>(CHCTL2_Bits::CH3P), .nen = 0U, .np = 0U, .iso = static_cast<uint32_t>(CTL1_Bits::ISO3), .iso_n = 0U}
     };
+
+    static constexpr std::array<ChannelBits, 4> CH_BITS[] {{
+        { ch_bit(CHCTL0_Bits::CH0MS), ch_bit(CHCTL2_Bits::CH0EN), ch_bit(CHCTL2_Bits::CH0P), ch_bit(CHCTL2_Bits::CH0NEN), ch_bit(CHCTL2_Bits::CH0NP), ch_bit(CTL1_Bits::ISO0), ch_bit(CTL1_Bits::ISO0N) },
+        { ch_bit(CHCTL0_Bits::CH1MS), ch_bit(CHCTL2_Bits::CH1EN), ch_bit(CHCTL2_Bits::CH1P), ch_bit(CHCTL2_Bits::CH1NEN), ch_bit(CHCTL2_Bits::CH1NP), ch_bit(CTL1_Bits::ISO1), ch_bit(CTL1_Bits::ISO1N) },
+        { ch_bit(CHCTL1_Bits::CH2MS), ch_bit(CHCTL2_Bits::CH2EN), ch_bit(CHCTL2_Bits::CH2P), ch_bit(CHCTL2_Bits::CH2NEN), ch_bit(CHCTL2_Bits::CH2NP), ch_bit(CTL1_Bits::ISO2), ch_bit(CTL1_Bits::ISO2N) },
+        { ch_bit(CHCTL1_Bits::CH3MS), ch_bit(CHCTL2_Bits::CH3EN), ch_bit(CHCTL2_Bits::CH3P), 0U,                          0U,                         ch_bit(CTL1_Bits::ISO3), 0U }
+    }};
 
     const auto idx = static_cast<size_t>(channel);
     const auto& bits = CH_BITS[idx];
@@ -736,10 +738,10 @@ void TIMER::set_output_mode(Timer_Channel channel, Output_Compare_Mode mode) {
     const TIMER_Regs reg = (channel <= Timer_Channel::CH1) ? TIMER_Regs::CHCTL0 : TIMER_Regs::CHCTL1;
 
     // Calculate the bit offset for the COMCTL bits
-    const uint32_t bit_offset = (channel == Timer_Channel::CH0) ? static_cast<uint32_t>(CHCTL0_Bits::CH0COMCTL) :
-                                (channel == Timer_Channel::CH1) ? static_cast<uint32_t>(CHCTL0_Bits::CH1COMCTL) :
-                                (channel == Timer_Channel::CH2) ? static_cast<uint32_t>(CHCTL1_Bits::CH2COMCTL) :
-                                static_cast<uint32_t>(CHCTL1_Bits::CH3COMCTL);
+    const uint32_t bit_offset = (channel == Timer_Channel::CH0) ? ch_bit(CHCTL0_Bits::CH0COMCTL) :
+                                (channel == Timer_Channel::CH1) ? ch_bit(CHCTL0_Bits::CH1COMCTL) :
+                                (channel == Timer_Channel::CH2) ? ch_bit(CHCTL1_Bits::CH2COMCTL) :
+                                ch_bit(CHCTL1_Bits::CH3COMCTL);
 
     // Clear and set the COMCTL bits for the given channel
     write_bit_range(*this, reg, bit_offset, static_cast<uint32_t>(mode));
@@ -781,10 +783,10 @@ void TIMER::set_output_shadow(Timer_Channel channel, Output_Compare_Shadow shado
     const TIMER_Regs reg = (channel <= Timer_Channel::CH1) ? TIMER_Regs::CHCTL0 : TIMER_Regs::CHCTL1;
 
     // Calculate the bit offset for the COMSEN bits
-    const uint32_t bit_offset = (channel == Timer_Channel::CH0) ? static_cast<uint32_t>(CHCTL0_Bits::CH0COMSEN) :
-                                (channel == Timer_Channel::CH1) ? static_cast<uint32_t>(CHCTL0_Bits::CH1COMSEN) :
-                                (channel == Timer_Channel::CH2) ? static_cast<uint32_t>(CHCTL1_Bits::CH2COMSEN) :
-                                static_cast<uint32_t>(CHCTL1_Bits::CH3COMSEN);
+    const uint32_t bit_offset = (channel == Timer_Channel::CH0) ? ch_bit(CHCTL0_Bits::CH0COMSEN) :
+                                (channel == Timer_Channel::CH1) ? ch_bit(CHCTL0_Bits::CH1COMSEN) :
+                                (channel == Timer_Channel::CH2) ? ch_bit(CHCTL1_Bits::CH2COMSEN) :
+                                ch_bit(CHCTL1_Bits::CH3COMSEN);
 
     // Clear and set the COMSEN bits for the given channel
     write_bit(*this, reg, bit_offset, (shadow == Output_Compare_Shadow::OC_SHADOW_ENABLE));
@@ -810,10 +812,10 @@ void TIMER::set_output_fast(Timer_Channel channel, Output_Compare_Fast fast) {
     const TIMER_Regs reg = (channel <= Timer_Channel::CH1) ? TIMER_Regs::CHCTL0 : TIMER_Regs::CHCTL1;
 
     // Calculate the bit offset for the COMFEN bits
-    const uint32_t bit_offset = (channel == Timer_Channel::CH0) ? static_cast<uint32_t>(CHCTL0_Bits::CH0COMFEN) :
-                                (channel == Timer_Channel::CH1) ? static_cast<uint32_t>(CHCTL0_Bits::CH1COMFEN) :
-                                (channel == Timer_Channel::CH2) ? static_cast<uint32_t>(CHCTL1_Bits::CH2COMFEN) :
-                                static_cast<uint32_t>(CHCTL1_Bits::CH3COMFEN);
+    const uint32_t bit_offset = (channel == Timer_Channel::CH0) ? ch_bit(CHCTL0_Bits::CH0COMFEN) :
+                                (channel == Timer_Channel::CH1) ? ch_bit(CHCTL0_Bits::CH1COMFEN) :
+                                (channel == Timer_Channel::CH2) ? ch_bit(CHCTL1_Bits::CH2COMFEN) :
+                                ch_bit(CHCTL1_Bits::CH3COMFEN);
 
     // Clear and set the COMFEN bits for the given channel
     write_bit(*this, reg, bit_offset, (fast == Output_Compare_Fast::OC_FAST_ENABLE));
@@ -838,10 +840,10 @@ void TIMER::set_output_clear(Timer_Channel channel, Output_Compare_Clear oc_clea
     const TIMER_Regs reg = (channel <= Timer_Channel::CH1) ? TIMER_Regs::CHCTL0 : TIMER_Regs::CHCTL1;
 
     // Calculate the bit offset for the COMCEN bits
-    const uint32_t bit_offset = (channel == Timer_Channel::CH0) ? static_cast<uint32_t>(CHCTL0_Bits::CH0COMCEN) :
-                                (channel == Timer_Channel::CH1) ? static_cast<uint32_t>(CHCTL0_Bits::CH1COMCEN) :
-                                (channel == Timer_Channel::CH2) ? static_cast<uint32_t>(CHCTL1_Bits::CH2COMCEN) :
-                                static_cast<uint32_t>(CHCTL1_Bits::CH3COMCEN);
+    const uint32_t bit_offset = (channel == Timer_Channel::CH0) ? ch_bit(CHCTL0_Bits::CH0COMCEN) :
+                                (channel == Timer_Channel::CH1) ? ch_bit(CHCTL0_Bits::CH1COMCEN) :
+                                (channel == Timer_Channel::CH2) ? ch_bit(CHCTL1_Bits::CH2COMCEN) :
+                                ch_bit(CHCTL1_Bits::CH3COMCEN);
 
     // Clear and set the COMCEN bits for the given channel
     write_bit(*this, reg, bit_offset, (oc_clear == Output_Compare_Clear::OC_CLEAR_ENABLE));
@@ -870,10 +872,10 @@ void TIMER::set_output_polarity(Timer_Channel channel, Output_Polarity polarity)
     }
 
     // Calculate the bit offset for the CHxP bits
-    const uint32_t bit_offset = (channel == Timer_Channel::CH0) ? static_cast<uint32_t>(CHCTL2_Bits::CH0P) :
-                                (channel == Timer_Channel::CH1) ? static_cast<uint32_t>(CHCTL2_Bits::CH1P) :
-                                (channel == Timer_Channel::CH2) ? static_cast<uint32_t>(CHCTL2_Bits::CH2P) :
-                                static_cast<uint32_t>(CHCTL2_Bits::CH3P);
+    const uint32_t bit_offset = (channel == Timer_Channel::CH0) ? ch_bit(CHCTL2_Bits::CH0P) :
+                                (channel == Timer_Channel::CH1) ? ch_bit(CHCTL2_Bits::CH1P) :
+                                (channel == Timer_Channel::CH2) ? ch_bit(CHCTL2_Bits::CH2P) :
+                                ch_bit(CHCTL2_Bits::CH3P);
 
     // Clear and set the CHxP bits for the given channel
     write_bit(*this, TIMER_Regs::CHCTL2, bit_offset, (polarity == Output_Polarity::OUTPUT_LOW));
@@ -905,9 +907,9 @@ void TIMER::set_complement_output_polarity(Timer_Channel channel, Output_Polarit
     }
 
     // Calculate the bit offset for the CHxNP bits
-    const uint32_t bit_offset = (channel == Timer_Channel::CH0) ? static_cast<uint32_t>(CHCTL2_Bits::CH0NP) :
-                                (channel == Timer_Channel::CH1) ? static_cast<uint32_t>(CHCTL2_Bits::CH1NP) :
-                                static_cast<uint32_t>(CHCTL2_Bits::CH2NP);
+    const uint32_t bit_offset = (channel == Timer_Channel::CH0) ? ch_bit(CHCTL2_Bits::CH0NP) :
+                                (channel == Timer_Channel::CH1) ? ch_bit(CHCTL2_Bits::CH1NP) :
+                                ch_bit(CHCTL2_Bits::CH2NP);
 
     // Clear and set the CHxNP bits for the given channel
     write_bit(*this, TIMER_Regs::CHCTL2, bit_offset, (polarity == Output_Polarity::OUTPUT_LOW));
@@ -933,10 +935,10 @@ void TIMER::set_channel_output_enable(Timer_Channel channel, bool enable) {
     }
 
     // Calculate the bit offset for the CHxEN bits
-    const uint32_t bit_offset = (channel == Timer_Channel::CH0) ? static_cast<uint32_t>(CHCTL2_Bits::CH0EN) :
-                                (channel == Timer_Channel::CH1) ? static_cast<uint32_t>(CHCTL2_Bits::CH1EN) :
-                                (channel == Timer_Channel::CH2) ? static_cast<uint32_t>(CHCTL2_Bits::CH2EN) :
-                                static_cast<uint32_t>(CHCTL2_Bits::CH3EN);
+    const uint32_t bit_offset = (channel == Timer_Channel::CH0) ? ch_bit(CHCTL2_Bits::CH0EN) :
+                                (channel == Timer_Channel::CH1) ? ch_bit(CHCTL2_Bits::CH1EN) :
+                                (channel == Timer_Channel::CH2) ? ch_bit(CHCTL2_Bits::CH2EN) :
+                                ch_bit(CHCTL2_Bits::CH3EN);
 
     // Clear and set the CHxEN bits for the given channel
     write_bit(*this, TIMER_Regs::CHCTL2, bit_offset, enable);
@@ -964,9 +966,9 @@ void TIMER::set_compliment_output_enable(Timer_Channel channel, bool enable) {
     }
 
     // Calculate the bit offset for the CHxNEN bits
-    const uint32_t bit_offset = (channel == Timer_Channel::CH0) ? static_cast<uint32_t>(CHCTL2_Bits::CH0NEN) :
-                                (channel == Timer_Channel::CH1) ? static_cast<uint32_t>(CHCTL2_Bits::CH1NEN) :
-                                static_cast<uint32_t>(CHCTL2_Bits::CH2NEN);
+    const uint32_t bit_offset = (channel == Timer_Channel::CH0) ? ch_bit(CHCTL2_Bits::CH0NEN) :
+                                (channel == Timer_Channel::CH1) ? ch_bit(CHCTL2_Bits::CH1NEN) :
+                                ch_bit(CHCTL2_Bits::CH2NEN);
 
     // Clear and set the CHxNEN bits for the given channel
     write_bit(*this, TIMER_Regs::CHCTL2, bit_offset, enable);
@@ -990,7 +992,7 @@ void TIMER::input_capture_init(Timer_Channel channel, TIMER_Input_Capture captur
         return;
     }
 
-    constexpr struct ChannelBits {
+    struct ChannelBits {
         uint32_t ms;
         uint32_t en;
         uint32_t p;
@@ -998,12 +1000,14 @@ void TIMER::input_capture_init(Timer_Channel channel, TIMER_Input_Capture captur
         uint32_t np;
         uint32_t capflt;
         uint32_t cappsc;
-    } CH_BITS[] = {
-        {.ms=static_cast<uint32_t>(CHCTL0_Bits::CH0MS), .en=static_cast<uint32_t>(CHCTL2_Bits::CH0EN), .p=static_cast<uint32_t>(CHCTL2_Bits::CH0P), .nen=static_cast<uint32_t>(CHCTL2_Bits::CH0NEN), .np=static_cast<uint32_t>(CHCTL2_Bits::CH0NP), .capflt=static_cast<uint32_t>(CHCTL0_Bits::CH0CAPFLT), .cappsc=static_cast<uint32_t>(CHCTL0_Bits::CH0CAPPSC)},
-        {.ms=static_cast<uint32_t>(CHCTL0_Bits::CH1MS), .en=static_cast<uint32_t>(CHCTL2_Bits::CH1EN), .p=static_cast<uint32_t>(CHCTL2_Bits::CH1P), .nen=static_cast<uint32_t>(CHCTL2_Bits::CH1NEN), .np=static_cast<uint32_t>(CHCTL2_Bits::CH1NP), .capflt=static_cast<uint32_t>(CHCTL0_Bits::CH1CAPFLT), .cappsc=static_cast<uint32_t>(CHCTL0_Bits::CH1CAPPSC)},
-        {.ms=static_cast<uint32_t>(CHCTL1_Bits::CH2MS), .en=static_cast<uint32_t>(CHCTL2_Bits::CH2EN), .p=static_cast<uint32_t>(CHCTL2_Bits::CH2P), .nen=static_cast<uint32_t>(CHCTL2_Bits::CH2NEN), .np=static_cast<uint32_t>(CHCTL2_Bits::CH2NP), .capflt=static_cast<uint32_t>(CHCTL1_Bits::CH2CAPFLT), .cappsc=static_cast<uint32_t>(CHCTL1_Bits::CH2CAPPSC)},
-        {.ms=static_cast<uint32_t>(CHCTL1_Bits::CH3MS), .en=static_cast<uint32_t>(CHCTL2_Bits::CH3EN), .p=static_cast<uint32_t>(CHCTL2_Bits::CH3P), .nen=0U, .np=0U, .capflt=static_cast<uint32_t>(CHCTL1_Bits::CH3CAPFLT), .cappsc=static_cast<uint32_t>(CHCTL1_Bits::CH3CAPPSC)},
     };
+
+    static constexpr std::array<ChannelBits, 4> CH_BITS {{
+        { ch_bit(CHCTL0_Bits::CH0MS), ch_bit(CHCTL2_Bits::CH0EN), ch_bit(CHCTL2_Bits::CH0P), ch_bit(CHCTL2_Bits::CH0NEN), ch_bit(CHCTL2_Bits::CH0NP), ch_bit(CHCTL0_Bits::CH0CAPFLT), ch_bit(CHCTL0_Bits::CH0CAPPSC) },
+        { ch_bit(CHCTL0_Bits::CH1MS), ch_bit(CHCTL2_Bits::CH1EN), ch_bit(CHCTL2_Bits::CH1P), ch_bit(CHCTL2_Bits::CH1NEN), ch_bit(CHCTL2_Bits::CH1NP), ch_bit(CHCTL0_Bits::CH1CAPFLT), ch_bit(CHCTL0_Bits::CH1CAPPSC) },
+        { ch_bit(CHCTL1_Bits::CH2MS), ch_bit(CHCTL2_Bits::CH2EN), ch_bit(CHCTL2_Bits::CH2P), ch_bit(CHCTL2_Bits::CH2NEN), ch_bit(CHCTL2_Bits::CH2NP), ch_bit(CHCTL1_Bits::CH2CAPFLT), ch_bit(CHCTL1_Bits::CH2CAPPSC) },
+        { ch_bit(CHCTL1_Bits::CH3MS), ch_bit(CHCTL2_Bits::CH3EN), ch_bit(CHCTL2_Bits::CH3P), 0U,                          0U,                         ch_bit(CHCTL1_Bits::CH3CAPFLT), ch_bit(CHCTL1_Bits::CH3CAPPSC) }
+    }};
 
     const auto idx = static_cast<size_t>(channel);
     const auto& bits = CH_BITS[idx];
@@ -1061,10 +1065,10 @@ void TIMER::set_input_capture_prescaler(Timer_Channel channel, Input_Capture_Pre
     const TIMER_Regs reg = (channel <= Timer_Channel::CH1) ? TIMER_Regs::CHCTL0 : TIMER_Regs::CHCTL1;
 
     // Calculate the bit offset for the CHxCAPPSC bits
-    const uint32_t bit_offset = (channel == Timer_Channel::CH0) ? static_cast<uint32_t>(CHCTL0_Bits::CH0CAPPSC) :
-                                (channel == Timer_Channel::CH1) ? static_cast<uint32_t>(CHCTL0_Bits::CH1CAPPSC) :
-                                (channel == Timer_Channel::CH2) ? static_cast<uint32_t>(CHCTL1_Bits::CH2CAPPSC) :
-                                static_cast<uint32_t>(CHCTL1_Bits::CH3CAPPSC);
+    const uint32_t bit_offset = (channel == Timer_Channel::CH0) ? ch_bit(CHCTL0_Bits::CH0CAPPSC) :
+                                (channel == Timer_Channel::CH1) ? ch_bit(CHCTL0_Bits::CH1CAPPSC) :
+                                (channel == Timer_Channel::CH2) ? ch_bit(CHCTL1_Bits::CH2CAPPSC) :
+                                ch_bit(CHCTL1_Bits::CH3CAPPSC);
 
     // Clear and set the CHxCAPPSC bits for the given channel
     write_bit_range(*this, reg, bit_offset, static_cast<uint32_t>(prescaler));
@@ -1095,11 +1099,11 @@ void TIMER::input_pwm_capture_enable(Timer_Channel channel) {
 
     // Helper lambda to configure a channel
     auto configure_channel = [this](Timer_Channel ch, Polarity_Select polarity, Input_Capture_Select src) {
-        const uint32_t ch_en = (ch == Timer_Channel::CH0) ? static_cast<uint32_t>(CHCTL2_Bits::CH0EN) : static_cast<uint32_t>(CHCTL2_Bits::CH1EN);
-        const uint32_t ch_p = (ch == Timer_Channel::CH0) ? static_cast<uint32_t>(CHCTL2_Bits::CH0P) : static_cast<uint32_t>(CHCTL2_Bits::CH1P);
-        const uint32_t ch_np = (ch == Timer_Channel::CH0) ? static_cast<uint32_t>(CHCTL2_Bits::CH0NP) : static_cast<uint32_t>(CHCTL2_Bits::CH1NP);
-        const uint32_t ch_ms = (ch == Timer_Channel::CH0) ? static_cast<uint32_t>(CHCTL0_Bits::CH0MS) : static_cast<uint32_t>(CHCTL0_Bits::CH1MS);
-        const uint32_t ch_capflt = (ch == Timer_Channel::CH0) ? static_cast<uint32_t>(CHCTL0_Bits::CH0CAPFLT) : static_cast<uint32_t>(CHCTL0_Bits::CH1CAPFLT);
+        const uint32_t ch_en     = (ch == Timer_Channel::CH0) ? ch_bit(CHCTL2_Bits::CH0EN)     : ch_bit(CHCTL2_Bits::CH1EN);
+        const uint32_t ch_p      = (ch == Timer_Channel::CH0) ? ch_bit(CHCTL2_Bits::CH0P)      : ch_bit(CHCTL2_Bits::CH1P);
+        const uint32_t ch_np     = (ch == Timer_Channel::CH0) ? ch_bit(CHCTL2_Bits::CH0NP)     : ch_bit(CHCTL2_Bits::CH1NP);
+        const uint32_t ch_ms     = (ch == Timer_Channel::CH0) ? ch_bit(CHCTL0_Bits::CH0MS)     : ch_bit(CHCTL0_Bits::CH1MS);
+        const uint32_t ch_capflt = (ch == Timer_Channel::CH0) ? ch_bit(CHCTL0_Bits::CH0CAPFLT) : ch_bit(CHCTL0_Bits::CH1CAPFLT);
 
         // Disable the channel and clear and set polarity
         write_bits_sequence(*this, TIMER_Regs::CHCTL2,
@@ -1263,9 +1267,9 @@ void TIMER::quadrature_decoder_configure(Decode_Mode mode, Polarity_Select polar
 
     // Helper lambda to configure input capture and polarity for a channel
     auto configure_channel = [this](Timer_Channel ch, Polarity_Select polarity) {
-        const uint32_t ch_ms = (ch == Timer_Channel::CH0) ? static_cast<uint32_t>(CHCTL0_Bits::CH0MS) : static_cast<uint32_t>(CHCTL0_Bits::CH1MS);
-        const uint32_t ch_p = (ch == Timer_Channel::CH0) ? static_cast<uint32_t>(CHCTL2_Bits::CH0P) : static_cast<uint32_t>(CHCTL2_Bits::CH1P);
-        const uint32_t ch_np = (ch == Timer_Channel::CH0) ? static_cast<uint32_t>(CHCTL2_Bits::CH0NP) : static_cast<uint32_t>(CHCTL2_Bits::CH1NP);
+        const uint32_t ch_ms = (ch == Timer_Channel::CH0) ? ch_bit(CHCTL0_Bits::CH0MS) : ch_bit(CHCTL0_Bits::CH1MS);
+        const uint32_t ch_p  = (ch == Timer_Channel::CH0) ? ch_bit(CHCTL2_Bits::CH0P)  : ch_bit(CHCTL2_Bits::CH1P);
+        const uint32_t ch_np = (ch == Timer_Channel::CH0) ? ch_bit(CHCTL2_Bits::CH0NP) : ch_bit(CHCTL2_Bits::CH1NP);
 
         // Configure input capture source
         write_bit_range(*this, TIMER_Regs::CHCTL0, ch_ms, static_cast<uint32_t>(Input_Capture_Select::IO_INPUT_CI0FE0));
@@ -1329,17 +1333,18 @@ void TIMER::set_clock_from_internal_trigger(Trigger_Select trigger) {
  */
 void TIMER::set_clock_from_external_trigger(Trigger_Select trigger, Polarity_Select polarity, uint32_t filter) {
     // Determine the channel to configure based on the current trigger source
-    Timer_Channel channel = (read_bit_range(*this, TIMER_Regs::SMCFG, static_cast<uint32_t>(SMCFG_Bits::TRGS)) == static_cast<uint32_t>(Trigger_Select::CI1FE1))
+    Timer_Channel channel = (read_bit_range(*this, TIMER_Regs::SMCFG,
+                            static_cast<uint32_t>(SMCFG_Bits::TRGS)) == static_cast<uint32_t>(Trigger_Select::CI1FE1))
                             ? Timer_Channel::CH1
                             : Timer_Channel::CH0;
 
     // Helper lambda to configure the selected channel
     auto configure_channel = [this](Timer_Channel ch, Polarity_Select polarity, uint32_t filter) {
-        const uint32_t ch_en = (ch == Timer_Channel::CH0) ? static_cast<uint32_t>(CHCTL2_Bits::CH0EN) : static_cast<uint32_t>(CHCTL2_Bits::CH1EN);
-        const uint32_t ch_p = (ch == Timer_Channel::CH0) ? static_cast<uint32_t>(CHCTL2_Bits::CH0P) : static_cast<uint32_t>(CHCTL2_Bits::CH1P);
-        const uint32_t ch_np = (ch == Timer_Channel::CH0) ? static_cast<uint32_t>(CHCTL2_Bits::CH0NP) : static_cast<uint32_t>(CHCTL2_Bits::CH1NP);
-        const uint32_t ch_ms = (ch == Timer_Channel::CH0) ? static_cast<uint32_t>(CHCTL0_Bits::CH0MS) : static_cast<uint32_t>(CHCTL0_Bits::CH1MS);
-        const uint32_t ch_capflt = (ch == Timer_Channel::CH0) ? static_cast<uint32_t>(CHCTL0_Bits::CH0CAPFLT) : static_cast<uint32_t>(CHCTL0_Bits::CH1CAPFLT);
+        const uint32_t ch_en     = (ch == Timer_Channel::CH0) ? ch_bit(CHCTL2_Bits::CH0EN)     : ch_bit(CHCTL2_Bits::CH1EN);
+        const uint32_t ch_p      = (ch == Timer_Channel::CH0) ? ch_bit(CHCTL2_Bits::CH0P)      : ch_bit(CHCTL2_Bits::CH1P);
+        const uint32_t ch_np     = (ch == Timer_Channel::CH0) ? ch_bit(CHCTL2_Bits::CH0NP)     : ch_bit(CHCTL2_Bits::CH1NP);
+        const uint32_t ch_ms     = (ch == Timer_Channel::CH0) ? ch_bit(CHCTL0_Bits::CH0MS)     : ch_bit(CHCTL0_Bits::CH1MS);
+        const uint32_t ch_capflt = (ch == Timer_Channel::CH0) ? ch_bit(CHCTL0_Bits::CH0CAPFLT) : ch_bit(CHCTL0_Bits::CH1CAPFLT);
 
         // Disable the channel and clear polarity settings
         write_bits_sequence(*this, TIMER_Regs::CHCTL2,
@@ -1538,11 +1543,11 @@ void TIMER::clear_interrupt_flag(Interrupt_Flags flag) {
  * the update interrupt flag and channel interrupt flags (CH0, CH1, CH2, CH3).
  */
 void TIMER::clear_all_interrupt_flags() {
-    const uint32_t all_flags = ((1U << static_cast<size_t>(Interrupt_Flags::INTR_FLAG_UP)) |
-                                (1U << static_cast<size_t>(Interrupt_Flags::INTR_FLAG_CH0)) |
-                                (1U << static_cast<size_t>(Interrupt_Flags::INTR_FLAG_CH1)) |
-                                (1U << static_cast<size_t>(Interrupt_Flags::INTR_FLAG_CH2)) |
-                                (1U << static_cast<size_t>(Interrupt_Flags::INTR_FLAG_CH3)));
+    const uint32_t all_flags = (1U << static_cast<size_t>(Interrupt_Flags::INTR_FLAG_UP)) |
+                               (1U << static_cast<size_t>(Interrupt_Flags::INTR_FLAG_CH0)) |
+                               (1U << static_cast<size_t>(Interrupt_Flags::INTR_FLAG_CH1)) |
+                               (1U << static_cast<size_t>(Interrupt_Flags::INTR_FLAG_CH2)) |
+                               (1U << static_cast<size_t>(Interrupt_Flags::INTR_FLAG_CH3));
 
     write_bits(*this, TIMER_Regs::INTF, all_flags, false);
 }
@@ -1579,11 +1584,11 @@ void TIMER::set_interrupt_enable(Interrupt_Type type, bool enable) {
  * generate interrupts for the specified types.
  */
 void TIMER::disable_all_interrupts() {
-    const uint32_t all_types = ((1U << static_cast<uint32_t>(Interrupt_Type::INTR_UPIE)) |
-                                (1U << static_cast<uint32_t>(Interrupt_Type::INTR_CH0IE)) |
-                                (1U << static_cast<uint32_t>(Interrupt_Type::INTR_CH1IE)) |
-                                (1U << static_cast<uint32_t>(Interrupt_Type::INTR_CH2IE)) |
-                                (1U << static_cast<uint32_t>(Interrupt_Type::INTR_CH3IE)));
+    const uint32_t all_types = (1U << static_cast<uint32_t>(Interrupt_Type::INTR_UPIE)) |
+                               (1U << static_cast<uint32_t>(Interrupt_Type::INTR_CH0IE)) |
+                               (1U << static_cast<uint32_t>(Interrupt_Type::INTR_CH1IE)) |
+                               (1U << static_cast<uint32_t>(Interrupt_Type::INTR_CH2IE)) |
+                               (1U << static_cast<uint32_t>(Interrupt_Type::INTR_CH3IE));
 
     write_bits(*this, TIMER_Regs::DMAINTEN, all_types, false);
 }

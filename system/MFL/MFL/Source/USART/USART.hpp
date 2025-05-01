@@ -178,7 +178,7 @@ private:
     USART_Config config_;
     RingBuffer<uint8_t, RxBufferSize> rx_buffer_;
     RingBuffer<uint8_t, TxBufferSize> tx_buffer_;
-    IRQCallback interrupt_callbacks_[static_cast<size_t>(Interrupt_Type::INTR_COUNT)];
+    std::array<IRQCallback, static_cast<size_t>(Interrupt_Type::INTR_COUNT)> interrupt_callbacks_;
 
     template <USART_Base Base>
     friend auto get_instance_for_base() -> USART&;

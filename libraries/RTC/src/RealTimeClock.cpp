@@ -17,7 +17,7 @@ auto RealTimeClock::get_instance() -> RealTimeClock& {
 RealTimeClock::RealTimeClock() :
     rtc_(rtc::RTC::get_instance()),
     time_(),
-    Callbacks_{nullptr, nullptr, nullptr}
+    Callbacks_{nullptr}
 {
     RCU_I.set_rtc_source(rcu::RTC_Source::RTCSRC_LXTAL);
     time_ = { 1970U, 1U, 1U, 0U, 0U, 0U, };
