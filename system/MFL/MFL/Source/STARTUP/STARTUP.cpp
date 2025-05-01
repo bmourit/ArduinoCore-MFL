@@ -136,7 +136,7 @@ void STARTUP::startup_init() {
         cee::CEE::get_instance().set_enhanced_mode_enable(true);
     #endif
 
-    if constexpr (std::is_same_v<mcu::ChipSeries, mcu::F103R>) {
+    if constexpr (std::is_same_v<mcu::ChipSeries, mcu::F303R>) {
         // Enable the gpio compensation cell
         gpio::AFIO::get_instance().set_compensation(true);
         while (!gpio::AFIO::get_instance().get_compensation()) {
