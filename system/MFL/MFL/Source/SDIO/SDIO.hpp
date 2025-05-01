@@ -135,6 +135,9 @@ public:
     inline auto get_config() -> SDIO_Config& { return config_;}
 
     inline auto calculate_clock_divider(uint32_t requested_clock) -> uint16_t {
+        // Guard against divide-by-zero trap
+        if (requested_clock == 0U) return 1;
+
         const uint32_t sdio_pclk = RCU_I.get_clock_frequency(rcu::Clock_Frequency::CK_AHB);
 
         // Cap to hardware limits
