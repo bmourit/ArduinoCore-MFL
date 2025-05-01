@@ -62,10 +62,12 @@ extern "C" {
         if (sign) {
             *sp++ = '-';
         }
+
         while (tp > tmp) {
             *sp++ = *--tp;
         }
         *sp = '\0';
+
         return string;
     }
 
@@ -105,6 +107,7 @@ extern "C" {
 
         char tmp[MAX_BUFFER_SIZE];
         char* tp = tmp;
+
         do {
             long i = value % radix;
             value = value / radix;
@@ -116,6 +119,7 @@ extern "C" {
             *sp++ = *--tp;
         }
         *sp = '\0';
+
         return string;
     }
 

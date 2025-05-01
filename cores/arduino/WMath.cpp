@@ -29,7 +29,7 @@
  *
  * @param seed The seed value to initialize the random number generator.
  */
-extern void randomSeed(unsigned long seed) {
+void randomSeed(unsigned long seed) {
     if (seed != 0U) {
         srand(seed);
     }
@@ -44,7 +44,7 @@ extern void randomSeed(unsigned long seed) {
  * @param size The range of the pseudo-random number.
  * @return A pseudo-random number in the range [0, size).
  */
-extern long random(long size) {
+long random(long size) {
     return (size == 0) ? 0 : rand() % size;
 }
 
@@ -58,7 +58,7 @@ extern long random(long size) {
  * @param max The maximum value of the range.
  * @return A pseudo-random number in the range [min, max).
  */
-extern long random(long min, long max) {
+long random(long min, long max) {
     if (min >= max) {
         return min;
     }
