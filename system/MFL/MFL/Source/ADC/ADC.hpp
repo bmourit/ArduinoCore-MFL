@@ -222,12 +222,12 @@ public:
         const auto index = static_cast<uint8_t>(adc_prescaler);
 
         // Array of prescaler values corresponding to ADC_Prescaler values
-        constexpr uint32_t prescaler_values[] = {
+        constexpr std::array<uint32_t, 13> prescaler_values = {
             2U, 4U, 6U, 8U, 2U, 12U, 8U, 16U, 5U, 6U, 10U, 20U, 0U
         };
 
         // Bounds check to prevent array out-of-bounds access
-        if (index < (sizeof(prescaler_values) / sizeof(prescaler_values[0]))) {
+        if (index < prescaler_values.size()) {
             return prescaler_values[index];
         }
 
