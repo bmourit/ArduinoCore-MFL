@@ -99,11 +99,14 @@ void GPIO::set_pin_mode(Pin_Number pin, Pin_Mode mode, Output_Speed speed) {
     // Cache the pin index for repeated use
     const auto pin_idx = static_cast<uint32_t>(pin);
 
+    // Calculate register and shift
     const uint32_t shift = (pin_idx & 0x7U) << 2;
     const GPIO_Regs reg = (pin_idx >= 8U) ? GPIO_Regs::CTL1 : GPIO_Regs::CTL0;
-    uint32_t ctl = read_register<uint32_t>(*this, reg) & ~(0xFU << shift);
 
-    bool max_speed = false;
+    uint32_t ctl = read_register<uint32_t>(*this, reg);
+    const uint32_t mask = 0xFU << shift;
+    ctl &= ~mask;
+
     uint32_t cfg = 0U;
 
     if (mode <= Pin_Mode::INPUT_PULLDOWN) {
@@ -111,10 +114,9 @@ void GPIO::set_pin_mode(Pin_Number pin, Pin_Mode mode, Output_Speed speed) {
         cfg = (mode == Pin_Mode::INPUT_FLOATING) ? 0x4U :
               (mode == Pin_Mode::ANALOG) ? 0x0U : 0x8U;
 
-        if (mode == Pin_Mode::INPUT_PULLUP)
-            atomic_write_bit(*this, GPIO_Regs::BOP, pin_idx, true);
-        else if (mode == Pin_Mode::INPUT_PULLDOWN)
-            atomic_write_bit(*this, GPIO_Regs::BC, pin_idx, true);
+        if (mode == Pin_Mode::INPUT_PULLUP || mode == Pin_Mode::INPUT_PULLDOWN) {
+            atomic_write_bit(*this, (mode == Pin_Mode::INPUT_PULLUP) ? GPIO_Regs::BOP : GPIO_Regs::BC, pin_idx, true);
+        }
     } else {
         // Handle output modes
         const bool is_open_drain = (mode == Pin_Mode::OUTPUT_OPENDRAIN || mode == Pin_Mode::ALT_OPENDRAIN);
@@ -125,7 +127,7 @@ void GPIO::set_pin_mode(Pin_Number pin, Pin_Mode mode, Output_Speed speed) {
         if constexpr (std::is_same_v<mcu::ChipSeries, mcu::F303R>) {
             if (speed == Output_Speed::SPEED_MAX) {
                 cfg |= 0x3U;
-                max_speed = true;
+                write_bit(*this, GPIO_Regs::SPD, pin_idx, true);
             } else {
                 cfg |= (speed == Output_Speed::INVALID) ?
                    static_cast<uint32_t>(Output_Speed::SPEED_50MHZ) :
@@ -136,10 +138,6 @@ void GPIO::set_pin_mode(Pin_Number pin, Pin_Mode mode, Output_Speed speed) {
                    static_cast<uint32_t>(Output_Speed::SPEED_50MHZ) :
                    static_cast<uint32_t>(speed);
         }
-    }
-
-    if (max_speed) {
-        write_bit(*this, GPIO_Regs::SPD, pin_idx, true);
     }
 
     write_register(*this, reg, ctl | (cfg << shift));
