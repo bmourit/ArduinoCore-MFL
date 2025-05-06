@@ -97,12 +97,18 @@ enum class Pin_Mode : uint8_t {
     INVALID
 };
 
+#if defined(GD32F103RE) || defined(GD32F103RC)
+    inline constexpr uint8_t max_speed = 3U;    // SPEED_50MHZ
+#else
+    inline constexpr uint8_t max_speed = 4U;    // 120MHZ
+#endif
+
 enum class Output_Speed : uint8_t {
     INVALID,
     SPEED_10MHZ,
     SPEED_2MHZ,
     SPEED_50MHZ,
-    SPEED_MAX
+    SPEED_MAX = max_speed
 };
 
 enum class Event_Port : uint8_t {
