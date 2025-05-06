@@ -84,40 +84,32 @@ private:
     friend auto get_instance_for_base() -> GPIO&;
 };
 
-static inline void fast_write_pin(GPIO_Base base, Pin_Number pin, bool value) {
-    if (value) {
-        volatile auto* bop_data = reinterpret_cast<volatile uint32_t*>(GPIO_baseAddress[static_cast<size_t>(base)] + BOP_OFFSET);
-        *bop_data = (1U << static_cast<uint32_t>(pin));
-    } else {
-        volatile auto* bc_data = reinterpret_cast<volatile uint32_t*>(GPIO_baseAddress[static_cast<size_t>(base)] + BC_OFFSET);
-        *bc_data = (1U << static_cast<uint32_t>(pin));
-    }
+[[gnu::always_inline]] static inline void fast_set_pin(GPIO_Base base, Pin_Number pin) {
+    volatile uint32_t* bop_data = reinterpret_cast<volatile uint32_t*>(GPIO_baseAddress[static_cast<size_t>(base)] + BOP_OFFSET);
+    *bop_data = (1U << static_cast<uint32_t>(pin));
 }
 
-static inline auto fast_read_pin(GPIO_Base base, Pin_Number pin) -> bool {
+[[gnu::always_inline]] static inline void fast_clear_pin(GPIO_Base base, Pin_Number pin) {
+    volatile uint32_t* bc_data = reinterpret_cast<volatile uint32_t*>(GPIO_baseAddress[static_cast<size_t>(base)] + BC_OFFSET);
+    *bc_data = (1U << static_cast<uint32_t>(pin));
+}
+
+[[gnu::always_inline]] static inline void fast_write_pin(GPIO_Base base, Pin_Number pin, bool value) {
+    if (value)
+        fast_set_pin(base, pin);
+    else
+        fast_clear_pin(base, pin);
+}
+
+[[gnu::always_inline]] static inline auto fast_read_pin(GPIO_Base base, Pin_Number pin) -> bool {
     volatile auto* istat_data = reinterpret_cast<volatile uint32_t*>(GPIO_baseAddress[static_cast<size_t>(base)] + ISTAT_OFFSET);
     return (*istat_data & (1U << static_cast<uint32_t>(pin))) != Clear;
 }
 
-static inline void fast_toggle_pin(GPIO_Base base, Pin_Number pin) {
+[[gnu::always_inline]] static inline void fast_toggle_pin(GPIO_Base base, Pin_Number pin) {
     volatile auto* octl_data = reinterpret_cast<volatile uint32_t*>(GPIO_baseAddress[static_cast<size_t>(base)] + OCTL_OFFSET);
     bool value = (*octl_data & (1U << static_cast<uint32_t>(pin))) ? false : true;
     fast_write_pin(base, pin, value);
 }
-
-//////////////////////////////////// DEPRECATED ////////////////////////////////////
-//
-// These two functions are deprecated in favor of fast_write_pin
-//
-static inline void fast_set_pin(GPIO_Base base, Pin_Number pin) {
-    volatile uint32_t* bop_data = reinterpret_cast<volatile uint32_t*>(GPIO_baseAddress[static_cast<size_t>(base)] + BOP_OFFSET);
-    *bop_data = (1U << static_cast<size_t>(pin));
-}
-
-static inline void fast_clear_pin(GPIO_Base base, Pin_Number pin) {
-    volatile uint32_t* bc_data = reinterpret_cast<volatile uint32_t*>(GPIO_baseAddress[static_cast<size_t>(base)] + BC_OFFSET);
-    *bc_data = (1U << static_cast<size_t>(pin));
-}
-////////////////////////////////////////////////////////////////////////////////////
 
 } // namespace gpio
