@@ -92,7 +92,7 @@ inline constexpr auto createPackedPinOps(gpio::Pin_Mode mode, gpio::Output_Speed
  * @return true if the pin is found in the array, false otherwise.
  */
 template<typename T>
-inline auto isPinInPinOps(const T* pinOpsArray, pin_size_t pin) -> bool {
+inline constexpr auto isPinInPinOps(const T* pinOpsArray, pin_size_t pin) -> bool {
     for (const T* ops = pinOpsArray; ops->pinOps.pin != gpio::Pin_Number::INVALID; ++ops) {
         const PortPinPair& pp = port_pin_map[pin];
         if (ops->pinOps.port == pp.port && ops->pinOps.pin == pp.pin) {

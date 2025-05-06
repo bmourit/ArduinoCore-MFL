@@ -150,11 +150,11 @@ public:
     void disable_all_interrupts();
 
     // Accessor methods
-    [[gnu::always_inline]] inline auto get_base() -> TIMER_Base { return base_; }
-    [[gnu::always_inline]] inline auto get_config() -> TIMER_Config& { return config_; }
-    [[gnu::always_inline]] inline auto get_break_config() -> TIMER_Break& { return break_config_; }
-    [[gnu::always_inline]] inline auto get_capture_config() -> TIMER_Input_Capture& { return capture_config_; }
-    [[gnu::always_inline]] inline auto get_compare_config() -> TIMER_Output_Compare& { return compare_config_; }
+    inline auto get_base() -> TIMER_Base { return base_; }
+    inline auto get_config() -> TIMER_Config& { return config_; }
+    inline auto get_break_config() -> TIMER_Break& { return break_config_; }
+    inline auto get_capture_config() -> TIMER_Input_Capture& { return capture_config_; }
+    inline auto get_compare_config() -> TIMER_Output_Compare& { return compare_config_; }
 
     [[nodiscard]] inline auto reg_address(TIMER_Regs reg) const -> volatile uint32_t* {
         const auto idx = static_cast<uint32_t>(base_);
@@ -186,7 +186,7 @@ private:
     }
 
     template <typename E>
-    [[gnu::always_inline]] inline constexpr uint32_t ch_bit(E e) {
+    inline constexpr uint32_t ch_bit(E e) {
         return static_cast<uint32_t>(e);
     }
 

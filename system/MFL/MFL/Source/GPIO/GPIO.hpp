@@ -64,7 +64,7 @@ public:
     void lock_pin(Pin_Number pin);
 
     // Accessor methods
-    [[gnu::always_inline]] inline auto get_base() -> GPIO_Base { return base_; }
+    inline auto get_base() -> GPIO_Base { return base_; }
 
     // Register address
     [[nodiscard]] inline auto reg_address(GPIO_Regs reg) const -> volatile uint32_t* {

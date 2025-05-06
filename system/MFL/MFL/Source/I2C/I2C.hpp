@@ -96,7 +96,7 @@ public:
     void set_interrupt_enable(Interrupt_Type type, bool enable);
 
     // Accessor methods
-    [[gnu::always_inline]] inline auto get_base() -> I2C_Base { return base_; }
+    inline auto get_base() -> I2C_Base { return base_; }
 
     [[nodiscard]] inline auto reg_address(I2C_Regs reg) const -> volatile uint32_t* {
         const auto idx = static_cast<uint32_t>(base_);

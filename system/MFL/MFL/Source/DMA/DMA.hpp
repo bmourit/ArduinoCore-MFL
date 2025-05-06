@@ -85,9 +85,9 @@ public:
     void set_interrupt_enable(Interrupt_Type type, bool enable);
 
     // Accessor methods
-    [[gnu::always_inline]] inline auto get_base() -> DMA_Base { return base_; }
-    [[gnu::always_inline]] inline auto get_channel() -> DMA_Channel { return channel_; }
-    [[gnu::always_inline]] inline auto get_config() -> DMA_Config { return config_; }
+    inline auto get_base() -> DMA_Base { return base_; }
+    inline auto get_channel() -> DMA_Channel { return channel_; }
+    inline auto get_config() -> DMA_Config { return config_; }
 
     // Register address
     [[nodiscard]] inline auto reg_address(DMA_Regs reg) const -> volatile uint32_t* {
@@ -114,7 +114,7 @@ private:
     void cache_register_offsets();
 
     // Inlined methods
-    [[gnu::always_inline]] inline auto get_channel_bits_from_flag(Status_Flags flag) -> INTF_Bits {
+    inline auto get_channel_bits_from_flag(Status_Flags flag) -> INTF_Bits {
         constexpr std::array<std::array<INTF_Bits, 7>, 4> flag_map {{
             {{
                 INTF_Bits::GIF0, INTF_Bits::GIF1, INTF_Bits::GIF2,
@@ -148,7 +148,7 @@ private:
         return flag_map[flag_idx][channel_idx];
     }
 
-    [[gnu::always_inline]] inline auto get_channel_offset_from_reg(Channel_Regs reg) -> DMA_Regs {
+    inline auto get_channel_offset_from_reg(Channel_Regs reg) -> DMA_Regs {
         // Early return for invalid inputs
         if (reg == Channel_Regs::INVALID) {
             return DMA_Regs::INVALID;
