@@ -136,11 +136,11 @@ public:
     auto usart_transmit_dma_interrupt(uint8_t data) -> bool;
 
     // Accessor methods
-    inline auto get_base() -> USART_Base { return base_; }
-    inline auto get_config() -> USART_Config& { return config_; }
-    inline auto get_rx_buffer() -> RingBuffer<uint8_t, RxBufferSize>& { return rx_buffer_; }
-    inline auto get_tx_buffer() -> RingBuffer<uint8_t, TxBufferSize>& { return tx_buffer_; }
-    inline auto get_last_data() -> uint8_t { return config_.last_data; }
+    [[gnu::always_inline]] inline auto get_base() -> USART_Base { return base_; }
+    [[gnu::always_inline]] inline auto get_config() -> USART_Config& { return config_; }
+    [[gnu::always_inline]] inline auto get_rx_buffer() -> RingBuffer<uint8_t, RxBufferSize>& { return rx_buffer_; }
+    [[gnu::always_inline]] inline auto get_tx_buffer() -> RingBuffer<uint8_t, TxBufferSize>& { return tx_buffer_; }
+    [[gnu::always_inline]] inline auto get_last_data() -> uint8_t { return config_.last_data; }
 
     // Accessor wrapper methods for buffer
     inline auto read_rx_buffer(uint8_t& data) -> bool {

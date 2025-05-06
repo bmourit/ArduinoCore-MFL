@@ -32,7 +32,7 @@
  * @return T The value read from the register.
  */
 template<typename T, typename RegType, typename Instance>
-inline __attribute__((always_inline)) auto read_register(const Instance& instance, RegType reg) -> T {
+[[gnu::always_inline]] inline auto read_register(const Instance& instance, RegType reg) -> T {
     return *reinterpret_cast<volatile T*>(instance.reg_address(reg));
 }
 
@@ -47,6 +47,6 @@ inline __attribute__((always_inline)) auto read_register(const Instance& instanc
  * @param value The value to write to the register.
  */
 template<typename T, typename RegType, typename Instance>
-inline __attribute__((always_inline)) void write_register(const Instance& instance, RegType reg, T value) {
+[[gnu::always_inline]] inline void write_register(const Instance& instance, RegType reg, T value) {
     *reinterpret_cast<volatile T*>(instance.reg_address(reg)) = value;
 }

@@ -97,7 +97,7 @@ public:
     auto start_regular_single_conversion(ADC_Channel channel, ADC_Sample_Time sample, ADC_Resolution resolution, bool calibrate = false) -> uint32_t;
 
     // Accessor methods
-    inline auto get_base() -> ADC_Base { return base_; }
+    [[gnu::always_inline]] inline auto get_base() -> ADC_Base { return base_; }
 
     [[nodiscard]] inline auto reg_address(ADC_Regs reg) const -> volatile uint32_t* {
         const auto idx = static_cast<uint32_t>(base_);

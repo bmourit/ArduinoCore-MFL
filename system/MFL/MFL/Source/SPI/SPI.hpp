@@ -80,8 +80,8 @@ public:
     void set_interrupt_enable(Interrupt_Type type, bool enabled);
 
     // Accessor methods
-    inline auto get_base() -> SPI_Base { return base_; }
-    inline auto get_config() -> SPI_Config& { return config_; }
+    [[gnu::always_inline]] inline auto get_base() -> SPI_Base { return base_; }
+    [[gnu::always_inline]] inline auto get_config() -> SPI_Config& { return config_; }
 
     [[nodiscard]] inline auto reg_address(SPI_Regs reg) const -> volatile uint32_t* {
         const auto idx = static_cast<size_t>(base_);
