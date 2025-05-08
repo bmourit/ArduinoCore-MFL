@@ -42,6 +42,7 @@ public:
     inline void begin(unsigned long baudrate) override { begin(baudrate, SERIAL_8N1); }
     void end() override;
     int available() override;
+    int availableForWrite();
     int peek() override;
     int read() override;
     void flush() override;

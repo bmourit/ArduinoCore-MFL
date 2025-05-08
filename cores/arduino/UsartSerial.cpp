@@ -192,6 +192,17 @@ int UsartSerial::available() {
 }
 
 /**
+ * @brief Checks how many bytes are available to write in the USART serial buffer.
+ *
+ * Checks how many bytes are available to write in the serial buffer.
+ *
+ * @return The number of bytes available to write in the serial buffer.
+ */
+int UsartSerial::availableForWrite() {
+    return usart_.available_for_write();
+}
+
+/**
  * @brief Peeks at the next byte in the USART serial buffer without removing it.
  *
  * Waits for the USART to become idle, updates the RX DMA buffer, and retrieves
