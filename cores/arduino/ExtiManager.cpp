@@ -20,7 +20,9 @@ std::array<exti_to_irq, maxExtiLines_> ExtiManager::irq_index {{
 
 ExtiManager::ExtiManager() :
     exti_(exti::EXTI::get_instance()),
-    callbacks_{nullptr}
+    callbacks_{nullptr},
+    params_{nullptr},
+    active_{false}
 {
 }
 
@@ -35,7 +37,8 @@ ExtiManager::ExtiManager() :
  * @param callback The callback function to call when the EXTI interrupt occurs.
  * @param type The type of EXTI interrupt to enable (RISING, FALLING, or CHANGE).
  */
-void ExtiManager::enablePinExtiInterrupt(pin_size_t pin, EXTICallback callback, exti::EXTI_Trigger type) {
+void ExtiManager::enablePinExtiInterrupt(pin_size_t pin, EXTICallback callback, void* param, exti::EXTI_Trigger type) {
+    if (pin >= TOTAL_PIN_COUNT) return;
     const PortPinPair& pp = port_pin_map[pin];
     if (pp.pin == gpio::Pin_Number::INVALID || pp.port == gpio::GPIO_Base::INVALID) {
         return;
@@ -46,8 +49,10 @@ void ExtiManager::enablePinExtiInterrupt(pin_size_t pin, EXTICallback callback, 
         return;
     }
 
-    // Store callback
+    // Store callback and parameter
     callbacks_[id] = callback;
+    params_[id] = param;
+    active_[id] = true;
 
     // Get GPIO instance
     auto portResult = gpio::GPIO::get_instance(pp.port);
@@ -99,6 +104,7 @@ void ExtiManager::enablePinExtiInterrupt(pin_size_t pin, EXTICallback callback, 
  * @param pin The pin to disable the EXTI interrupt for.
  */
 void ExtiManager::disablePinExtiInterrupt(pin_size_t pin) {
+    if (pin >= TOTAL_PIN_COUNT) return;
     const PortPinPair& pp = port_pin_map[pin];
     if (pp.pin == gpio::Pin_Number::INVALID) {
         return;
@@ -110,6 +116,8 @@ void ExtiManager::disablePinExtiInterrupt(pin_size_t pin) {
     }
 
     callbacks_[id] = nullptr;
+    params_[id] = nullptr;
+    active_[id] = false;
 
     // Get the IRQ for this EXTI line
     auto irq = extiToIrq(id);
@@ -117,7 +125,7 @@ void ExtiManager::disablePinExtiInterrupt(pin_size_t pin) {
     // Check for unhandled callbacks
     bool disableIRQ = true;
     for (uint8_t i = 0U; i < maxExtiLines_; ++i) {
-        if (extiToIrq(i) == irq && callbacks_[i] != nullptr) {
+        if (extiToIrq(i) == irq && active_[i]) {
             disableIRQ = false;
             break;
         }
@@ -147,11 +155,10 @@ void ExtiManager::handleCallback(gpio::Pin_Number pin) {
     if (exti_.get_interrupt_flag(flag)) {
         exti_.clear_interrupt_flag(flag);
         if (callbacks_[id] != nullptr) {
-            callbacks_[id]();
+            callbacks_[id](params_[id]);
         }
     }
 }
-
 
 // Interrupt handlers
 extern "C" {

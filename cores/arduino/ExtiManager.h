@@ -28,9 +28,9 @@ class ExtiManager {
 public:
     static auto get_instance() -> ExtiManager&;
 
-    using EXTICallback = void (*)();
+    using EXTICallback = voidFuncPtrParam;
 
-    void enablePinExtiInterrupt(pin_size_t pin, EXTICallback callback, exti::EXTI_Trigger type);
+    void enablePinExtiInterrupt(pin_size_t pin, EXTICallback callback, void* param, exti::EXTI_Trigger type);
     void disablePinExtiInterrupt(pin_size_t pin);
     void handleCallback(gpio::Pin_Number pin);
 
@@ -41,6 +41,8 @@ private:
 
     exti::EXTI& exti_;
     std::array<EXTICallback, maxExtiLines_> callbacks_;
+    std::array<void*, maxExtiLines_> params_;
+    std::array<bool, maxExtiLines_> active_;
 
     inline auto extiToIrq(uint8_t extiIndex) -> IRQn_Type {
         if (extiIndex < maxExtiLines_) {
