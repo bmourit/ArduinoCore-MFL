@@ -226,8 +226,15 @@ protected:
     inline timer::Timer_Channel convertToChannel(uint8_t channel) { return static_cast<timer::Timer_Channel>(channel); }
 
 private:
-    static std::array<timer_to_irq, TIMER_COUNT> timer_up_irq;
-    static std::array<timer_to_irq, TIMER_COUNT> timer_ch_irq;
+    inline static constexpr std::array<timer_to_irq, TIMER_COUNT> timer_up_irq {{
+        {0U, TIMER0_UP_IRQn}, {1U, TIMER1_IRQn}, {2U, TIMER2_IRQn}, {3U, TIMER3_IRQn},
+        {4U, TIMER4_IRQn}, {5U, TIMER5_IRQn}, {6U, TIMER6_IRQn}, {7U, TIMER7_UP_IRQn}
+    }};
+
+    inline static constexpr std::array<timer_to_irq, TIMER_COUNT> timer_ch_irq {{
+        {0U, TIMER0_Channel_IRQn}, {1U, TIMER1_IRQn}, {2U, TIMER2_IRQn}, {3U, TIMER3_IRQn},
+        {4U, TIMER4_IRQn}, {5U, TIMER5_IRQn}, {6U, TIMER6_IRQn}, {7U, TIMER7_Channel_IRQn}
+    }};
 
     inline auto timerToUpIrq() -> IRQn_Type {
         uint8_t timerIndex = static_cast<uint8_t>(base_);

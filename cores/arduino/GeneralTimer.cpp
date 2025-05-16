@@ -42,16 +42,6 @@ auto GeneralTimer::get_instance(timer::TIMER_Base Base) -> GeneralTimer& {
     }
 }
 
-std::array<timer_to_irq, maxNumTimers_> GeneralTimer::timer_up_irq {{
-    {0U, TIMER0_UP_IRQn}, {1U, TIMER1_IRQn}, {2U, TIMER2_IRQn}, {3U, TIMER3_IRQn},
-    {4U, TIMER4_IRQn}, {5U, TIMER5_IRQn}, {6U, TIMER6_IRQn}, {7U, TIMER7_UP_IRQn}
-}};
-
-std::array<timer_to_irq, maxNumTimers_> GeneralTimer::timer_ch_irq {{
-    {0U, TIMER0_Channel_IRQn}, {1U, TIMER1_IRQn}, {2U, TIMER2_IRQn}, {3U, TIMER3_IRQn},
-    {4U, TIMER4_IRQn}, {5U, TIMER5_IRQn}, {6U, TIMER6_IRQn}, {7U, TIMER7_Channel_IRQn}
-}};
-
 GeneralTimer::GeneralTimer(timer::TIMER_Base Base) :
     base_(Base),
     timer_(get_timer_instance(Base)),
