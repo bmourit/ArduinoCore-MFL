@@ -66,10 +66,6 @@ auto UsartSerial::get_instance(usart::USART_Base Base, pin_size_t rxPin, pin_siz
 
 std::array<bool, static_cast<size_t>(usart::USART_Base::INVALID)> UsartSerial::dataTransmitted_ = {false};
 
-std::array<usart_to_irq, maxNumUsart_> UsartSerial::usart_irq {{
-    {USART0_IRQn, 0U}, {USART1_IRQn, 1U}, {USART2_IRQn, 2U}, {UART3_IRQn, 3U}, {UART4_IRQn, 4U}
-}};
-
 UsartSerial::UsartSerial(usart::USART_Base Base, pin_size_t rxPin, pin_size_t txPin) :
     base_(Base),
     usart_(get_usart_instance(Base)),

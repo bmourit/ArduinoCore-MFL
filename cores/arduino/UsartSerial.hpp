@@ -151,7 +151,9 @@ protected:
                dma::DMA_Channel::INVALID;
     }
 
-    static std::array<usart_to_irq, USART_COUNT> usart_irq;
+    inline static constexpr std::array<usart_to_irq, USART_COUNT> usart_irq {{
+        {USART0_IRQn, 0U}, {USART1_IRQn, 1U}, {USART2_IRQn, 2U}, {UART3_IRQn, 3U}, {UART4_IRQn, 4U}
+    }};
 
     inline auto usartToIrq(uint8_t usartIndex) -> IRQn_Type {
         for (const auto& index : usart_irq) {
