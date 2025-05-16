@@ -11,13 +11,6 @@ auto ExtiManager::get_instance() -> ExtiManager& {
     return instance;
 }
 
-std::array<exti_to_irq, maxExtiLines_> ExtiManager::irq_index {{
-    {0U, EXTI0_IRQn},       {1U, EXTI1_IRQn},       {2U, EXTI2_IRQn},       {3U, EXTI3_IRQn},
-    {4U, EXTI4_IRQn},       {5U, EXTI5_9_IRQn},     {6U, EXTI5_9_IRQn},     {7U, EXTI5_9_IRQn},
-    {8U, EXTI5_9_IRQn},     {9U, EXTI5_9_IRQn},     {10U, EXTI10_15_IRQn},  {11U, EXTI10_15_IRQn},
-    {12U, EXTI10_15_IRQn},  {13U, EXTI10_15_IRQn},  {14U, EXTI10_15_IRQn},  {15U, EXTI10_15_IRQn}
-}};
-
 ExtiManager::ExtiManager() :
     exti_(exti::EXTI::get_instance()),
     callbacks_{nullptr},
