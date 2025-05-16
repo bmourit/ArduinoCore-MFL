@@ -487,7 +487,6 @@ void GeneralTimer::setChannelMode(timer::Timer_Channel channel, InputOutputMode 
             timer_.input_capture_init(channel, capture_config_);
             // Configure companion channel
             const auto companionCh = getCompanionChannel(channel);
-            channel_modes_[channelIndex] = mode;
             capture_config_.polarity = timer::Polarity_Select::LOW_FALLING;
             capture_config_.source_select = timer::Input_Capture_Select::IO_INPUT_CI1FE0;
             timer_.input_capture_init(companionCh, capture_config_);
@@ -721,22 +720,24 @@ void GeneralTimer::setInterruptPriority(uint8_t preemptPriority, uint8_t subPrio
  *
  * This function sets the interrupt callback function for the timer's update
  * interrupt. The callback function will be called when the update interrupt
- * occurs. If the callback is null, the interrupt is disabled.
+ * occurs. If the callback is null, the update callback flag is cleared. The
+ * function also sets the interrupt enable bit for the update interrupt if
+ * the callback is non-null.
  *
  * @param callback The callback function to attach to the update interrupt.
  */
 void GeneralTimer::attachInterrupt(TimerCallback callback) {
-    if (callbacks_.up_callback) {
-        callbacks_.up_callback = callback;
-        callbacks_.active_callbacks |= (callback ? 0x01U : 0x00U);
-    } else {
-        callbacks_.up_callback = callback;
-        callbacks_.active_callbacks |= (callback ? 0x01U : 0x00U);
-        if (callback) {
-            timer_.clear_interrupt_flag(timer::Interrupt_Flags::INTR_FLAG_UP);
-            timer_.set_interrupt_enable(timer::Interrupt_Type::INTR_UPIE, true);
-        }
-    }
+    if (callback == nullptr) return;
+
+    const bool hasUpCallback = callbacks_.up_callback != nullptr;
+
+    callbacks_.up_callback = callback;
+    callbacks_.active_callbacks |= 0x01U;
+
+    if (!hasUpCallback) {
+        timer_.clear_interrupt_flag(timer::Interrupt_Flags::INTR_FLAG_UP);
+        timer_.set_interrupt_enable(timer::Interrupt_Type::INTR_UPIE, true);
+     }
 }
 
 /**
@@ -752,19 +753,19 @@ void GeneralTimer::attachInterrupt(TimerCallback callback) {
  * @note If channel is invalid or out of range, function returns without action.
  */
 void GeneralTimer::attachInterrupt(TimerCallback callback, timer::Timer_Channel channel) {
-    const auto channelIndex = static_cast<size_t>(channel);
-    if (channelIndex < 0 || channelIndex > static_cast<size_t>(TIMER_CHANNELS)) return;
+    if (callback == nullptr) return;
 
-    if (callbacks_.channel_callbacks[channelIndex]) {
-        callbacks_.channel_callbacks[channelIndex] = callback;
-        callbacks_.active_callbacks |= (callback ? (1U << (channelIndex + 1U)) : 0x00U);
-    } else {
-        callbacks_.channel_callbacks[channelIndex] = callback;
-        callbacks_.active_callbacks |= (callback ? (1U << (channelIndex + 1U)) : 0x00U);
-        if (callback) {
-            timer_.clear_interrupt_flag(convertToInterruptFlag(channel));
-            timer_.set_interrupt_enable(convertToInterrupt(channel), true);
-        }
+    const auto channelIndex = static_cast<size_t>(channel);
+    if (channelIndex >= static_cast<size_t>(TIMER_CHANNELS)) return;
+
+    const bool hasChanCallback = callbacks_.channel_callbacks[channelIndex] != nullptr;
+
+    callbacks_.channel_callbacks[channelIndex] = callback;
+    callbacks_.active_callbacks |= (1U << (channelIndex + 1U));
+
+    if (!hasChanCallback) {
+        timer_.clear_interrupt_flag(convertToInterruptFlag(channel));
+        timer_.set_interrupt_enable(convertToInterrupt(channel), true);
     }
 }
 
@@ -776,8 +777,10 @@ void GeneralTimer::attachInterrupt(TimerCallback callback, timer::Timer_Channel 
 void GeneralTimer::detachInterrupt() {
     auto upIrq = timerToUpIrq();
     if (upIrq == INVALID_IRQ) return;
+
     timer_.set_interrupt_enable(timer::Interrupt_Type::INTR_UPIE, false);
     callbacks_.up_callback = nullptr;
+    callbacks_.active_callbacks &= ~0x01U;
 }
 
 /**
@@ -798,6 +801,7 @@ void GeneralTimer::detachInterrupt(timer::Timer_Channel channel) {
 
     timer_.set_interrupt_enable(convertToInterrupt(channel), false);
     callbacks_.channel_callbacks[channelIndex] = nullptr;
+    callbacks_.active_callbacks &= ~(1U << (channelIndex + 1U));
 }
 
 /**
