@@ -195,7 +195,7 @@ int UsartSerial::available() {
  * @return The number of bytes available to write in the serial buffer.
  */
 int UsartSerial::availableForWrite() {
-    return usart_.available_for_write();
+    return usart_.available_for_write(false);
 }
 
 /**
