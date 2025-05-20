@@ -55,6 +55,48 @@ Servo::Servo() :
 }
 
 /**
+ * @brief Callback function triggered when the timer period elapses for servo control.
+ *
+ * This function manages the pulsing of servos by iterating over active servo channels.
+ * It pulses the corresponding pin to LOW or HIGH depending on the channel's activity, 
+ * updates the rollover value for the timer, and manages the refresh interval once all 
+ * channels have been processed. If there are no active channels, it resets the TotalCount.
+ */
+static void Servo_PeriodElapsedCallback() {
+    constexpr Timers16Bit timerId = Timers16Bit::timer1;
+    const auto idx = static_cast<uint8_t>(timerId);
+    int8_t channel = timerChannel[idx];
+
+    if (channel < 0) {
+        TotalCount = 0;
+    } else if (std::cmp_less(channel , ServoCount) && servos[channel].pinNumber.isActive == true) {
+        digitalWrite(servos[channel].pinNumber.pin, LOW);   // Pulse LOW if active
+    }
+
+    // Increment to the next channel
+    ++channel;
+    timerChannel[idx] = channel;
+
+    if (std::cmp_less(channel , ServoCount) && std::cmp_less(channel , SERVOS_PER_TIMER)) {
+        const auto& servo = servos[channel];
+        servoTimer.setRolloverValue(servo.ticks, TimerFormat::TICK);
+        TotalCount = TotalCount + servo.ticks;
+
+        if (servo.pinNumber.isActive) {
+            digitalWrite(servo.pinNumber.pin, HIGH);    // Pulse HIGH if active
+        }
+    } else {
+        // Finished all channels so wait for the refresh period to expire before starting over
+        if (TotalCount + 4U < REFRESH_INTERVAL) {
+            servoTimer.setRolloverValue(REFRESH_INTERVAL - TotalCount, TimerFormat::TICK);
+        } else {
+            servoTimer.refresh();   // Start over immediately
+        }
+        timerChannel[idx] = -1;     // Prepare for restart
+    }
+}
+
+/**
  * @brief Initializes the servo timer.
  *
  * This function sets the channel mode to timing mode, sets the prescaler to the
@@ -227,46 +269,4 @@ auto Servo::readMicroseconds() -> int {
  */
 auto Servo::attached() -> bool {
     return servos[this->servoIndex].pinNumber.isActive;
-}
-
-/**
- * @brief Callback function triggered when the timer period elapses for servo control.
- *
- * This function manages the pulsing of servos by iterating over active servo channels.
- * It pulses the corresponding pin to LOW or HIGH depending on the channel's activity, 
- * updates the rollover value for the timer, and manages the refresh interval once all 
- * channels have been processed. If there are no active channels, it resets the TotalCount.
- */
-static void Servo_PeriodElapsedCallback() {
-    constexpr Timers16Bit timerId = Timers16Bit::timer1;
-    const auto idx = static_cast<uint8_t>(timerId);
-    int8_t channel = timerChannel[idx];
-
-    if (channel < 0) {
-        TotalCount = 0;
-    } else if (std::cmp_less(channel , ServoCount) && servos[channel].pinNumber.isActive == true) {
-        digitalWrite(servos[channel].pinNumber.pin, LOW);   // Pulse LOW if active
-    }
-
-    // Increment to the next channel
-    ++channel;
-    timerChannel[idx] = channel;
-
-    if (std::cmp_less(channel , ServoCount) && std::cmp_less(channel , SERVOS_PER_TIMER)) {
-        const auto& servo = servos[channel];
-        servoTimer.setRolloverValue(servo.ticks, TimerFormat::TICK);
-        TotalCount = TotalCount + servo.ticks;
-
-        if (servo.pinNumber.isActive) {
-            digitalWrite(servo.pinNumber.pin, HIGH);    // Pulse HIGH if active
-        }
-    } else {
-        // Finished all channels so wait for the refresh period to expire before starting over
-        if (TotalCount + 4U < REFRESH_INTERVAL) {
-            servoTimer.setRolloverValue(REFRESH_INTERVAL - TotalCount, TimerFormat::TICK);
-        } else {
-            servoTimer.refresh();   // Start over immediately
-        }
-        timerChannel[idx] = -1;     // Prepare for restart
-    }
 }
