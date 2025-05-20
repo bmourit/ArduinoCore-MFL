@@ -59,15 +59,15 @@ private:
     SPIClassMFL(spi::SPI_Base Base, pin_size_t mosiPin, pin_size_t misoPin,
                 pin_size_t sclkPin, pin_size_t sselPin);
 
-    spi::SPI_Base base_;
+    spi::SPI_Config config_;
+    SPISettings settings_;
     spi::SPI& spi_;
+    int interruptMask_;
     pin_size_t customMosiPin_;
     pin_size_t customMisoPin_;
     pin_size_t customSclkPin_;
     pin_size_t customSselPin_;
-    spi::SPI_Config config_;
-    SPISettings settings_;
-    int interruptMask_;
+    spi::SPI_Base base_;
     bool initialized_;
 
     SPISettings const DEFAULT_SPI_SETTINGS = SPISettings(1000000, MSBFIRST, SPI_MODE0);

@@ -20,15 +20,19 @@ ExtiManager::ExtiManager() :
 }
 
 /**
- * @brief Enables an EXTI interrupt on the specified pin.
+ * @brief Enable an EXTI interrupt for a specific pin.
  *
- * This function enables an EXTI interrupt on the specified pin. The pin
- * must be configured as an input pin and the EXTI source must be set.
- * The callback function will be called when the EXTI interrupt occurs.
+ * This function configures and enables an external interrupt on the specified pin.
+ * It sets up the pin for input mode, maps the GPIO port to the EXTI source, and
+ * initializes the EXTI line with the specified trigger type. It also configures
+ * the NVIC with priority settings and enables the interrupt.
  *
- * @param pin The pin on which to enable the EXTI interrupt.
- * @param callback The callback function to call when the EXTI interrupt occurs.
- * @param type The type of EXTI interrupt to enable (RISING, FALLING, or CHANGE).
+ * @param pin The pin for which to enable the EXTI interrupt.
+ * @param callback The callback function to be called when the interrupt occurs.
+ * @param param A parameter to be passed to the callback function.
+ * @param type The trigger type for the EXTI interrupt (RISING, FALLING, or BOTH).
+ *
+ * @note Only input pins can have an EXTI interrupt. The pin must be configured for input mode.
  */
 void ExtiManager::enablePinExtiInterrupt(pin_size_t pin, EXTICallback callback, void* param, exti::EXTI_Trigger type) {
     if (pin >= TOTAL_PIN_COUNT) return;
@@ -89,12 +93,12 @@ void ExtiManager::enablePinExtiInterrupt(pin_size_t pin, EXTICallback callback, 
 }
 
 /**
- * @brief Disable an EXTI interrupt and its NVIC IRQ.
+ * @brief Disable the EXTI interrupt for the specified pin.
  *
- * This function will disable an EXTI interrupt and its NVIC IRQ if there are
- * no more callbacks registered for the same IRQ.
+ * Disables the EXTI interrupt for the specified pin. The callback function
+ * will no longer be called when the EXTI interrupt occurs.
  *
- * @param pin The pin to disable the EXTI interrupt for.
+ * @param pin The pin for which to disable the EXTI interrupt.
  */
 void ExtiManager::disablePinExtiInterrupt(pin_size_t pin) {
     if (pin >= TOTAL_PIN_COUNT) return;

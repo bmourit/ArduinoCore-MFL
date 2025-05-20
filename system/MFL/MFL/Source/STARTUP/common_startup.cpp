@@ -65,6 +65,16 @@ static constexpr uint32_t SCSS = 0x0000000CU;
 static constexpr uint32_t SCSS_SHIFT = 2U;
 static constexpr uint32_t SOURCE_PLL = 2U;
 
+// SYSCFG
+//static volatile uint32_t& SYSCFG_BASE = *reinterpret_cast<volatile uint32_t*>(0x4002103CU);
+//
+//static constexpr uint32_t CEE_SHIFT = 7;
+//static constexpr uint32_t CEE_BIT = (1U << CEE_SHIFT);
+//
+//static inline void set_cee_enable() {
+//    SYSCFG_BASE |= CEE_BIT;
+//}
+
 static inline void stabilize_voltage(uint32_t cycles) {
     asm volatile (
         "1: subs %0, %0, #1 \n"
@@ -122,6 +132,9 @@ extern "C" void system_startup() {
     regs->CTL &= 0xFFFBFFFFU;
     regs->CFG0 = 0x00000000U;
     regs->CFG1 = 0x00000000U;
+
+    // Prefetch
+    //set_cee_enable();
 
     // Vector table offset
     SCB->VTOR = VTOR_ADDRESS;

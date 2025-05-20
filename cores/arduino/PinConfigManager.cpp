@@ -3,7 +3,12 @@
 #include "PinOpsMap.hpp"
 #include "PinOps.hpp"
 
-inline constexpr uint8_t Max_Pins_Per_Port = 16U;
+auto PinConfigManager::get_instance() -> PinConfigManager& {
+    static PinConfigManager instance;
+    return instance;
+}
+
+PinConfigManager::PinConfigManager() = default;
 
 /**
  * @brief Check if the specified pin is configured.
@@ -19,7 +24,7 @@ inline constexpr uint8_t Max_Pins_Per_Port = 16U;
  */
 auto PinConfigManager::isPinConfigured(pin_size_t pin) -> bool {
     const PortPinPair& pp = port_pin_map[pin];
-    return (pinIsConfig[static_cast<size_t>(pp.port)] & (1U << static_cast<size_t>(pp.pin))) != 0U;
+    return (pinIsConfig[static_cast<size_t>(pp.port)] & (1U << static_cast<uint8_t>(pp.pin))) != 0U;
 }
 
 /**
@@ -33,7 +38,7 @@ auto PinConfigManager::isPinConfigured(pin_size_t pin) -> bool {
  */
 void PinConfigManager::setPinConfigured(pin_size_t pin) {
     const PortPinPair& pp = port_pin_map[pin];
-    pinIsConfig[static_cast<size_t>(pp.port)] |= (1U << static_cast<size_t>(pp.pin));
+    pinIsConfig[static_cast<size_t>(pp.port)] |= (1U << static_cast<uint8_t>(pp.pin));
 }
 
 /**
@@ -47,7 +52,7 @@ void PinConfigManager::setPinConfigured(pin_size_t pin) {
  */
 void PinConfigManager::resetPinConfigured(pin_size_t pin) {
     const PortPinPair& pp = port_pin_map[pin];
-    pinIsConfig[static_cast<size_t>(pp.port)] &= (~(1U << static_cast<size_t>(pp.pin)));
+    pinIsConfig[static_cast<size_t>(pp.port)] &= (~(1U << static_cast<uint8_t>(pp.pin)));
 }
 
-PinConfigManager pinConfigManager;
+PinConfigManager& pinConfigManager = PinConfigManager::get_instance();

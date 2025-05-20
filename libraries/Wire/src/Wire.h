@@ -67,12 +67,12 @@ public:
 private:
     TwoWire(i2c::I2C_Base Base, pin_size_t sdaPin, pin_size_t sclPin);
 
-    i2c::I2C_Base base_;
+    RingBufferN<WIRE_BUFFER_LENGTH> rxBuffer_;
+    RingBufferN<WIRE_BUFFER_LENGTH> txBuffer_;
     i2c::I2C& i2c_;
     pin_size_t customSdaPin_;
     pin_size_t customSclPin_;
-    RingBufferN<WIRE_BUFFER_LENGTH> rxBuffer_;
-    RingBufferN<WIRE_BUFFER_LENGTH> txBuffer_;
+    i2c::I2C_Base base_;
     uint8_t ownerAddress_;
     uint8_t txAddress_;
     bool transmitting_;

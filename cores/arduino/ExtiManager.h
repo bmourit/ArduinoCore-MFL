@@ -20,7 +20,7 @@ enum {
 inline constexpr uint8_t maxExtiLines_ = MAX_EXTI_LINES;
 
 struct exti_to_irq {
-    uint8_t line_number;
+    uint8_t line_number : 4;
     IRQn_Type irq_type;
 };
 

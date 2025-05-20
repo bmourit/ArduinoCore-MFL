@@ -51,12 +51,12 @@ auto TwoWire::get_instance(i2c::I2C_Base Base, pin_size_t sdaPin, pin_size_t scl
 }
 
 TwoWire::TwoWire(i2c::I2C_Base Base, pin_size_t sdaPin, pin_size_t sclPin) :
-    base_(Base),
+    rxBuffer_(),
+    txBuffer_(),
     i2c_(i2c::I2C::get_instance(Base).value()),
     customSdaPin_(sdaPin),
     customSclPin_(sclPin),
-    rxBuffer_(),
-    txBuffer_(),
+    base_(Base),
     ownerAddress_(0),
     txAddress_(0),
     transmitting_(false)

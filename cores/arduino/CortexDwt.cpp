@@ -1,4 +1,4 @@
-
+#include "Arduino.h"
 #include "CortexDwt.h"
 
 auto CortexDWT::get_instance() -> CortexDWT& {

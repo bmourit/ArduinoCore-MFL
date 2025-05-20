@@ -44,7 +44,6 @@ inline constexpr USARTPinOps UART_CTS_PinOps[] = {
     {usart::USART_Base::INVALID,        gpio::GPIO_Base::INVALID,     gpio::Pin_Number::INVALID,    0}
 };*/
 
-
 ///////////////////////////// TIMERS /////////////////////////////
 
 inline constexpr TIMERPinOps TIMER_PinOps[] = {
@@ -86,7 +85,6 @@ inline constexpr TIMERPinOps TIMER_PinOps[] = {
     {timer::TIMER_Base::INVALID,        gpio::GPIO_Base::INVALID,     gpio::Pin_Number::INVALID,    0}
 };
 
-
 ///////////////////////////// ADC /////////////////////////////
 
 inline constexpr ADCPinOps ADC_PinOps[] = {
@@ -109,7 +107,6 @@ inline constexpr ADCPinOps ADC_PinOps[] = {
     {adc::ADC_Base::INVALID,    gpio::GPIO_Base::INVALID,     gpio::Pin_Number::INVALID,    0}
 };
 
-
 ///////////////////////////// DAC /////////////////////////////
 
 inline constexpr DACPinOps DAC_PinOps[] = {
@@ -117,7 +114,6 @@ inline constexpr DACPinOps DAC_PinOps[] = {
     {dac::Internal_Device::DAC0_BASE,   gpio::GPIO_Base::GPIOA_BASE,  gpio::Pin_Number::PIN_5,      createPackedPinOps(gpio::Pin_Mode::ANALOG, MAX_SPEED,   gpio::Pin_Remap_Select::NO_REMAP, 2, 0)},
     {dac::Internal_Device::INVALID,     gpio::GPIO_Base::INVALID,     gpio::Pin_Number::INVALID,    0}
 };
-
 
 ///////////////////////////// I2C /////////////////////////////
 
@@ -139,7 +135,6 @@ inline constexpr I2CPinOps I2C_SCL_PinOps[] = {
     {i2c::I2C_Base::I2C1_BASE,  gpio::GPIO_Base::GPIOB_BASE,  gpio::Pin_Number::PIN_10,     ALT_OD_NO_REMAP_NO_CH},
     {i2c::I2C_Base::INVALID,    gpio::GPIO_Base::INVALID,     gpio::Pin_Number::INVALID,    0}
 };
-
 
 ///////////////////////////// SPI /////////////////////////////
 
@@ -177,7 +172,6 @@ inline constexpr SPIPinOps SPI_SSEL_PinOps[] = {
     {spi::SPI_Base::INVALID,    gpio::GPIO_Base::INVALID,     gpio::Pin_Number::INVALID,    0}
 };
 
-
 ///////////////////////////// CAN /////////////////////////////
 
 //inline constexpr CANPinOps CAN_RD_PinOps[] = {
@@ -191,7 +185,6 @@ inline constexpr SPIPinOps SPI_SSEL_PinOps[] = {
 //  {can::CAN_Base::CAN0_BASE,  gpio::GPIO_Base::GPIOB_BASE,  gpio::Pin_Number::PIN_9,      createPackedPinOps(gpio::Pin_Mode::ALT_PUSHPULL, MAX_SPEED,  gpio::Pin_Remap_Select::CAN_FULL_REMAP,    0, 0)},
 //  {can::CAN_Base::INVALID,    gpio::GPIO_Base::INVALID,     gpio::Pin_Number::INVALID,    0}
 //};
-
 
 ///////////////////////////// SDIO /////////////////////////////
 

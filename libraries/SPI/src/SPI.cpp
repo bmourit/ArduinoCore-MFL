@@ -57,15 +57,16 @@ auto SPIClassMFL::get_instance(spi::SPI_Base Base,
 SPIClassMFL::SPIClassMFL(spi::SPI_Base Base,
                          pin_size_t mosiPin, pin_size_t misoPin,
                          pin_size_t sclkPin, pin_size_t sselPin) :
-    base_(Base),
+
+    config_(spi::default_config),
+    settings_(DEFAULT_SPI_SETTINGS),
     spi_(spi::SPI::get_instance(Base).value()),
+    interruptMask_(0),
     customMosiPin_(mosiPin),
     customMisoPin_(misoPin),
     customSclkPin_(sclkPin),
     customSselPin_(sselPin),
-    config_(spi::default_config),
-    settings_(DEFAULT_SPI_SETTINGS),
-    interruptMask_(0),
+    base_(Base),
     initialized_(false)
 {
 }

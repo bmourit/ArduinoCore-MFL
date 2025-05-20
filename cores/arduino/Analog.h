@@ -45,7 +45,7 @@ void pwmStop(pin_size_t pin);
  * @param pin The pin number for which to get the ADC channel
  * @return ADC_Channel enum value corresponding to the pin, or INVALID if no valid channel exists
  */
-inline const auto getAdcChannel(pin_size_t pin) -> adc::ADC_Channel {
+inline auto getAdcChannel(pin_size_t pin) -> adc::ADC_Channel {
     constexpr adc::ADC_Channel channels[] = {
         adc::ADC_Channel::CHANNEL_0, adc::ADC_Channel::CHANNEL_1, adc::ADC_Channel::CHANNEL_2,
         adc::ADC_Channel::CHANNEL_3, adc::ADC_Channel::CHANNEL_4, adc::ADC_Channel::CHANNEL_5,

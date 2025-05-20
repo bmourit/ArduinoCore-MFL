@@ -3,6 +3,7 @@
 
 #include <limits>
 
+#include "Arduino.h"
 #include "mfl_api.h"
 
 class CortexDWT {

@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include <cinttypes>
+#include <inttypes.h>
 
 enum class Timers16Bit : uint8_t {
     timer1,
@@ -33,8 +33,8 @@ enum class Timers16Bit : uint8_t {
 };
 
 struct ServoPin {
-    uint8_t pin;
-    uint8_t isActive;
+    uint8_t pin : 6;
+    bool isActive : 1;
 };
 
 struct ServoConfig {

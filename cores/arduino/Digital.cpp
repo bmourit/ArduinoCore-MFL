@@ -25,7 +25,7 @@
  */
 void pinMode(pin_size_t pin, PinMode mode) {
     // Check for invalid pin
-    if (pin == NO_PIN) {
+    if (pin == NO_PIN || pin >= TOTAL_PIN_COUNT) {
         core_debug("Selected pin is not a valid pin number");
         return;
     }
@@ -84,10 +84,8 @@ void pinMode(pin_size_t pin, PinMode mode) {
  * @param status The PinStatus to write to the pin. Valid values are LOW (0) or HIGH (1).
  */
 void digitalWrite(pin_size_t pin, PinStatus status) {
+    if (pin >= TOTAL_PIN_COUNT) return;
     const PortPinPair& pp = port_pin_map[pin];
-    if (pp.port == gpio::GPIO_Base::INVALID || pp.pin == gpio::Pin_Number::INVALID) {
-        return;
-    }
 
     auto result = gpio::GPIO::get_instance(pp.port);
     if (result.error() == gpio::GPIO_Error_Type::OK) {
@@ -106,10 +104,9 @@ void digitalWrite(pin_size_t pin, PinStatus status) {
  * @return The current state of the pin as a PinStatus.
  */
 PinStatus digitalRead(pin_size_t pin) {
+    if (pin >= TOTAL_PIN_COUNT) return LOW;
+
     const PortPinPair& pp = port_pin_map[pin];
-    if (pp.port == gpio::GPIO_Base::INVALID || pp.pin == gpio::Pin_Number::INVALID) {
-        return LOW; // Return a default value for invalid port or pin
-    }
 
     auto result = gpio::GPIO::get_instance(pp.port);
     if (result.error() != gpio::GPIO_Error_Type::OK) {
@@ -129,10 +126,8 @@ PinStatus digitalRead(pin_size_t pin) {
  * @param pin The pin number to toggle.
  */
 void digitalToggle(pin_size_t pin) {
+    if (pin >= TOTAL_PIN_COUNT) return;
     const PortPinPair& pp = port_pin_map[pin];
-    if (pp.port == gpio::GPIO_Base::INVALID || pp.pin == gpio::Pin_Number::INVALID) {
-        return;
-    }
 
     auto result = gpio::GPIO::get_instance(pp.port);
     if (result.error() == gpio::GPIO_Error_Type::OK) {

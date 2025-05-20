@@ -32,7 +32,6 @@ public:
         if (isFull()) return false;  // Prevent overflow
         buffer_[head_] = value;
         head_ = (head_ + 1 == N) ? 0 : head_ + 1;
-        //head_ = (head_ + 1) % N;
         full_ = (head_ == tail_);
         return true;
     }
@@ -42,7 +41,6 @@ public:
         if (isEmpty()) return false;  // No data to read
         value = buffer_[tail_];
         tail_ = (tail_ + 1 == N) ? 0 : tail_ +1;
-        //tail_ = (tail_ + 1) % N;
         full_ = false;
         return true;
     }

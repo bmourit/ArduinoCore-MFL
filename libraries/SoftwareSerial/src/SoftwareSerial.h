@@ -105,11 +105,7 @@ private:
     void setSpeed(uint32_t speed);
 
     inline void setTX() {
-        if (inverseLogic_) {
-            gpio::fast_write_pin(txPort_, txPinNumber_, false);
-        } else {
-            gpio::fast_write_pin(txPort_, txPinNumber_, true);
-        }
+        gpio::fast_write_pin(txPort_, txPinNumber_, inverseLogic_ ? false : true);
         setPinOpsFast(txPort_, txPinNumber_, gpio::Pin_Mode::OUTPUT_PUSHPULL);
     }
 
@@ -118,9 +114,7 @@ private:
     }
 
     inline void setRXTX(bool input) {
-        if (!halfDuplex_) {
-            return;
-        }
+        if (!halfDuplex_) return;
 
         if (input) {
             // Switch to RX mode
@@ -140,10 +134,8 @@ private:
     }
 
     inline void send() {
-        if (--txTickCount > 0) {
-            // If txTickCount > 0, interrupt is discarded
-            return;
-        }
+        // If txTickCount > 0, interrupt is discarded
+        if (--txTickCount > 0) return;
 
         // Only when txTickCount reaches 0 we set TX pin
         if (txBitCount < 10) {  // Transmission not finished (10 = 1 start + 8 bits + 1 stop)
@@ -175,10 +167,8 @@ private:
 
     inline void receive() {
         rxTickCount = rxTickCount - 1;
-        if (rxTickCount > 0) {
-            // If rxTickCount > 0, interrupt is discarded
-            return;
-        }
+        // If rxTickCount > 0, interrupt is discarded
+        if (rxTickCount > 0) return;
 
         // Only when rxTickCount reaches 0, RX pin is considered
         bool inbit = gpio::fast_read_pin(rxPort_, rxPinNumber_);

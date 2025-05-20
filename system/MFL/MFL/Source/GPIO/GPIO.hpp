@@ -36,7 +36,7 @@ public:
     void reset();
 
     // Set and get pin mode
-    void set_pin_mode(Pin_Number pin, Pin_Mode mode, Output_Speed speed = Output_Speed::SPEED_50MHZ);
+    void set_pin_mode(Pin_Number pin, Pin_Mode mode, Output_Speed speed = Output_Speed::SPEED_MAX);
     auto get_pin_mode(Pin_Number pin) -> Pin_Mode;
 
     // Pin level
