@@ -54,6 +54,8 @@ auto SPIClassMFL::get_instance(spi::SPI_Base Base,
     }
 }
 
+const SPISettings SPIClassMFL::DEFAULT_SPI_SETTINGS(SPISettings(1000000, MSBFIRST, SPI_MODE0));
+
 SPIClassMFL::SPIClassMFL(spi::SPI_Base Base,
                          pin_size_t mosiPin, pin_size_t misoPin,
                          pin_size_t sclkPin, pin_size_t sselPin) :

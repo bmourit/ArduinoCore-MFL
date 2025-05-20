@@ -70,7 +70,7 @@ private:
     spi::SPI_Base base_;
     bool initialized_;
 
-    static const SPISettings DEFAULT_SPI_SETTINGS = SPISettings(1000000, MSBFIRST, SPI_MODE0);
+    static const SPISettings DEFAULT_SPI_SETTINGS;
 
     void configurePins();
     void updateSettings(SPISettings settings);
