@@ -1,5 +1,5 @@
 /*
- * TWI/I2C library for the MFL Ardunio Core
+ * TWI/I2C library for the MFL Arduino Core
  *
  * Copyright (c) 2025 Arduino LLC. All rights reserved.
  *

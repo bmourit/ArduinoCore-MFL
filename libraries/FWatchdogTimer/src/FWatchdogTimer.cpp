@@ -1,5 +1,5 @@
 /*
- * Free Watchdog Timer library for the MFL Ardunio Core
+ * Free Watchdog Timer library for the MFL Arduino Core
  * Copyright (c) 2025 Arduino LLC. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or
